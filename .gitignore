@@ -1,0 +1,20 @@
+# Build output
+.gradle/
+.kotlin/
+build/
+app/build/
+captures/
+/release/
+*.apk
+*.aab
+
+# Machine-specific
+local.properties
+.idea/
+*.iml
+.DS_Store
+
+# Signing key: NEVER commit. CI gets it from GitHub Actions secrets.
+*.jks
+*.keystore
+keystore.properties

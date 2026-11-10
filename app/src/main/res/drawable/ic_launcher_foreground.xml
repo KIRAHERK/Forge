@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Forward-leaning F: stem, top bar, middle bar -->
+    <path
+        android:fillColor="#CCFF4D"
+        android:pathData="M39,76 L49,76 L55,32 L45,32 Z" />
+    <path
+        android:fillColor="#CCFF4D"
+        android:pathData="M45,32 L73,32 L71.64,42 L43.64,42 Z" />
+    <path
+        android:fillColor="#CCFF4D"
+        android:pathData="M42.55,50 L64,50 L62.77,59 L41.32,59 Z" />
+</vector>

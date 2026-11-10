@@ -1,0 +1,117 @@
+package com.forge.app.ui.theme
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
+import com.forge.app.R
+
+// ---------- Palette ----------
+// One accent (volt) carries progress and primary actions. Red is reserved for
+// misses, slips and penalties. Everything else is neutral.
+object C {
+    val Bg = Color(0xFF0B0B0D)
+    val S1 = Color(0xFF141417)
+    val S2 = Color(0xFF1B1B1F)
+    val S3 = Color(0xFF26262B)
+    val Line = Color(0xFF232328)
+    val LineStrong = Color(0xFF34343B)
+
+    val Hi = Color(0xFFF2F2F3)
+    val Mid = Color(0xFF9B9BA4)
+    val Lo = Color(0xFF63636C)
+
+    val Volt = Color(0xFFCCFF4D)
+    val VoltSoft = Color(0x24CCFF4D)
+    val OnVolt = Color(0xFF0B0B0D)
+
+    val Red = Color(0xFFFF4D3D)
+    val RedSoft = Color(0x24FF4D3D)
+    val Amber = Color(0xFFFFB547)
+    val AmberSoft = Color(0x24FFB547)
+}
+
+// ---------- Type ----------
+val Barlow = FontFamily(
+    Font(R.font.barlow_regular, FontWeight.Normal),
+    Font(R.font.barlow_medium, FontWeight.Medium),
+    Font(R.font.barlow_semi_bold, FontWeight.SemiBold),
+    Font(R.font.barlow_bold, FontWeight.Bold),
+)
+
+val BarlowCondensed = FontFamily(
+    Font(R.font.barlow_condensed_medium, FontWeight.Medium),
+    Font(R.font.barlow_condensed_semi_bold, FontWeight.SemiBold),
+    Font(R.font.barlow_condensed_bold, FontWeight.Bold),
+)
+
+object T {
+    private const val TNUM = "tnum"
+
+    val Hero = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 64.sp, lineHeight = 58.sp, letterSpacing = (-0.01).em, fontFeatureSettings = TNUM)
+    val Display = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 40.sp, lineHeight = 40.sp, letterSpacing = 0.em, fontFeatureSettings = TNUM)
+    val H1 = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = 32.sp, letterSpacing = 0.01.em)
+    val H2 = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 26.sp, letterSpacing = 0.02.em)
+    val H3 = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, lineHeight = 22.sp, letterSpacing = 0.03.em)
+    val Num = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 24.sp, fontFeatureSettings = TNUM)
+    val NumL = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = 30.sp, fontFeatureSettings = TNUM)
+    val Eyebrow = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 0.14.em)
+    val Body = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 21.sp)
+    val BodyM = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 21.sp)
+    val BodyS = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 21.sp)
+    val Small = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp)
+    val Tiny = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 14.sp, fontFeatureSettings = TNUM)
+    val Button = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 20.sp, letterSpacing = 0.06.em)
+}
+
+private val scheme = darkColorScheme(
+    primary = C.Volt,
+    onPrimary = C.OnVolt,
+    secondary = C.Hi,
+    onSecondary = C.Bg,
+    background = C.Bg,
+    onBackground = C.Hi,
+    surface = C.S1,
+    onSurface = C.Hi,
+    surfaceVariant = C.S2,
+    onSurfaceVariant = C.Mid,
+    surfaceContainer = C.S1,
+    surfaceContainerHigh = C.S2,
+    surfaceContainerHighest = C.S3,
+    surfaceContainerLow = C.S1,
+    surfaceContainerLowest = C.Bg,
+    outline = C.LineStrong,
+    outlineVariant = C.Line,
+    error = C.Red,
+    onError = C.Hi,
+)
+
+private val typography = Typography(
+    bodyLarge = T.Body,
+    bodyMedium = T.Body,
+    bodySmall = T.Small,
+    labelLarge = T.BodyS,
+    labelMedium = T.Small,
+    labelSmall = T.Tiny,
+    titleLarge = T.H2,
+    titleMedium = T.H3,
+    titleSmall = T.BodyS,
+    headlineLarge = T.H1,
+    headlineMedium = T.H1,
+    headlineSmall = T.H2,
+    displayLarge = T.Hero,
+    displayMedium = T.Display,
+    displaySmall = T.H1,
+)
+
+@Composable
+fun ForgeTheme(content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = scheme, typography = typography, content = content)
+}

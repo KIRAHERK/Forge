@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Forge</string>
+    <string name="widget_label">Forge — Today</string>
+    <string name="widget_description">Today\'s workout, deadline and protein.</string>
+</resources>
