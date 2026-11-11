@@ -9,8 +9,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
@@ -31,6 +33,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -46,6 +49,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -60,6 +64,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -572,77 +577,259 @@ fun ForgeDialog(
     )
 }
 
+// ------------------------------------------------------------------ details
+
+/**
+ * Extra explanation that most people only need once. Closed by default, so the
+ * screen shows numbers first and words only on request.
+ */
+@Composable
+fun Details(
+    label: String = "Details",
+    modifier: Modifier = Modifier,
+    initiallyOpen: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    var open by rememberSaveable { mutableStateOf(initiallyOpen) }
+    val rot by animateFloatAsState(if (open) 180f else 0f, tween(200), label = "details")
+    Column(modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { open = !open }.padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(label, style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
+            Icon(
+                Icons.Rounded.ExpandMore, if (open) "Hide $label" else "Show $label", tint = C.Mid,
+                modifier = Modifier.size(20.dp).graphicsLayer { rotationZ = rot },
+            )
+        }
+        AnimatedVisibility(open, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+            Column(Modifier.fillMaxWidth().padding(bottom = 8.dp), content = content)
+        }
+    }
+}
+
+/** Small legend entry: a colour swatch and a label. */
+@Composable
+fun LegendItem(label: String, color: Color, line: Boolean = false, dashed: Boolean = false) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Canvas(Modifier.size(width = 14.dp, height = 8.dp)) {
+            if (line) {
+                drawLine(
+                    color, Offset(0f, size.height / 2), Offset(size.width, size.height / 2), 4f, cap = StrokeCap.Round,
+                    pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(6f, 5f)) else null,
+                )
+            } else {
+                drawCircle(color, size.height / 2.2f, Offset(size.width / 2, size.height / 2))
+            }
+        }
+        HGap(5.dp)
+        Text(label, style = T.Tiny, color = C.Mid)
+    }
+}
+
 // ------------------------------------------------------------------ charts
 
-/** Weight chart: daily readings as dots, 7-day average as a line. */
+private const val DAY_MS = 86_400_000L
+
+/** Range picker shared by the time-series charts. */
+enum class ChartRange(val label: String, val days: Long?) { M1("1M", 30), M3("3M", 90), Y1("1Y", 365), ALL("All", null) }
+
 @Composable
-fun WeightChart(points: List<Pair<Long, Double>>, avg: List<Pair<Long, Double>>, modifier: Modifier = Modifier, goal: Double? = null) {
-    if (points.size < 2) {
-        Box(modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-            Text("Log at least two mornings to see the trend.", style = T.Small, color = C.Lo)
+fun RangePicker(selected: ChartRange, onSelect: (ChartRange) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.clip(RoundedCornerShape(10.dp)).background(C.S2).padding(2.dp)) {
+        ChartRange.entries.forEach { r ->
+            val sel = r == selected
+            Box(
+                Modifier.clip(RoundedCornerShape(8.dp)).background(if (sel) C.S3 else Color.Transparent)
+                    .clickable { onSelect(r) }.padding(horizontal = 10.dp, vertical = 5.dp),
+            ) { Text(r.label, style = T.Tiny, color = if (sel) C.Hi else C.Lo) }
+        }
+    }
+}
+
+private fun niceLabel(v: Double, decimals: Int): String =
+    if (decimals == 0) Math.round(v).toString() else String.format(java.util.Locale.US, "%.${decimals}f", v)
+
+private val shortDate = java.time.format.DateTimeFormatter.ofPattern("d MMM", java.util.Locale.ENGLISH)
+
+/**
+ * Time-series line chart with labelled axes. [points] are drawn as faint dots
+ * (single readings), [line] as the main line (usually an average). X values are
+ * epoch days.
+ */
+@Composable
+fun LineChart(
+    points: List<Pair<Long, Double>>,
+    line: List<Pair<Long, Double>>,
+    modifier: Modifier = Modifier,
+    goal: Double? = null,
+    height: Dp = 170.dp,
+    decimals: Int = 1,
+    lineColor: Color = C.Volt,
+    empty: String = "Not enough data yet.",
+) {
+    val xs = (points.map { it.first } + line.map { it.first })
+    if (xs.distinct().size < 2) {
+        Box(modifier.fillMaxWidth().height(height), contentAlignment = Alignment.Center) {
+            Text(empty, style = T.Small, color = C.Lo)
         }
         return
     }
-    val reveal by animateFloatAsState(1f, tween(1000, easing = FastOutSlowInEasing), label = "chart")
-    Canvas(modifier.fillMaxWidth().height(150.dp)) {
-        val minX = points.first().first.toFloat()
-        val maxX = points.last().first.toFloat().coerceAtLeast(minX + 1)
-        val all = points.map { it.second } + avg.map { it.second } + listOfNotNull(goal?.takeIf { g -> g <= (points.maxOf { it.second } + 1.5) })
-        val minY = (all.min() - 0.4).toFloat()
-        val maxY = (all.max() + 0.4).toFloat()
-        fun x(v: Long) = (v - minX) / (maxX - minX) * size.width
-        fun y(v: Double) = size.height - ((v.toFloat() - minY) / (maxY - minY)) * size.height
+    val minX = xs.min()
+    val maxX = xs.max().coerceAtLeast(minX + 1)
+    val ys = points.map { it.second } + line.map { it.second }
+    // Show the goal only when it's close enough not to squash the data into a flat line.
+    val span = (ys.max() - ys.min()).coerceAtLeast(1.0)
+    val goalShown = goal?.takeIf { it in (ys.min() - span)..(ys.max() + span) }
+    val all = ys + listOfNotNull(goalShown)
+    val pad = ((all.max() - all.min()) * 0.12).coerceAtLeast(0.3)
+    val minY = all.min() - pad
+    val maxY = all.max() + pad
+    val reveal by animateFloatAsState(1f, tween(900, easing = FastOutSlowInEasing), label = "line")
 
-        // grid
-        for (i in 0..3) {
-            val gy = size.height * i / 3f
-            drawLine(C.Line, Offset(0f, gy), Offset(size.width, gy), 1f)
-        }
-        goal?.let { g ->
-            if (g in minY..maxY) {
-                drawLine(C.Volt.copy(alpha = 0.5f), Offset(0f, y(g)), Offset(size.width, y(g)), 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f)))
+    Column(modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().height(height)) {
+            Column(Modifier.fillMaxHeight().padding(end = 6.dp), verticalArrangement = Arrangement.SpaceBetween) {
+                listOf(maxY, (maxY + minY) / 2, minY).forEach { Text(niceLabel(it, decimals), style = T.Tiny, color = C.Lo) }
+            }
+            Canvas(Modifier.weight(1f).fillMaxHeight()) {
+                fun x(v: Long) = (v - minX).toFloat() / (maxX - minX) * size.width
+                fun y(v: Double) = (size.height - ((v - minY) / (maxY - minY)) * size.height).toFloat()
+                for (i in 0..2) {
+                    val gy = 7f + (size.height - 14f) * i / 2f
+                    drawLine(C.Line, Offset(0f, gy), Offset(size.width, gy), 1f)
+                }
+                goalShown?.let { g ->
+                    drawLine(C.Hi.copy(alpha = 0.4f), Offset(0f, y(g)), Offset(size.width, y(g)), 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f)))
+                }
+                points.forEach { (d, v) -> drawCircle(C.Mid.copy(alpha = 0.55f), 3.5f, Offset(x(d), y(v))) }
+                if (line.size >= 2) {
+                    val n = (line.size * reveal).toInt().coerceIn(2, line.size)
+                    val path = Path()
+                    line.take(n).forEachIndexed { i, (d, v) -> if (i == 0) path.moveTo(x(d), y(v)) else path.lineTo(x(d), y(v)) }
+                    // Soft fill under the line makes the direction readable at a glance.
+                    val fill = Path().apply {
+                        addPath(path)
+                        lineTo(x(line[n - 1].first), size.height)
+                        lineTo(x(line.first().first), size.height)
+                        close()
+                    }
+                    drawPath(fill, lineColor.copy(alpha = 0.10f))
+                    drawPath(path, lineColor, style = Stroke(4f, cap = StrokeCap.Round))
+                    val last = line[n - 1]
+                    drawCircle(lineColor, 7f, Offset(x(last.first), y(last.second)))
+                    drawCircle(C.Bg, 3f, Offset(x(last.first), y(last.second)))
+                } else if (line.size == 1) {
+                    drawCircle(lineColor, 6f, Offset(x(line[0].first), y(line[0].second)))
+                }
             }
         }
-        points.forEach { (d, v) -> drawCircle(C.Mid.copy(alpha = 0.7f), 3.5f, Offset(x(d), y(v))) }
-        if (avg.size >= 2) {
-            val path = Path()
-            val n = (avg.size * reveal).toInt().coerceAtLeast(2)
-            avg.take(n).forEachIndexed { i, (d, v) -> if (i == 0) path.moveTo(x(d), y(v)) else path.lineTo(x(d), y(v)) }
-            drawPath(path, C.Volt, style = Stroke(4f, cap = StrokeCap.Round))
-            val last = avg[n - 1]
-            drawCircle(C.Volt, 7f, Offset(x(last.first), y(last.second)))
-            drawCircle(C.Bg, 3f, Offset(x(last.first), y(last.second)))
+        Gap(4.dp)
+        Row(Modifier.fillMaxWidth().padding(start = 30.dp)) {
+            val mid = (minX + maxX) / 2
+            listOf(minX, mid, maxX).forEachIndexed { i, d ->
+                Text(
+                    java.time.LocalDate.ofEpochDay(d).format(shortDate), style = T.Tiny, color = C.Lo,
+                    textAlign = when (i) { 0 -> TextAlign.Start; 1 -> TextAlign.Center; else -> TextAlign.End },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+/** Weight chart: daily readings as dots, 7-day average as a line, with a range picker. */
+@Composable
+fun WeightChart(points: List<Pair<Long, Double>>, avg: List<Pair<Long, Double>>, modifier: Modifier = Modifier, goal: Double? = null) {
+    var range by rememberSaveable { mutableStateOf(ChartRange.M3) }
+    val last = (points.map { it.first } + avg.map { it.first }).maxOrNull()
+    val from = range.days?.let { d -> last?.minus(d) }
+    fun cut(l: List<Pair<Long, Double>>) = if (from == null) l else l.filter { it.first >= from }
+    Column(modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                LegendItem("Average", C.Volt, line = true)
+                LegendItem("Daily", C.Mid)
+                if (goal != null) LegendItem("Goal", C.Hi.copy(alpha = 0.5f), line = true, dashed = true)
+            }
+            RangePicker(range, { range = it })
+        }
+        Gap(12.dp)
+        LineChart(cut(points), cut(avg), goal = goal, empty = "Log at least two mornings to see the trend.")
+    }
+}
+
+/**
+ * Bar chart with the value printed on each bar and an optional dashed target.
+ * Bars at or above 95% of the target use the accent colour.
+ */
+@Composable
+fun BarChart(
+    values: List<Float>,
+    labels: List<String>,
+    modifier: Modifier = Modifier,
+    target: Float? = null,
+    highlight: Int = -1,
+    height: Dp = 130.dp,
+    valueText: (Float) -> String = { if (it <= 0f) "" else Math.round(it).toString() },
+    color: Color = C.Volt,
+) {
+    val reveal by animateFloatAsState(1f, tween(800, easing = FastOutSlowInEasing), label = "bars")
+    val maxV = (values.maxOrNull() ?: 0f).coerceAtLeast((target ?: 0f) * 1.1f).coerceAtLeast(1f)
+    Column(modifier.fillMaxWidth()) {
+        Box(Modifier.fillMaxWidth().height(height)) {
+            Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
+                values.forEachIndexed { i, v ->
+                    val frac = (v / maxV * reveal).coerceIn(0f, 1f)
+                    val hit = target != null && v >= target * 0.95f
+                    val col = when {
+                        target == null -> if (i == highlight) color else color.copy(alpha = 0.55f)
+                        hit -> color
+                        i == highlight -> C.Hi.copy(alpha = 0.7f)
+                        else -> C.LineStrong
+                    }
+                    Column(Modifier.weight(1f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
+                        Text(valueText(v), style = T.Tiny, color = if (hit || i == highlight) C.Hi else C.Mid, maxLines = 1)
+                        Gap(3.dp)
+                        Box(
+                            Modifier.fillMaxWidth(0.62f).fillMaxHeight(frac * 0.82f)
+                                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)).background(col),
+                        )
+                    }
+                }
+            }
+            if (target != null) {
+                Canvas(Modifier.fillMaxSize()) {
+                    val ty = size.height - (target / maxV) * size.height * 0.82f
+                    drawLine(C.Hi.copy(alpha = 0.4f), Offset(0f, ty), Offset(size.width, ty), 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f)))
+                }
+            }
+        }
+        Hairline()
+        Gap(6.dp)
+        Row(Modifier.fillMaxWidth()) {
+            labels.forEachIndexed { i, l ->
+                Text(l, style = T.Tiny, color = if (i == highlight) C.Hi else C.Lo, textAlign = TextAlign.Center, modifier = Modifier.weight(1f), maxLines = 1)
+            }
         }
     }
 }
 
 /** Seven bars against a target line. */
 @Composable
-fun WeekBars(values: List<Float>, target: Float, labels: List<String>, modifier: Modifier = Modifier, highlight: Int = -1) {
-    val reveal by animateFloatAsState(1f, tween(800, easing = FastOutSlowInEasing), label = "bars")
-    Column(modifier.fillMaxWidth()) {
-        Canvas(Modifier.fillMaxWidth().height(110.dp)) {
-            val maxV = (values.maxOrNull() ?: 0f).coerceAtLeast(target * 1.15f).coerceAtLeast(1f)
-            val slot = size.width / values.size
-            val bw = slot * 0.46f
-            values.forEachIndexed { i, v ->
-                val h = (v / maxV) * size.height * reveal
-                val left = slot * i + (slot - bw) / 2
-                val col = when {
-                    v >= target * 0.95f -> C.Volt
-                    i == highlight -> C.Hi.copy(alpha = 0.6f)
-                    else -> C.S3
-                }
-                drawRoundRect(col, Offset(left, size.height - h), Size(bw, h), androidx.compose.ui.geometry.CornerRadius(6f, 6f))
-            }
-            val ty = size.height - (target / maxV) * size.height
-            drawLine(C.Hi.copy(alpha = 0.35f), Offset(0f, ty), Offset(size.width, ty), 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f)))
-        }
-        Gap(6.dp)
-        Row(Modifier.fillMaxWidth()) {
-            labels.forEachIndexed { i, l ->
-                Text(l, style = T.Tiny, color = if (i == highlight) C.Hi else C.Lo, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
-            }
+fun WeekBars(values: List<Float>, target: Float, labels: List<String>, modifier: Modifier = Modifier, highlight: Int = -1) =
+    BarChart(values, labels, modifier, target = target, highlight = highlight)
+
+/**
+ * A strip of small squares, one per day, oldest on the left. Good for showing
+ * consistency over the last few weeks without any words.
+ */
+@Composable
+fun DayDots(colors: List<Color>, modifier: Modifier = Modifier, cell: Dp = 10.dp) {
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        colors.forEach { c ->
+            Box(Modifier.weight(1f).height(cell).clip(RoundedCornerShape(3.dp)).background(c))
         }
     }
 }

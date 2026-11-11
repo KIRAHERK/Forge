@@ -24,6 +24,8 @@ echo "- Arabic translation" > release-notes.md && git add release-notes.md && gi
 scripts/release.sh 1.2.0
 ```
 
+No laptop? On GitHub open **Actions → Release → Run workflow**, pick the branch, type the version (for example `1.4.0`) and run it. The workflow checks the version is new, builds, signs, and creates the tag and release itself. This also works from a phone or a cloud session that can't push tags.
+
 The version comes from the tag. `versionCode` is derived from it (`1.2.0` → `10200`), so it always increases. Versions must only go up, because Android refuses to install an older version over a newer one.
 
 On the phone: **Settings → Updates → Check**, or wait for the daily notification. The first time, Android asks you to allow Forge to install apps. That happens once.

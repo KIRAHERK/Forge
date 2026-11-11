@@ -193,7 +193,7 @@ fun OnboardingScreen() {
                             ForgeField(protein, { protein = it }, "Protein / day", Modifier.weight(1f), number = true, suffix = "g")
                         }
                         Gap(6.dp)
-                        Text("Prefilled from the built-in plan. Change them to yours; fat and carbs are in Settings. Weigh in tomorrow morning for a clean first reading.", style = T.Small, color = C.Lo)
+                        Text("Prefilled from the built-in plan. Fat and carbs are in Settings.", style = T.Small, color = C.Lo)
                         Gap(22.dp)
                         Eyebrow("Habits (optional)")
                         Gap(6.dp)

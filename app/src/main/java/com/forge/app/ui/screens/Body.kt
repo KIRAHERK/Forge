@@ -81,10 +81,9 @@ fun PhotosPanel() {
         Eyebrow("Progress photos")
         Gap(4.dp)
         if (photos.isEmpty()) {
-            Text("Same spot, same light, same pose, every two weeks. The mirror lies. Photos side by side don't.", style = T.Small, color = C.Mid)
+            Text("Every two weeks. Same spot, light and pose.", style = T.Small, color = C.Mid)
         } else {
-            Text("Stored on this phone only. Never in your gallery.", style = T.Tiny, color = C.Lo)
-            Gap(12.dp)
+            Gap(8.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 PhotoTile(photos.first(), "Start", Modifier.weight(1f)) { viewing = photos.first() }
                 if (photos.size > 1) PhotoTile(photos.last(), "Latest", Modifier.weight(1f)) { viewing = photos.last() }
@@ -171,7 +170,7 @@ fun MeasurementsPanel(list: List<MeasurementEntity>) {
         }
         Gap(12.dp)
         if (last == null) {
-            Text("Weight says how much. Tape says where. Measure every two weeks: chest, flexed arm, waist at the navel, mid-thigh.", style = T.Small, color = C.Mid)
+            Text("Every two weeks: chest, flexed arm, waist at the navel, mid-thigh.", style = T.Small, color = C.Mid)
         } else {
             Row(Modifier.fillMaxWidth()) {
                 MeasureCell("Chest", last.chest, first?.chest, Modifier.weight(1f))

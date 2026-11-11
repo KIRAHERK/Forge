@@ -50,6 +50,7 @@ import com.forge.app.ui.LocalSettings
 import com.forge.app.ui.Nav
 import com.forge.app.ui.components.Loading
 import com.forge.app.ui.components.BottomSpace
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.ForgeDialog
 import com.forge.app.ui.components.Gap
@@ -113,8 +114,6 @@ fun TrainScreen(nav: Nav) {
             if (slot == Program.REST) {
                 Panel {
                     Text(Program.REST_TITLE.uppercase(), style = T.H2, color = C.Hi)
-                    Gap(4.dp)
-                    Text(Program.REST_NOTE, style = T.Body, color = C.Mid)
                 }
                 Gap(12.dp)
             } else {
@@ -125,14 +124,14 @@ fun TrainScreen(nav: Nav) {
         }
 
         item {
-            Panel(color = C.S1) {
-                Eyebrow("Rules")
-                Gap(8.dp)
-                Text(Exercises.EFFORT_RULE, style = T.Body, color = C.Hi)
-                Gap(8.dp)
-                Text(Exercises.PROGRESSION_RULE, style = T.Body, color = C.Mid)
-                Gap(8.dp)
-                Text(Program.NOTES, style = T.BodyS, color = C.Volt)
+            Panel(padding = PaddingValues(horizontal = 18.dp, vertical = 4.dp)) {
+                Details("Training rules") {
+                    Text(Exercises.EFFORT_RULE, style = T.Body, color = C.Hi)
+                    Gap(8.dp)
+                    Text(Exercises.PROGRESSION_RULE, style = T.Body, color = C.Mid)
+                    Gap(8.dp)
+                    Text(Program.REST_NOTE, style = T.Body, color = C.Mid)
+                }
             }
             Gap(12.dp)
         }
@@ -141,7 +140,7 @@ fun TrainScreen(nav: Nav) {
             SectionTitle("Recent sessions", action = if (sessions.any { it.finishedAt != null }) "All" else null, onAction = { nav.go("history") })
             val recent = sessions.filter { it.finishedAt != null }.take(4)
             if (recent.isEmpty()) {
-                Text("Nothing logged yet. Your first session shows up here.", style = T.Small, color = C.Lo)
+                Text("Nothing logged yet.", style = T.Small, color = C.Lo)
             }
             recent.forEach { SessionRow(it); Gap(8.dp) }
             BottomSpace()
@@ -287,12 +286,21 @@ fun ExerciseScreen(nav: Nav, exerciseId: String) {
                         Stat("Best set", if (ex.loaded || best.weightKg > 0) "${best.reps}×${Progression.fmtKg(best.weightKg)}" else "${best.reps}", Modifier.weight(1f), color = C.Volt)
                         Stat("Sessions", "${bySession.size}", Modifier.weight(1f))
                     }
-                    Gap(14.dp)
-                    Sparkline(
-                        bySession.map { (_, sets) -> sets.maxOf { Progression.e1rm(it.reps, it.weightKg) } },
-                        Modifier.fillMaxWidth().height(56.dp),
+                    Gap(16.dp)
+                    val series = bySession.mapNotNull { (sid, sets) ->
+                        val date = d.second[sid]?.date ?: return@mapNotNull null
+                        date to sets.maxOf { if (ex.loaded || it.weightKg > 0) Progression.e1rm(it.reps, it.weightKg) else it.reps.toDouble() }
+                    }.groupBy { it.first }.map { (date, l) -> date to l.maxOf { it.second } }.sortedBy { it.first }
+                    Eyebrow(if (ex.loaded) "Estimated 1-rep max, kg" else "Best reps per session")
+                    Gap(10.dp)
+                    com.forge.app.ui.components.LineChart(
+                        points = emptyList(), line = series, height = 140.dp,
+                        decimals = if (ex.loaded) 1 else 0,
+                        empty = "Log a second session to see the trend.",
                     )
-                    Gap(14.dp)
+                    Gap(16.dp)
+                    Eyebrow("Recent sessions")
+                    Gap(6.dp)
                     bySession.takeLast(5).reversed().forEach { (sid, sets) ->
                         val ses = d.second[sid]
                         Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {

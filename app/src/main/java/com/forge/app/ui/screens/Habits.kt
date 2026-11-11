@@ -60,6 +60,8 @@ import com.forge.app.ui.LocalSettings
 import com.forge.app.ui.Nav
 import com.forge.app.ui.components.BottomSpace
 import com.forge.app.ui.components.Chip
+import com.forge.app.ui.components.DayDots
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.ForgeDialog
 import com.forge.app.ui.components.ForgeField
@@ -222,7 +224,7 @@ fun HabitsScreen(nav: Nav) {
                 }
                 Gap(6.dp)
                 Text(
-                    if (defs.isEmpty()) "Add a habit to track it here." else "Tap a habit cell to log or correct that day.",
+                    if (defs.isEmpty()) "Add a habit to track it here." else "Tap a habit cell to change that day.",
                     style = T.Tiny, color = C.Lo,
                 )
             }
@@ -236,11 +238,7 @@ fun HabitsScreen(nav: Nav) {
                 Panel {
                     Text("NOTHING TRACKED YET", style = T.H3, color = C.Hi)
                     Gap(4.dp)
-                    Text(
-                        "Add something to build (read 20 pages, stretch, sleep by 23:00) or something to quit. " +
-                            "Each one gets a streak, a row in the grid and a daily check-in.",
-                        style = T.Small, color = C.Mid,
-                    )
+                    Text("Something to build, or something to quit.", style = T.Small, color = C.Mid)
                     Gap(14.dp)
                     PrimaryButton("Add a habit", { adding = true }, icon = Icons.Rounded.Add, height = 48.dp)
                 }
@@ -258,8 +256,6 @@ fun HabitsScreen(nav: Nav) {
                 Gap(2.dp)
                 Panel(onClick = { nav.go("urge") }) {
                     Text("HAVING AN URGE?", style = T.H2, color = C.Hi)
-                    Gap(4.dp)
-                    Text("An urge peaks and fades within minutes. Start the timer and wait it out.", style = T.Small, color = C.Mid)
                     Gap(12.dp)
                     PrimaryButton("Open urge timer", { nav.go("urge") }, height = 46.dp)
                 }
@@ -279,7 +275,9 @@ fun HabitsScreen(nav: Nav) {
                         HGap(6.dp)
                         Text("${s.jarCurrency} owed".trim(), style = T.Small, color = C.Mid, modifier = Modifier.padding(bottom = 6.dp))
                     }
-                    Text("Every miss and slip adds ${s.jarAmount}${if (s.jarCurrency.isNotBlank()) " " + s.jarCurrency else ""}. Put it aside for real — savings or charity.", style = T.Small, color = C.Mid)
+                    Details("How the jar works") {
+                        Text("Every miss and slip adds ${s.jarAmount}${if (s.jarCurrency.isNotBlank()) " " + s.jarCurrency else ""}. Put it aside for real: savings or charity.", style = T.Small, color = C.Mid)
+                    }
                     if (owed > 0) {
                         Gap(12.dp)
                         SecondaryButton("I put it aside", { scope.launch { repo.payJar() } }, Modifier.fillMaxWidth(), color = C.Amber, border = C.Amber.copy(alpha = 0.5f), height = 46.dp)
@@ -362,7 +360,7 @@ private fun HabitCard(def: HabitDef, logs: List<HabitLog>, today: LocalDate, wee
                 }
                 Gap(6.dp)
                 Text(def.name, style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("Best: $best · tap to edit", style = T.Small, color = C.Lo)
+                Text("Best: $best", style = T.Small, color = C.Lo)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("$streak", style = T.Hero.copy(fontSize = 48.sp, lineHeight = 46.sp), color = if (streak > 0) C.Volt else C.Hi)
@@ -371,6 +369,25 @@ private fun HabitCard(def: HabitDef, logs: List<HabitLog>, today: LocalDate, wee
                     style = T.Tiny, color = C.Mid,
                 )
             }
+        }
+        // Last 4 weeks at a glance, oldest on the left.
+        Gap(12.dp)
+        val logByDay = logs.filter { it.habitId == def.id }.associateBy { it.date }
+        DayDots((27 downTo 0).map { back ->
+            val d = today.minusDays(back.toLong()).toEpochDay()
+            when {
+                d < def.startDate -> C.S2
+                else -> when (Stats.kept(def, logByDay[d])) {
+                    true -> C.Volt
+                    false -> C.Red.copy(alpha = 0.75f)
+                    null -> C.S3
+                }
+            }
+        })
+        Gap(4.dp)
+        Row {
+            Text("4 weeks ago", style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f))
+            Text("Today", style = T.Tiny, color = C.Lo)
         }
         if (def.isQuit && def.counted) {
             val ws = weekStart.toEpochDay()
