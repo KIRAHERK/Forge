@@ -191,8 +191,6 @@ fun SettingsScreen(nav: Nav) {
                         })
                     }
                 }
-                Gap(6.dp)
-                Text("Choosing a start day lays out the PDF's cycle: Day 1, Day 2, rest, Day 4, Day 5, rest, rest.", style = T.Tiny, color = C.Lo)
                 Gap(14.dp)
                 Eyebrow("Each day")
                 Gap(4.dp)
@@ -244,11 +242,9 @@ fun SettingsScreen(nav: Nav) {
                     timeEdit = Triple("Workout reminder", s.workoutTime) { v -> upd { it.copy(workoutTime = v) } }
                 }
                 Hairline()
-                ValueRow("Deadline", Fmt.time(s.deadline), "Not done by then = missed, penalty issued", valueColor = C.Red) {
+                ValueRow("Deadline", Fmt.time(s.deadline), "Warnings at ${Fmt.time(Scheduler.nudgeMinutes(s))} and ${Fmt.time(Scheduler.finalMinutes(s))}", valueColor = C.Red) {
                     timeEdit = Triple("Deadline", s.deadline) { v -> upd { it.copy(deadline = v.coerceAtLeast(it.workoutTime + 30)) } }
                 }
-                Text("Extra warnings at ${Fmt.time(Scheduler.nudgeMinutes(s))} and ${Fmt.time(Scheduler.finalMinutes(s))}.", style = T.Tiny, color = C.Lo)
-                Gap(6.dp)
                 Hairline()
                 ValueRow("Morning weigh-in", Fmt.time(s.weighInTime)) {
                     timeEdit = Triple("Morning weigh-in", s.weighInTime) { v -> upd { it.copy(weighInTime = v) } }

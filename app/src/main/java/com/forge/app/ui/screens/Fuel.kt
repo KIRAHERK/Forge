@@ -83,6 +83,8 @@ import com.forge.app.ui.LocalSettings
 import com.forge.app.ui.Nav
 import com.forge.app.ui.UiEvents
 import com.forge.app.ui.components.Bar
+import com.forge.app.ui.components.BarChart
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.BottomSpace
 import com.forge.app.ui.components.Chip
 import com.forge.app.ui.components.Eyebrow
@@ -212,8 +214,6 @@ fun FuelScreen(nav: Nav) {
             item {
                 Panel {
                     Eyebrow("What to eat next")
-                    Gap(4.dp)
-                    Text("Picked to fit what's left today.", style = T.Small, color = C.Lo)
                     sugg.forEach { r ->
                         Gap(10.dp)
                         Row(
@@ -246,17 +246,7 @@ fun FuelScreen(nav: Nav) {
 
         item {
             Gap(8.dp)
-            Panel {
-                Eyebrow("Protein this week")
-                Gap(12.dp)
-                val days = (0..6).map { weekStart.plusDays(it.toLong()) }
-                WeekBars(
-                    values = days.map { d -> weekFoods.filter { it.date == d.toEpochDay() }.sumOf { it.protein }.toFloat() },
-                    target = s.protein.toFloat(),
-                    labels = days.map { Fmt.dowLetter(it) },
-                    highlight = days.indexOf(today),
-                )
-            }
+            WeekPanel(s, weekStart, weekFoods, today)
             Gap(12.dp)
         }
 
@@ -267,6 +257,43 @@ fun FuelScreen(nav: Nav) {
     }
 
     if (sheet) AddFoodSheet(date) { sheet = false }
+}
+
+/** This week's calories or protein per day, with the daily average. */
+@Composable
+private fun WeekPanel(s: Settings, weekStart: LocalDate, weekFoods: List<FoodEntity>, today: LocalDate) {
+    var showKcal by remember { mutableStateOf(false) }
+    val days = (0..6).map { weekStart.plusDays(it.toLong()) }
+    val values = days.map { d ->
+        val list = weekFoods.filter { it.date == d.toEpochDay() }
+        (if (showKcal) list.sumOf { it.kcal }.toDouble() else list.sumOf { it.protein }).toFloat()
+    }
+    val logged = days.indices.filter { values[it] > 0f && !days[it].isAfter(today) }
+    val avg = if (logged.isEmpty()) null else logged.map { values[it] }.average()
+    val target = if (showKcal) s.kcal.toFloat() else s.protein.toFloat()
+    val hits = logged.count { values[it] >= target * 0.95f }
+    Panel {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Eyebrow("This week", modifier = Modifier.weight(1f))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Chip("Protein", !showKcal, { showKcal = false })
+                Chip("Calories", showKcal, { showKcal = true })
+            }
+        }
+        Gap(14.dp)
+        Row(Modifier.fillMaxWidth()) {
+            Stat("Daily avg", avg?.let { Fmt.num(it.roundToInt()) } ?: "—", Modifier.weight(1f), unit = if (showKcal) "kcal" else "g")
+            Stat("Target hit", "$hits/${logged.size}", Modifier.weight(1f), color = if (logged.isNotEmpty() && hits == logged.size) C.Volt else C.Hi)
+        }
+        Gap(16.dp)
+        BarChart(
+            values = values,
+            labels = days.map { Fmt.dowLetter(it) },
+            target = target,
+            highlight = days.indexOf(today),
+            valueText = { if (it <= 0f) "" else if (showKcal) Fmt.num(it.roundToInt()) else it.roundToInt().toString() },
+        )
+    }
 }
 
 @Composable
@@ -479,12 +506,14 @@ fun AddFoodSheet(date: LocalDate, onDismiss: () -> Unit) {
                             }
                         }
                         item {
-                            Gap(24.dp)
-                            Text(
-                                "Basics: USDA FoodData Central. Syrian dishes: lab-measured or FAO values, tap one to see its source. " +
-                                    "Online: Open Food Facts, from product labels. Brands and home recipes differ, so check when you can.",
-                                style = T.Tiny, color = C.Lo,
-                            )
+                            Gap(16.dp)
+                            Details("Where the numbers come from") {
+                                Text(
+                                    "Basics: USDA FoodData Central. Syrian dishes: lab-measured or FAO values, tap one to see its source. " +
+                                        "Online: Open Food Facts, from product labels. Brands and home recipes differ, so check when you can.",
+                                    style = T.Tiny, color = C.Lo,
+                                )
+                            }
                             Gap(40.dp)
                         }
                     }

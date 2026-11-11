@@ -43,6 +43,7 @@ import com.forge.app.ui.UiEvents
 import com.forge.app.ui.components.Loading
 import com.forge.app.ui.components.BottomSpace
 import com.forge.app.ui.components.Chip
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.ForgeDialog
 import com.forge.app.ui.components.ForgeField
@@ -98,8 +99,6 @@ fun WeighDialog(initialKg: Double, onDismiss: () -> Unit, onSave: (LocalDate, Do
         confirm = "Save",
         onConfirm = { if (valid) onSave(date, value!!) },
     ) {
-        Text("Morning, after the bathroom, before food or water. Same scale every time.", style = T.Small, color = C.Mid)
-        Gap(12.dp)
         if (fixedDate == null) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 (0..3).forEach { i ->
@@ -172,11 +171,17 @@ fun WeightScreen(nav: Nav) {
             item {
                 Panel {
                     Eyebrow("Reminder")
-                    ToggleRow("Morning weigh-in reminder", "Skipped automatically once you've logged", s.remindWeighIn) { v -> upd { it.copy(remindWeighIn = v) } }
+                    ToggleRow("Morning weigh-in reminder", null, s.remindWeighIn) { v -> upd { it.copy(remindWeighIn = v) } }
                     Hairline()
-                    ValueRow("Reminder time", Fmt.time(s.weighInTime), "A second nudge at ${Fmt.time(Scheduler.weighLateMinutes(s))} if you still haven't") { timeEdit = true }
-                    Gap(4.dp)
-                    Text("You can type your weight straight into the notification. No need to open the app.", style = T.Small, color = C.Mid)
+                    ValueRow("Reminder time", Fmt.time(s.weighInTime)) { timeEdit = true }
+                    Details("How it works") {
+                        Text(
+                            "Skipped once you've logged. A second nudge comes at ${Fmt.time(Scheduler.weighLateMinutes(s))} if you still haven't. " +
+                                "You can type your weight straight into the notification.\n\n" +
+                                "Weigh in the morning, after the bathroom, before food or water. Same scale every time.",
+                            style = T.Small, color = C.Mid,
+                        )
+                    }
                 }
                 Gap(12.dp)
             }
@@ -194,10 +199,21 @@ fun WeightScreen(nav: Nav) {
                             Text("target ${Plan.RATE_MIN}–${Plan.RATE_MAX}", style = T.Tiny, color = C.Lo)
                         }
                     }
-                    Gap(14.dp)
+                    Gap(16.dp)
                     WeightChart(weights.map { it.date to it.kg }, avgSeries, goal = s.goalWeight)
-                    Gap(8.dp)
-                    Text("Dots are single mornings. The line is the 7-day average — that's the number that matters.", style = T.Tiny, color = C.Lo)
+                    if (weights.isNotEmpty()) {
+                        Gap(16.dp)
+                        Hairline()
+                        Gap(14.dp)
+                        val monthAgo = today.minusDays(30).toEpochDay()
+                        val base = weights.filter { it.date <= monthAgo }.maxByOrNull { it.date } ?: weights.first()
+                        val change = (avgSeries.lastOrNull()?.second ?: weights.last().kg) - base.kg
+                        Row(Modifier.fillMaxWidth()) {
+                            Stat("30 days", String.format(Locale.US, "%+.1f", change), Modifier.weight(1f), unit = "kg", color = rateColor(change / 4.3))
+                            Stat("Lowest", Fmt.kg(weights.minOf { it.kg }), Modifier.weight(1f), unit = "kg")
+                            Stat("Highest", Fmt.kg(weights.maxOf { it.kg }), Modifier.weight(1f), unit = "kg")
+                        }
+                    }
                 }
                 Gap(12.dp)
             }
@@ -205,8 +221,6 @@ fun WeightScreen(nav: Nav) {
             if (weeks.isNotEmpty()) {
                 item {
                     SectionTitle("Weekly averages")
-                    Text(Plan.checkIn[2], style = T.Small, color = C.Mid)
-                    Gap(10.dp)
                     Panel(padding = PaddingValues(vertical = 6.dp)) {
                         weeks.take(10).forEachIndexed { i, w ->
                             if (i > 0) Hairline(Modifier.padding(horizontal = 16.dp))

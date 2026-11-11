@@ -44,6 +44,8 @@ import com.forge.app.ui.LocalSettings
 import com.forge.app.ui.Nav
 import com.forge.app.ui.components.Loading
 import com.forge.app.ui.components.Bar
+import com.forge.app.ui.components.BarChart
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.BottomSpace
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.Gap
@@ -138,9 +140,10 @@ fun ProgressScreen(nav: Nav) {
                     val weeks = ceil(toGo / rate).toLong()
                     "At this rate: about $weeks weeks (${today.plusWeeks(weeks).format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH))}). Plan estimate: ${Plan.TIMELINE.lowercase()}."
                 } else "Plan estimate: ${Plan.TIMELINE.lowercase()}. Needs two weeks of weigh-ins for your own estimate."
-                Gap(4.dp)
-                Text(eta, style = T.Small, color = C.Mid)
-                Gap(14.dp)
+                Details("When will I get there?") {
+                    Text(eta, style = T.Small, color = C.Mid)
+                }
+                Gap(6.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (weights.none { it.date == today.toEpochDay() }) {
                         PrimaryButton("Log weight", { showWeigh = true }, Modifier.weight(1f), height = 46.dp)
@@ -219,9 +222,13 @@ fun ProgressScreen(nav: Nav) {
                         }
                     }
                 }
-                Gap(10.dp)
-                Text(Program.NOTES, style = T.Small, color = C.Mid)
             }
+            Gap(12.dp)
+        }
+
+        // ---------------- weekly training charts
+        item {
+            WeeklyTrainingPanel(s, finished, today)
             Gap(12.dp)
         }
 
@@ -240,13 +247,13 @@ fun ProgressScreen(nav: Nav) {
                 Gap(10.dp)
                 Bar(level.progress)
                 if (xpRecent.isNotEmpty()) {
-                    Gap(14.dp)
-                    Hairline()
-                    Gap(8.dp)
-                    xpRecent.take(8).forEach { e ->
-                        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                            Text(e.reason, style = T.Small, color = C.Mid, modifier = Modifier.weight(1f), maxLines = 1)
-                            Text((if (e.amount > 0) "+" else "") + e.amount, style = T.Small, color = if (e.amount >= 0) C.Volt else C.Red)
+                    Gap(6.dp)
+                    Details("Recent XP") {
+                        xpRecent.take(8).forEach { e ->
+                            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                Text(e.reason, style = T.Small, color = C.Mid, modifier = Modifier.weight(1f), maxLines = 1)
+                                Text((if (e.amount > 0) "+" else "") + e.amount, style = T.Small, color = if (e.amount >= 0) C.Volt else C.Red)
+                            }
                         }
                     }
                 }
@@ -312,6 +319,42 @@ fun ProgressScreen(nav: Nav) {
     }
 }
 
+/** Workouts and volume for the last 8 weeks. */
+@Composable
+private fun WeeklyTrainingPanel(s: com.forge.app.data.Settings, finished: List<com.forge.app.data.SessionEntity>, today: LocalDate) {
+    var volume by remember { mutableStateOf(false) }
+    val thisWeek = s.weekStartOf(today)
+    val weeks = (7 downTo 0).map { thisWeek.minusWeeks(it.toLong()) }
+    val byWeek = weeks.map { w ->
+        val from = w.toEpochDay(); val to = from + 6
+        finished.filter { it.date in from..to }
+    }
+    val values = byWeek.map { list -> if (volume) (list.sumOf { it.volumeKg } / 1000).toFloat() else list.size.toFloat() }
+    val past = values.dropLast(1).filter { it > 0f }
+    Panel {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Eyebrow("Last 8 weeks", modifier = Modifier.weight(1f))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                com.forge.app.ui.components.Chip("Workouts", !volume, { volume = false })
+                com.forge.app.ui.components.Chip("Volume", volume, { volume = true })
+            }
+        }
+        Gap(14.dp)
+        Row(Modifier.fillMaxWidth()) {
+            Stat("This week", if (volume) String.format(Locale.US, "%.1f", values.last()) else "${values.last().toInt()}", Modifier.weight(1f), unit = if (volume) "t" else "/ ${Program.WORKOUTS_PER_WEEK}")
+            Stat("Weekly avg", if (past.isEmpty()) "—" else String.format(Locale.US, if (volume) "%.1f" else "%.1f", past.average()), Modifier.weight(1f), unit = if (volume && past.isNotEmpty()) "t" else null)
+        }
+        Gap(16.dp)
+        BarChart(
+            values = values,
+            labels = weeks.map { "${it.dayOfMonth}/${it.monthValue}" },
+            target = if (volume) null else Program.WORKOUTS_PER_WEEK.toFloat(),
+            highlight = weeks.size - 1,
+            valueText = { if (it <= 0f) "" else if (volume) String.format(Locale.US, "%.1f", it) else it.toInt().toString() },
+        )
+    }
+}
+
 private fun weekCount(doneDates: List<Long>, programStart: Long, week: Int): Int {
     val from = programStart + (week - 1) * 7L
     val to = from + 6
@@ -358,7 +401,5 @@ private fun CheckInPanel(ci: CheckIn?, onAdjust: (Int) -> Unit, onAck: () -> Uni
                 PrimaryButton("Got it", onAck, height = 46.dp)
             }
         }
-        Gap(8.dp)
-        Text("Changes adjust your calorie and carb targets. You can reset them in Settings.", style = T.Tiny, color = C.Lo)
     }
 }

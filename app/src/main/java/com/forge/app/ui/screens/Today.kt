@@ -67,7 +67,9 @@ import com.forge.app.ui.Nav
 import com.forge.app.ui.UiEvents
 import com.forge.app.ui.components.Loading
 import com.forge.app.ui.components.BottomSpace
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.Eyebrow
+import com.forge.app.ui.components.Sparkline
 import com.forge.app.ui.components.ForgeDialog
 import com.forge.app.ui.components.Gap
 import com.forge.app.ui.components.HGap
@@ -171,7 +173,7 @@ fun TodayScreen(nav: Nav) {
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(bottom = 18.dp)) {
                 Box(Modifier.width(3.dp).fillMaxHeight().background(C.Volt))
                 HGap(14.dp)
-                Text(line, style = T.H2, color = C.Hi)
+                Text(line, style = T.H3, color = C.Hi)
             }
         }
 
@@ -234,7 +236,7 @@ fun TodayScreen(nav: Nav) {
             val latest = weights.lastOrNull()?.kg
             val avg = Stats.movingAverage(weights).lastOrNull()?.second ?: latest
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp)) {
+                Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp), onClick = { nav.tab("train") }) {
                     Stat("Streak", "$streak", caption = if (streak == 1) "session" else "sessions", color = if (streak > 0) C.Volt else C.Hi)
                 }
                 Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp), onClick = { nav.tab("habits") }) {
@@ -245,6 +247,8 @@ fun TodayScreen(nav: Nav) {
                 Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp), onClick = { nav.go("weight") }) {
                     val toGo = avg?.let { (s.goalWeight - it).coerceAtLeast(0.0) }
                     Stat("To ${s.goalWeight.roundToInt()} kg", toGo?.let { Fmt.kg(it) } ?: "—", unit = if (toGo != null) "kg" else null)
+                    Gap(8.dp)
+                    Sparkline(Stats.movingAverage(weights).takeLast(21).map { it.second }, Modifier.fillMaxWidth().height(18.dp))
                 }
             }
             BottomSpace()
@@ -334,8 +338,6 @@ private fun HeroCard(
                 Eyebrow("Today")
                 Gap(8.dp)
                 Text("REST DAY", style = T.Display, color = C.Hi)
-                Gap(6.dp)
-                Text(Program.REST_NOTE, style = T.Body, color = C.Mid)
                 if (nextText != null) {
                     Gap(16.dp)
                     Hairline()
@@ -369,16 +371,16 @@ private fun HeroCard(
                     Stat("Sets", "${day.totalSets}", Modifier.weight(1f))
                     Stat("Time left", Fmt.left(now, deadline), Modifier.weight(1.3f), color = urgency)
                 }
-                Gap(16.dp)
-                Hairline()
-                Gap(12.dp)
-                day.exercises.forEach { pe ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-                        Text(pe.displayName, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f))
-                        Text(pe.prescription, style = T.Small, color = C.Mid)
+                Gap(8.dp)
+                Details("Exercises") {
+                    day.exercises.forEach { pe ->
+                        Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+                            Text(pe.displayName, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f))
+                            Text(pe.prescription, style = T.Small, color = C.Mid)
+                        }
                     }
                 }
-                Gap(18.dp)
+                Gap(8.dp)
                 PrimaryButton("Start workout", onStart, icon = Icons.Rounded.PlayArrow)
             }
         }
@@ -389,7 +391,7 @@ private fun HeroCard(
                 Gap(8.dp)
                 Text(day.name.uppercase(), style = T.Display, color = C.Hi)
                 Gap(6.dp)
-                Text("Deadline passed at ${Fmt.time(s.deadline)}. Penalty issued, streak reset. You can still make it up.", style = T.Body, color = C.Mid)
+                Text("Missed at ${Fmt.time(s.deadline)}. You can still make it up.", style = T.Body, color = C.Mid)
             }
         }
     }
@@ -468,7 +470,7 @@ private fun MakeUpCard(day: WorkoutDay, date: LocalDate, now: LocalDateTime, s: 
         Gap(8.dp)
         Text(day.title.uppercase(), style = T.H2, color = C.Hi)
         Gap(4.dp)
-        Text("Missed ${Fmt.day(date)}. Do it now to restore your streak. The penalty still stands.", style = T.Small, color = C.Mid)
+        Text("Missed ${Fmt.day(date)}. Restores your streak.", style = T.Small, color = C.Mid)
         Gap(14.dp)
         PrimaryButton("Make it up", onStart, color = C.Amber, height = 48.dp)
     }
@@ -527,7 +529,6 @@ private fun CheckInCard(
         Row(Modifier.fillMaxWidth().clickable(onClick = onWeigh).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("Morning weight", style = T.BodyM, color = C.Hi)
-                Text(if (weightLogged != null) "Logged today" else "After the bathroom, before food", style = T.Small, color = C.Mid)
             }
             if (weightLogged != null) Text("${Fmt.kg(weightLogged)} kg", style = T.Num, color = C.Volt)
             else SecondaryButton("Log", onWeigh, height = 40.dp)

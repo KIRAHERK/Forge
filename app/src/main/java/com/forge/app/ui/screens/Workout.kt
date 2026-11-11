@@ -81,10 +81,12 @@ import com.forge.app.ui.LocalSettings
 import com.forge.app.ui.Nav
 import com.forge.app.ui.components.Bar
 import com.forge.app.ui.components.CheckCircle
+import com.forge.app.ui.components.Details
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.ForgeDialog
 import com.forge.app.ui.components.Gap
 import com.forge.app.ui.components.HGap
+import com.forge.app.ui.components.Hairline
 import com.forge.app.ui.components.IconBtn
 import com.forge.app.ui.components.NumberDialog
 import com.forge.app.ui.components.Panel
@@ -490,40 +492,17 @@ fun GuideContent(ex: Exercise, pe: ProgramExercise? = null) {
             Tag("Rest ${ex.restSec}s")
         }
     }
-    Gap(20.dp)
+    Gap(14.dp)
+    GuideSection("How to do it", ex.steps, numbered = true, initiallyOpen = true)
     GuideSection("Setup", ex.setup, numbered = true)
-    GuideSection("Execution", ex.steps, numbered = true)
-    Text("CUES", style = T.H3, color = C.Hi)
-    Gap(8.dp)
-    ex.cues.forEach {
-        Row(Modifier.padding(vertical = 4.dp)) {
-            Box(Modifier.padding(top = 8.dp).size(6.dp).clip(CircleShape).background(C.Volt))
-            HGap(10.dp)
-            Text(it, style = T.Body, color = C.Hi)
-        }
+    GuideBullets("Cues", ex.cues, C.Volt, C.Hi)
+    GuideBullets("Common mistakes", ex.mistakes, C.Red, C.Mid)
+    ex.homeTip?.let { tip ->
+        Hairline()
+        Details("Note") { Text(tip, style = T.Body, color = C.Hi) }
     }
-    Gap(18.dp)
-    Text("COMMON MISTAKES", style = T.H3, color = C.Hi)
-    Gap(8.dp)
-    ex.mistakes.forEach {
-        Row(Modifier.padding(vertical = 4.dp)) {
-            Box(Modifier.padding(top = 8.dp).size(6.dp).clip(RoundedCornerShape(1.dp)).background(C.Red))
-            HGap(10.dp)
-            Text(it, style = T.Body, color = C.Mid)
-        }
-    }
-    ex.homeTip?.let {
-        Gap(18.dp)
-        Panel(color = C.S2) {
-            Eyebrow("Note")
-            Gap(4.dp)
-            Text(it, style = T.Body, color = C.Hi)
-        }
-    }
-    Gap(18.dp)
-    Panel(color = C.S2) {
-        Eyebrow("Effort and progression")
-        Gap(4.dp)
+    Hairline()
+    Details("Effort and progression") {
         Text(Exercises.EFFORT_RULE, style = T.Small, color = C.Hi)
         Gap(6.dp)
         Text(Exercises.PROGRESSION_RULE, style = T.Small, color = C.Mid)
@@ -540,16 +519,30 @@ fun GuideContent(ex: Exercise, pe: ProgramExercise? = null) {
 }
 
 @Composable
-private fun GuideSection(title: String, lines: List<String>, numbered: Boolean) {
-    Text(title.uppercase(), style = T.H3, color = C.Hi)
-    Gap(8.dp)
-    lines.forEachIndexed { i, l ->
-        Row(Modifier.padding(vertical = 4.dp)) {
-            if (numbered) Text("${i + 1}", style = T.Num.copy(fontSize = 16.sp), color = C.Volt, modifier = Modifier.width(22.dp))
-            Text(l, style = T.Body, color = C.Hi)
+private fun GuideSection(title: String, lines: List<String>, numbered: Boolean, initiallyOpen: Boolean = false) {
+    Hairline()
+    Details(title, initiallyOpen = initiallyOpen) {
+        lines.forEachIndexed { i, l ->
+            Row(Modifier.padding(vertical = 4.dp)) {
+                if (numbered) Text("${i + 1}", style = T.Num.copy(fontSize = 16.sp), color = C.Volt, modifier = Modifier.width(22.dp))
+                Text(l, style = T.Body, color = C.Hi)
+            }
         }
     }
-    Gap(18.dp)
+}
+
+@Composable
+private fun GuideBullets(title: String, lines: List<String>, dot: androidx.compose.ui.graphics.Color, text: androidx.compose.ui.graphics.Color) {
+    Hairline()
+    Details(title) {
+        lines.forEach {
+            Row(Modifier.padding(vertical = 4.dp)) {
+                Box(Modifier.padding(top = 8.dp).size(6.dp).clip(CircleShape).background(dot))
+                HGap(10.dp)
+                Text(it, style = T.Body, color = text)
+            }
+        }
+    }
 }
 
 fun SessionEntity.minutes(): Long = ((finishedAt ?: startedAt) - startedAt) / 60000
