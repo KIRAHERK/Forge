@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "about": "Syrian and Levantine dishes. Values are per 100 g. Every dish names its source; nothing here is estimated. The app downloads the newest copy of this file from the repo, so dishes can be added without a new release. Bump version when you change it.",
+  "sources": {
+    "hoteit2021": {
+      "name": "Lab-measured",
+      "detail": "Home-style Levantine dishes from a Beirut kitchen, analysed in an accredited lab. Hoteit et al., F1000Research 10:12 (2021), Table 2. Portions from Table 4.",
+      "url": "https://doi.org/10.12688/f1000research.27461.1"
+    },
+    "fao1982": {
+      "name": "FAO Near East tables",
+      "detail": "FAO/USDA Food Composition Tables for the Near East (1982).",
+      "url": "https://www.fao.org/4/x6879e/x6879e00.htm"
+    },
+    "usda_baklava": {
+      "name": "USDA FoodData Central",
+      "detail": "Baklava, FNDDS food 2708044. Piece size from Hoteit et al. (2021), Table 4.",
+      "url": "https://fdc.nal.usda.gov/food-details/2708044/nutrients"
+    }
+  },
+  "dishes": [
+    { "id": "shish_barak", "name": "Shish barak", "ar": "شيش برك", "aka": ["chichbarak", "shishbarak"], "kcal": 154, "p": 4.8, "f": 6.7, "c": 18.7, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "kibbeh_sayniyeh", "name": "Kibbeh bil sayniyeh", "ar": "كبة بالصينية", "aka": ["kibbeh", "kibbe", "kebbeh", "baked kibbeh", "kibbeh tray", "كبة"], "kcal": 266, "p": 11.3, "f": 15.8, "c": 19.7, "portions": [{ "label": "½ square", "g": 76 }], "src": "hoteit2021" },
+    { "id": "yabraq", "name": "Yabraq (vine leaves, meat and rice)", "ar": "يبرق", "aka": ["warak enab", "warak dawali", "grape leaves", "vine leaves", "dolma", "ورق عنب"], "kcal": 102, "p": 4.4, "f": 1.5, "c": 17.7, "portions": [{ "label": "6 pieces", "g": 100 }], "src": "hoteit2021" },
+    { "id": "kousa_mahshi", "name": "Kousa mahshi", "ar": "كوسا محشي", "aka": ["stuffed zucchini", "stuffed courgette", "mahshi", "محشي"], "kcal": 123, "p": 3.8, "f": 2.9, "c": 20.3, "portions": [{ "label": "2 medium", "g": 100 }], "src": "hoteit2021" },
+    { "id": "malfouf_mahshi", "name": "Malfouf mahshi", "ar": "ملفوف محشي", "aka": ["stuffed cabbage", "cabbage rolls", "mahshi", "محشي"], "kcal": 75, "p": 3.8, "f": 1.3, "c": 12.1, "portions": [{ "label": "4 pieces", "g": 100 }], "src": "hoteit2021" },
+    { "id": "batata_mahshi", "name": "Batata mahshi (stuffed potatoes)", "ar": "بطاطا محشية", "aka": ["stuffed potatoes", "mahshi", "محشي"], "kcal": 143, "p": 5.0, "f": 5.7, "c": 18.0, "portions": [{ "label": "1 large or 3 small", "g": 100 }], "src": "hoteit2021" },
+    { "id": "mloukhieh", "name": "Mloukhieh with chicken and rice", "ar": "ملوخية", "aka": ["molokhia", "mulukhiyah", "mouloukhia", "jute leaves"], "kcal": 112, "p": 5.4, "f": 4.8, "c": 11.9, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "bamieh", "name": "Bamieh (okra stew with lamb)", "ar": "بامية", "aka": ["okra", "bamia", "bamya", "yakhnet bamieh"], "kcal": 122, "p": 3.9, "f": 4.3, "c": 17.0, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "fasoulia", "name": "Fasoulia (white bean stew with lamb)", "ar": "فاصولياء", "aka": ["fasolia", "fassoulia", "white beans", "yakhnet fasoulia"], "kcal": 140, "p": 8.1, "f": 1.9, "c": 22.6, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "mujaddara", "name": "Mujaddara", "ar": "مجدرة", "aka": ["mjaddara", "moujadara", "lentils and rice"], "kcal": 113, "p": 5.4, "f": 0.5, "c": 21.8, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "burghul_banadoura", "name": "Burghul bi banadoura", "ar": "برغل ببندورة", "aka": ["bulgur", "burghul", "borgul", "برغل"], "kcal": 146, "p": 3.0, "f": 5.6, "c": 20.8, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "rice_chicken", "name": "Rice with chicken", "ar": "رز بالدجاج", "aka": ["riz a djej", "riz bi djaj", "chicken and rice", "رز"], "kcal": 167, "p": 7.2, "f": 7.0, "c": 18.8, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "rice_meat", "name": "Rice with meat", "ar": "رز باللحمة", "aka": ["riz bi lahmeh", "hashweh", "رز"], "kcal": 165, "p": 7.5, "f": 4.8, "c": 23.0, "portions": [{ "label": "⅓ cup", "g": 65 }], "src": "hoteit2021" },
+    { "id": "sayadieh", "name": "Sayadieh (fish and rice)", "ar": "صيادية", "aka": ["sayadiyeh", "fish and rice"], "kcal": 171, "p": 6.5, "f": 6.3, "c": 22.1, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "moghrabieh", "name": "Moghrabieh", "ar": "مغربية", "aka": ["maftoul", "pearl couscous"], "kcal": 124, "p": 6.7, "f": 3.9, "c": 15.6, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "kofta_potatoes", "name": "Kofta with potatoes (oven tray)", "ar": "كفتة بالصينية", "aka": ["kafta", "kofta", "kafta wa batata"], "kcal": 94, "p": 8.8, "f": 3.4, "c": 7.0, "portions": [{ "label": "1 cup", "g": 200 }], "src": "hoteit2021" },
+    { "id": "musaqaa", "name": "Musaqa'a (eggplant and chickpeas)", "ar": "مسقعة", "aka": ["moussaka", "mousaka", "batinjan", "eggplant", "aubergine"], "kcal": 165, "p": 3.2, "f": 10.3, "c": 14.8, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "loubieh", "name": "Loubieh bil zeit (green beans)", "ar": "لوبية بالزيت", "aka": ["green beans", "lubia", "loubia"], "kcal": 62, "p": 2.1, "f": 2.8, "c": 7.2, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "hindbeh", "name": "Hindbeh bil zeit (dandelion greens)", "ar": "هندبة بالزيت", "aka": ["dandelion", "chicory", "hindbe"], "kcal": 235, "p": 2.5, "f": 22.4, "c": 5.9, "portions": [{ "label": "¼ cup", "g": 50 }], "src": "hoteit2021" },
+    { "id": "fatteh", "name": "Fatteh hummus", "ar": "فتة حمص", "aka": ["fatteh", "fatta", "fattet hummus", "فتة"], "kcal": 159, "p": 6.5, "f": 7.7, "c": 15.8, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "foul", "name": "Foul mudammas", "ar": "فول مدمس", "aka": ["ful", "foul", "fava beans", "فول"], "kcal": 116, "p": 5.3, "f": 4.2, "c": 14.2, "portions": [{ "label": "½ cup", "g": 100 }], "src": "hoteit2021" },
+    { "id": "hummus", "name": "Hummus", "ar": "حمص بطحينة", "aka": ["hommos", "houmous", "hummus bi tahini", "حمص"], "kcal": 146, "p": 7.5, "f": 5.2, "c": 17.2, "portions": [{ "label": "6 tbsp", "g": 100 }], "src": "hoteit2021" },
+    { "id": "mutabbal", "name": "Mutabbal (baba ghanoush)", "ar": "متبل", "aka": ["baba ghanoush", "baba ghanouj", "moutabal", "بابا غنوج"], "kcal": 39, "p": 1.1, "f": 1.8, "c": 4.5, "portions": [{ "label": "6 tbsp", "g": 100 }], "src": "hoteit2021" },
+    { "id": "falafel", "name": "Falafel", "ar": "فلافل", "aka": ["taameya"], "kcal": 339, "p": 13.3, "f": 15.6, "c": 36.5, "portions": [{ "label": "2 pieces", "g": 40 }], "src": "hoteit2021" },
+    { "id": "tabbouleh", "name": "Tabbouleh", "ar": "تبولة", "aka": ["tabouli", "tabbouli", "tabouleh"], "kcal": 53, "p": 1.9, "f": 2.3, "c": 6.1, "portions": [{ "label": "1 cup", "g": 200 }], "src": "hoteit2021" },
+    { "id": "fattoush", "name": "Fattoush", "ar": "فتوش", "aka": ["fatoush", "salad"], "kcal": 52, "p": 1.5, "f": 1.9, "c": 7.2, "portions": [{ "label": "1 cup", "g": 200 }], "src": "hoteit2021" },
+    { "id": "shawarma_chicken", "name": "Chicken shawarma (meat only)", "ar": "شاورما دجاج", "aka": ["shawarma", "shawerma", "شاورما"], "kcal": 197, "p": 29.7, "f": 8.2, "c": 1.1, "portions": [{ "label": "4 tbsp", "g": 54 }], "src": "hoteit2021" },
+    { "id": "shawarma_meat", "name": "Meat shawarma (meat only)", "ar": "شاورما لحمة", "aka": ["shawarma", "shawerma", "beef shawarma", "lamb shawarma", "شاورما"], "kcal": 179, "p": 17.5, "f": 11.0, "c": 2.6, "portions": [{ "label": "4 tbsp", "g": 50 }], "src": "hoteit2021" },
+    { "id": "lahm_bi_ajeen", "name": "Lahm bi ajeen (sfiha)", "ar": "لحم بعجين", "aka": ["sfiha", "sfeeha", "lahmacun", "صفيحة"], "kcal": 244, "p": 11.2, "f": 5.6, "c": 37.1, "portions": [{ "label": "2 medium pieces", "g": 40 }], "src": "hoteit2021" },
+    { "id": "fatayer_sabanekh", "name": "Spinach fatayer", "ar": "فطاير سبانخ", "aka": ["fatayer", "sabanekh", "spinach pie"], "kcal": 311, "p": 5.3, "f": 20.1, "c": 27.2, "portions": [{ "label": "1 triangle", "g": 55 }], "src": "hoteit2021" },
+    { "id": "manakish", "name": "Manakish", "ar": "مناقيش", "aka": ["manakeesh", "manoushe", "manousheh", "za'atar", "zaatar", "زعتر"], "kcal": 349, "p": 8.3, "f": 10.2, "c": 55.9, "portions": [], "src": "fao1982" },
+    { "id": "khubz", "name": "Arabic bread (white)", "ar": "خبز عربي", "aka": ["khubz", "khobz", "pita", "bread", "خبز"], "kcal": 284, "p": 9.2, "f": 0.8, "c": 64.6, "portions": [], "src": "fao1982" },
+    { "id": "halawa", "name": "Halawa (halva)", "ar": "حلاوة", "aka": ["halva", "halvah", "tahini halva", "حلاوة طحينية"], "kcal": 516, "p": 10.3, "f": 29.6, "c": 56.7, "portions": [{ "label": "2 tbsp", "g": 33 }], "src": "fao1982" },
+    { "id": "halawa_pistachio", "name": "Halawa with pistachio", "ar": "حلاوة بالفستق", "aka": ["halva", "halvah", "pistachio halva"], "kcal": 535, "p": 12.3, "f": 33.6, "c": 50.9, "portions": [{ "label": "2 tbsp", "g": 33 }], "src": "fao1982" },
+    { "id": "baklava", "name": "Baklava", "ar": "بقلاوة", "aka": ["baklawa", "baqlawa"], "kcal": 440, "p": 6.6, "f": 29.3, "c": 37.6, "portions": [{ "label": "1 small piece", "g": 23 }], "src": "usda_baklava" }
+  ]
+}

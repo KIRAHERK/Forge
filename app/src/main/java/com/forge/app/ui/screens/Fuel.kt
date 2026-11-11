@@ -33,9 +33,11 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -55,10 +57,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.forge.app.Graph
 import com.forge.app.data.Fmt
+import com.forge.app.data.Dishes
 import com.forge.app.data.FoodEntity
+import com.forge.app.data.FoodPick
+import com.forge.app.data.OffProduct
+import com.forge.app.data.OpenFoodFacts
+import com.forge.app.data.TextMatch
+import com.forge.app.data.per
 import com.forge.app.data.Settings
 import com.forge.app.data.Stats
 import com.forge.app.domain.DayPlans
@@ -95,6 +104,7 @@ import com.forge.app.ui.components.TopBar
 import com.forge.app.ui.components.WeekBars
 import com.forge.app.ui.theme.C
 import com.forge.app.ui.theme.T
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -104,8 +114,6 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private fun macroText(m: Macros) = "${Fmt.num(m.kcal)} kcal · ${Fmt.g(m.protein)} g protein"
-private fun fullMacro(m: Macros) = "${Fmt.num(m.kcal)} kcal · P ${Fmt.g(m.protein)} · F ${Fmt.g(m.fat)} · C ${Fmt.g(m.carbs)}"
 
 fun suggestions(kLeft: Int, pLeft: Double): List<Recipe> {
     if (kLeft < 250) return emptyList()
@@ -332,34 +340,56 @@ private fun PlanPanel(s: Settings, open: Boolean, onToggle: () -> Unit) {
 
 // ------------------------------------------------------------------ add food
 
-private sealed interface Pick {
-    data class F(val food: Food) : Pick
-    data class R(val recipe: Recipe) : Pick
-    data class Custom(val name: String, val serving: String, val m: Macros) : Pick
-    data class Recent(val e: FoodEntity) : Pick
+private sealed interface Online {
+    data object Idle : Online
+    data object Loading : Online
+    data object Offline : Online
+    data class Done(val items: List<OffProduct>) : Online
 }
+
+private fun recentPick(e: FoodEntity) = FoodPick(
+    name = e.name,
+    base = Macros(e.kcal, e.protein, e.fat, e.carbs) * (1.0 / e.servings.coerceAtLeast(0.01)),
+    source = e.source,
+    servings = e.servings,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFoodSheet(date: LocalDate, onDismiss: () -> Unit) {
     val repo = Graph.repo
+    val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var tab by remember { mutableIntStateOf(0) }
     var query by remember { mutableStateOf("") }
-    var pick by remember { mutableStateOf<Pick?>(null) }
-    var servings by remember { mutableDoubleStateOf(1.0) }
+    var pick by remember { mutableStateOf<FoodPick?>(null) }
+    var scanning by remember { mutableStateOf(false) }
     val recent by repo.recentFoods.collectAsState(emptyList())
     val custom by repo.customFoods.collectAsState(emptyList())
+    val book by Dishes.book.collectAsState()
     var added by remember { mutableIntStateOf(0) }
+    var online by remember { mutableStateOf<Online>(Online.Idle) }
+    val q = query.trim()
 
-    fun add(name: String, m: Macros, source: String) {
-        // Capture the quantity now: the reset below runs before the coroutine does.
-        val qty = servings
-        scope.launch { repo.addFood(date, name, m, qty, source) }
+    LaunchedEffect(Unit) { Dishes.refresh(ctx) }
+    LaunchedEffect(q) {
+        if (q.length < 3) { online = Online.Idle; return@LaunchedEffect }
+        delay(700)
+        online = Online.Loading
+        online = when (val r = OpenFoodFacts.search(q)) {
+            is OpenFoodFacts.Search.Ok -> Online.Done(r.items)
+            OpenFoodFacts.Search.Offline -> Online.Offline
+        }
+    }
+
+    fun log(item: LogItem) {
+        scope.launch {
+            repo.addFood(date, item.name, item.perServing, item.servings, item.source)
+            item.saveAs?.let { (name, serving) -> repo.addCustomFood(name, serving, item.perServing) }
+        }
         added++
         pick = null
-        servings = 1.0
     }
 
     ModalBottomSheet(
@@ -382,94 +412,105 @@ fun AddFoodSheet(date: LocalDate, onDismiss: () -> Unit) {
             }
             Gap(12.dp)
 
-            // Serving picker for the selected item
             pick?.let { p ->
-                val (name, serving, base) = when (p) {
-                    is Pick.F -> Triple(p.food.name, p.food.serving, p.food.m)
-                    is Pick.R -> Triple(p.recipe.name, "1 serving", p.recipe.perServing)
-                    is Pick.Custom -> Triple(p.name, p.serving, p.m)
-                    is Pick.Recent -> Triple(p.e.name, "as logged before", Macros(p.e.kcal, p.e.protein, p.e.fat, p.e.carbs) * (1.0 / p.e.servings.coerceAtLeast(0.01)))
-                }
-                Column(Modifier.padding(horizontal = 20.dp).clip(RoundedCornerShape(18.dp)).background(C.S2).border(1.dp, C.Volt.copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(name, style = T.BodyS, color = C.Hi)
-                            Text(serving, style = T.Small, color = C.Mid)
-                        }
-                        IconBtn(Icons.Rounded.Close, "Cancel", { pick = null }, tint = C.Mid, size = 36.dp)
-                    }
-                    Gap(10.dp)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Stepper(
-                            "${Fmt.kg(servings).removeSuffix(".0")}×",
-                            onMinus = { servings = (servings - 0.5).coerceAtLeast(0.5) },
-                            onPlus = { servings += 0.5 },
-                            modifier = Modifier.width(140.dp),
-                        )
-                        HGap(12.dp)
-                        Text(fullMacro(base * servings), style = T.Small, color = C.Hi, modifier = Modifier.weight(1f))
-                    }
-                    Gap(12.dp)
-                    PrimaryButton("Add", {
-                        val src = when (p) {
-                            is Pick.F -> "food:${p.food.id}"
-                            is Pick.R -> "recipe:${p.recipe.id}"
-                            is Pick.Custom -> "custom"
-                            is Pick.Recent -> p.e.source
-                        }
-                        add(name, base, src)
-                    }, height = 46.dp, icon = Icons.Rounded.Check)
-                }
+                PickPanel(p, onCancel = { pick = null }, onAdd = ::log)
                 Gap(12.dp)
             }
 
             when (tab) {
                 0 -> {
-                    Box(Modifier.padding(horizontal = 20.dp)) { ForgeField(query, { query = it }, "Search foods") }
+                    Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f)) { ForgeField(query, { query = it }, "Search foods, dishes, products") }
+                        HGap(10.dp)
+                        Box(
+                            Modifier.padding(top = 6.dp).size(56.dp).clip(RoundedCornerShape(14.dp)).background(C.S2)
+                                .border(1.dp, C.LineStrong, RoundedCornerShape(14.dp)).clickable { scanning = true },
+                            contentAlignment = Alignment.Center,
+                        ) { Icon(Icons.Rounded.DocumentScanner, "Scan a barcode or label", tint = C.Volt, modifier = Modifier.size(24.dp)) }
+                    }
                     Gap(8.dp)
-                    val q = query.trim().lowercase()
-                    val recents = recent.distinctBy { it.name }.take(6).filter { q.isEmpty() || it.name.lowercase().contains(q) }
+                    val recents = recent.distinctBy { it.name }.take(6).filter { q.isEmpty() || TextMatch.matches(q, it.name) }
+                    val dishes = book?.dishes.orEmpty().filter { it.matches(q) }
                     LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
                         if (recents.isNotEmpty()) {
                             item { Eyebrow("Recent", modifier = Modifier.padding(vertical = 8.dp)) }
                             items(recents, key = { "r" + it.id }) { e ->
-                                PickRow(e.name, macroText(Macros(e.kcal, e.protein, e.fat, e.carbs))) { pick = Pick.Recent(e); servings = e.servings }
+                                PickRow(e.name, macroText(Macros(e.kcal, e.protein, e.fat, e.carbs))) { pick = recentPick(e) }
+                            }
+                        }
+                        if (dishes.isNotEmpty()) {
+                            item { Eyebrow("Syrian dishes", modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
+                            items(dishes, key = { "d" + it.id }) { d ->
+                                val first = d.portions.firstOrNull()
+                                val amount = first?.let { "${it.label} · ${Fmt.g(it.g)} g" } ?: "100 g"
+                                val m = d.per100.per(first?.g ?: 100.0)
+                                PickRow(d.name, "$amount · ${macroText(m)}", aside = d.ar.ifBlank { null }) { pick = book!!.pick(d) }
                             }
                         }
                         FoodGroup.entries.forEach { g ->
-                            val list = Foods.all.filter { it.group == g && (q.isEmpty() || it.name.lowercase().contains(q)) }
+                            val list = Foods.all.filter { it.group == g && TextMatch.matches(q, it.name) }
                             if (list.isNotEmpty()) {
                                 item { Eyebrow(g.label, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
                                 items(list, key = { it.id }) { f ->
-                                    PickRow(f.name, "${f.serving} · ${macroText(f.m)}") { pick = Pick.F(f); servings = 1.0 }
+                                    PickRow(f.name, "${f.serving} · ${macroText(f.m)}") {
+                                        pick = FoodPick(f.name, base = f.m, source = "food:${f.id}", sourceNote = "${f.serving} · USDA FoodData Central")
+                                    }
                                 }
                             }
                         }
-                        item { Gap(24.dp); Text("Values per serving from USDA FoodData Central. Check your labels — brands differ.", style = T.Tiny, color = C.Lo); Gap(40.dp) }
+                        if (q.isNotEmpty()) {
+                            item {
+                                Row(Modifier.padding(top = 14.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Eyebrow("Online · Open Food Facts", modifier = Modifier.weight(1f))
+                                    if (online == Online.Loading) CircularProgressIndicator(color = C.Volt, strokeWidth = 2.dp, modifier = Modifier.size(14.dp))
+                                }
+                            }
+                            when (val o = online) {
+                                Online.Idle -> item { Text("Type at least 3 letters to search packaged foods online.", style = T.Small, color = C.Lo) }
+                                Online.Loading -> item { Text("Searching…", style = T.Small, color = C.Lo) }
+                                Online.Offline -> item { Text("Couldn't reach Open Food Facts. Check your connection, or scan the label.", style = T.Small, color = C.Amber) }
+                                is Online.Done -> if (o.items.isEmpty()) {
+                                    item { Text("No products with full nutrition data for \"$q\". Try another word, or scan the label.", style = T.Small, color = C.Lo) }
+                                } else {
+                                    items(o.items, key = { "o" + it.code }) { p ->
+                                        PickRow(p.name, listOf(p.brand, "per 100 g", macroText(p.per100)).filter { it.isNotBlank() }.joinToString(" · ")) { pick = p.pick() }
+                                    }
+                                }
+                            }
+                        }
+                        item {
+                            Gap(24.dp)
+                            Text(
+                                "Basics: USDA FoodData Central. Syrian dishes: lab-measured or FAO values, tap one to see its source. " +
+                                    "Online: Open Food Facts, from product labels. Brands and home recipes differ, so check when you can.",
+                                style = T.Tiny, color = C.Lo,
+                            )
+                            Gap(40.dp)
+                        }
                     }
                 }
                 1 -> LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
                     MealType.entries.forEach { t ->
                         val list = Recipes.all.filter { it.type == t }
                         item { Eyebrow(t.label, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
-                        items(list, key = { it.id }) { r -> PickRow(r.name, macroText(r.perServing)) { pick = Pick.R(r); servings = 1.0 } }
+                        items(list, key = { it.id }) { r ->
+                            PickRow(r.name, macroText(r.perServing)) { pick = FoodPick(r.name, base = r.perServing, source = "recipe:${r.id}", sourceNote = "1 serving") }
+                        }
                     }
                     item { Gap(40.dp) }
                 }
                 2 -> QuickAdd(onAdd = { name, m, save ->
-                    servings = 1.0
-                    add(name, m, "quick")
-                    if (save) scope.launch { repo.addCustomFood(name, "1 serving", m) }
+                    log(LogItem(name, m, 1.0, "quick", if (save) name to "1 serving" else null))
                 })
                 3 -> LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
                     if (custom.isEmpty()) item {
-                        Text("Foods you save from Quick add show up here.", style = T.Small, color = C.Lo, modifier = Modifier.padding(vertical = 12.dp))
+                        Text("Foods you save from Quick add, a search or a scan show up here.", style = T.Small, color = C.Lo, modifier = Modifier.padding(vertical = 12.dp))
                     }
                     items(custom, key = { it.id }) { c ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.weight(1f)) {
                                 PickRow(c.name, "${c.serving} · ${macroText(Macros(c.kcal, c.protein, c.fat, c.carbs))}") {
-                                    pick = Pick.Custom(c.name, c.serving, Macros(c.kcal, c.protein, c.fat, c.carbs)); servings = 1.0
+                                    pick = FoodPick(c.name, base = Macros(c.kcal, c.protein, c.fat, c.carbs), source = "custom", sourceNote = c.serving)
                                 }
                             }
                             IconBtn(Icons.Rounded.Close, "Delete", { scope.launch { repo.deleteCustomFood(c.id) } }, tint = C.Lo, size = 36.dp)
@@ -480,20 +521,8 @@ fun AddFoodSheet(date: LocalDate, onDismiss: () -> Unit) {
             }
         }
     }
-}
 
-@Composable
-private fun PickRow(title: String, sub: String, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(vertical = 10.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(title, style = T.BodyM, color = C.Hi)
-            Text(sub, style = T.Small, color = C.Mid)
-        }
-        Icon(Icons.Rounded.Add, null, tint = C.Volt, modifier = Modifier.size(20.dp))
-    }
+    if (scanning) ScanDialog(onDismiss = { scanning = false }, onPick = { p -> pick = p; tab = 0; scanning = false })
 }
 
 @Composable

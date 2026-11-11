@@ -2,7 +2,7 @@
 
 A training and nutrition app for Android that holds you to your plan: reminders, deadlines, and real consequences for skipping.
 
-It ships with a 4-day home muscle program and a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, and tracks the daily habits you choose. Everything stays on your phone.
+It ships with a 4-day home muscle program and a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
 
 <p>
   <img src="docs/screenshots/today.png" width="19%" alt="Today">
@@ -27,7 +27,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Today** | Today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
 | **Train** | The program, form guides for every exercise (setup, cues, common mistakes), session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |
-| **Fuel** | Calories and macros against your targets, a food list with USDA values, 15 budget high-protein recipes, full-day meal plans, "what to eat next" suggestions. |
+| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans, "what to eat next" suggestions. |
 | **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, an urge timer for quit habits, penalty record. Starts empty. |
 | **Progress** | 7-day average weight, kg per week vs target, ETA, 2-week check-in, progress photos (stored privately), body measurements, 12-week tracker, levels, lifts. |
 | **Weight** | Morning weigh-ins with a type-in reminder notification, streak, weekly averages, editable history. |
@@ -41,7 +41,9 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 
 ## Your data
 
-- Stored only on the device. No account, no analytics. The only network call checks this repo for a new release.
+- Stored only on the device. No account, no analytics.
+- Network calls: this repo (new releases, and the latest dish list) and [Open Food Facts](https://world.openfoodfacts.org) (what you type into food search, or a barcode you scan). Nothing else is sent.
+- Nutrition labels are read on the phone. Photos are never uploaded or saved.
 - Updates keep your data: same app, same signing key. The updater refuses any APK signed with a different key.
 - A backup is written before every update, and daily to `Downloads/Forge/` on Android 10+. **Settings → Data** exports, imports and restores.
 
@@ -50,6 +52,16 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 The program (Day 1 Chest Priority, Day 2 Legs + Posterior Chain, rest, Day 4 Upper + Back + Arms, Day 5 Legs + Delts/Arms, rest, rest) is used exactly as written. Nutrition targets default to 2,700 kcal and 130 g protein, and you set your own during setup or in Settings.
 
 **Not medical advice.** If you have a medical condition, check calorie and protein limits with your clinician.
+
+## Syrian dishes
+
+Food search includes 35 Syrian and Levantine dishes in English and Arabic: shish barak, kibbeh bil sayniyeh, yabraq, mloukhieh, fatteh, mujaddara and more. Every value has a source shown in the app, and nothing is estimated:
+
+- 30 dishes measured in an accredited lab: Hoteit et al., [*F1000Research* 10:12 (2021)](https://doi.org/10.12688/f1000research.27461.1).
+- Manakish, Arabic bread and halawa from the [FAO/USDA Food Composition Tables for the Near East](https://www.fao.org/4/x6879e/x6879e00.htm).
+- Baklava from [USDA FoodData Central](https://fdc.nal.usda.gov/food-details/2708044/nutrients).
+
+The list lives in [`app/src/main/assets/dishes.json`](app/src/main/assets/dishes.json), and the app downloads the newest copy from this repo, so a dish can be added without a new release. To add one, give its values per 100 g with a published source, and bump `version`. Fried kibbeh, maqluba and muhammara aren't in yet: no measured values for them turned up. Corrections and sources are welcome.
 
 ## Build
 
@@ -63,7 +75,7 @@ Releases are built and signed by GitHub Actions when a `v*` tag is pushed. See [
 
 ## Credits
 
-Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Strength, Eric Cressey and StrengthLog. Food values from USDA FoodData Central. Typeface: Barlow (SIL Open Font License).
+Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Strength, Eric Cressey and StrengthLog. Food values from USDA FoodData Central, Hoteit et al. (2021) and the FAO Near East tables. Product data from Open Food Facts (ODbL). Scanning uses Google ML Kit, on device. Typeface: Barlow (SIL Open Font License).
 
 ## License
 

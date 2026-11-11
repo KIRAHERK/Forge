@@ -55,6 +55,8 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (keystoreProps.isNotEmpty()) signingConfig = signingConfigs.getByName("release")
+            // Phones only: the scanner libraries carry native code per CPU type, and x86 is just for emulators.
+            ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a") }
         }
     }
 
@@ -70,6 +72,9 @@ android {
 
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        // Compress the scanner native libraries: updates download from GitHub, so a small APK matters
+        // more than the few MB they take once extracted on the phone.
+        jniLibs.useLegacyPackaging = true
     }
 
     lint {
@@ -118,6 +123,14 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("androidx.work:work-runtime-ktx:2.10.1")
+
+    // Barcode and nutrition-label scanning. ML Kit models are bundled, so scanning works offline.
+    implementation("androidx.camera:camera-core:1.4.2")
+    implementation("androidx.camera:camera-camera2:1.4.2")
+    implementation("androidx.camera:camera-lifecycle:1.4.2")
+    implementation("androidx.camera:camera-view:1.4.2")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 
     testImplementation("junit:junit:4.13.2")
 }
