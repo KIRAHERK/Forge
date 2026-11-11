@@ -1,10 +1,14 @@
-## Forge 1.3.0
+## Forge 1.4.0
 
-Find food values instead of typing them.
+A simpler, easier-to-read app with more charts.
 
-- **Search online.** Add food now also searches Open Food Facts, a free database of packaged foods built from their labels. Results show the brand and values per 100 g. Pick a serving, 100 g, or type the exact grams.
-- **Syrian dishes.** 35 dishes in English and Arabic: shish barak, kibbeh bil sayniyeh, yabraq, mloukhieh, fatteh, mujaddara, fasoulia, bamieh, manakish, halawa and more. Every value has a source shown in the app (30 are lab-measured); nothing is estimated. The list updates from GitHub, so new dishes arrive without an app update.
-- **Scan a barcode.** Tap the scan button next to search and point at the barcode. If the product isn't in the database, scan its label instead. You can also type the barcode digits.
-- **Scan a nutrition label.** Take a photo of the nutrition table (or pick one you already took), name the food, and check the numbers before adding. Labels are read on your phone and never uploaded. Arabic-only labels can't be read yet; use the English side.
-- Online and scanned foods can be corrected before you add them, and saved to My foods.
-- The app asks for camera access the first time you scan. It's larger now (about 18 MB) because the scanners work offline.
+- **Less text.** Explanations, rules and hints now sit in "Details" dropdowns. Tap one when you need it.
+- **Better charts.** The weight chart has labelled axes, dates, a legend and a 1M / 3M / 1Y / All switch. Bar charts show the number on each bar.
+- **Fuel:** a weekly chart that switches between protein and calories, with your daily average and how many days you hit the target.
+- **Progress:** workouts and training volume for the last 8 weeks.
+- **Weight:** 30-day change, lowest and highest weight.
+- **Exercises:** a chart of your estimated 1-rep max over time. The how-to guide is split into dropdowns.
+- **Habits:** each habit shows its last 4 weeks as coloured squares.
+- **Today:** the exercise list folds away under "Start workout", and the weight tile has a small trend line.
+
+Your data is untouched.
