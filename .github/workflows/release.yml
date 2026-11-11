@@ -1,10 +1,18 @@
 name: Release
 
-# Push a tag like v1.2.0 and this builds a signed APK and publishes it as a GitHub Release.
+# Builds a signed APK and publishes it as a GitHub Release. Two ways to start it:
+#  - push a tag like v1.2.0 (scripts/release.sh), or
+#  - Actions tab -> Release -> Run workflow, and type the version. This works from a
+#    phone or a cloud session that can't push tags; the tag is created for you.
 # Installed copies of the app find it within a day (or right away via Settings → Updates).
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, like 1.4.0 (must be newer than the last one)"
+        required: true
 
 permissions:
   contents: write
@@ -14,6 +22,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Work out the version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            v="${INPUT_VERSION#v}"
+            if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Version must look like 1.4.0"; exit 1
+            fi
+            if git rev-parse "v$v" >/dev/null 2>&1; then
+              echo "::error::v$v already exists."; exit 1
+            fi
+            latest="$(git tag --list 'v*' --sort=-v:refname | head -1)"
+            if [ -n "$latest" ] && [ "$(printf '%s\n%s\n' "${latest#v}" "$v" | sort -V | tail -1)" != "$v" ]; then
+              echo "::error::v$v must be newer than $latest, or phones won't update."; exit 1
+            fi
+          else
+            v="${GITHUB_REF_NAME#v}"
+          fi
+          echo "VERSION=$v" >> "$GITHUB_ENV"
 
       - uses: actions/setup-java@v4
         with:
@@ -40,7 +71,6 @@ jobs:
       - name: Test and build the signed APK
         run: |
           chmod +x gradlew
-          VERSION="${GITHUB_REF_NAME#v}"
           ./gradlew testDebugUnitTest assembleRelease \
             -PforgeVersion="$VERSION" -PforgeRepo="$GITHUB_REPOSITORY" --no-daemon
           cp app/build/outputs/apk/release/app-release.apk "Forge-$VERSION.apk"
@@ -49,6 +79,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: Forge-*.apk
+          tag_name: v${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
           body_path: ${{ hashFiles('release-notes.md') != '' && 'release-notes.md' || '' }}
 
