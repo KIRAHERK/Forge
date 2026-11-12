@@ -589,9 +589,9 @@ private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs
         }
         Gap(16.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            PrimaryButton("Add food", onAdd, Modifier.weight(1f), icon = Icons.Rounded.Add, height = 48.dp)
-            com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", onScan)
+            PrimaryButton("Add food", onAdd, Modifier.weight(1.3f), icon = Icons.Rounded.Add, height = 48.dp)
             SecondaryButton("Recipes", onRecipes, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
+            com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", onScan)
         }
     }
 }

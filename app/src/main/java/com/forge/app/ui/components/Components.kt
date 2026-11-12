@@ -278,7 +278,7 @@ fun PrimaryButton(
             Icon(icon, null, tint = if (enabled) textColor else C.Lo, modifier = Modifier.size(20.dp))
             HGap(8.dp)
         }
-        Text(text.uppercase(), style = T.Button, color = if (enabled) textColor else C.Lo)
+        Text(text.uppercase(), style = T.Button, color = if (enabled) textColor else C.Lo, maxLines = 1, softWrap = false)
     }
 }
 

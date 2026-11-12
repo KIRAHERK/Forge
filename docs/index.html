@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge · Download</title>
+<meta name="description" content="Forge: a training and nutrition app for Android that holds you to your plan. Free for personal use.">
+<meta property="og:title" content="Forge · Your plan. Enforced.">
+<meta property="og:description" content="Pick or build a program, log every set, track food and weight. Free for personal use, for Android.">
+<meta property="og:image" content="https://kiraherk.github.io/Forge/screenshots/today.png">
+<style>
+  @font-face { font-family: "Barlow"; font-weight: 400; src: url("fonts/barlow_regular.ttf"); }
+  @font-face { font-family: "Barlow"; font-weight: 500; src: url("fonts/barlow_medium.ttf"); }
+  @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("fonts/barlow_condensed_bold.ttf"); }
+  :root {
+    --bg: #0B0B0D; --wash: #15170E; --panel: #141417; --line: #232328;
+    --ink: #F2F2F3; --mid: #9B9BA4; --low: #63636C; --volt: #CCFF4D; --on-volt: #0B0B0D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(1100px 600px at 90% -10%, rgba(204, 255, 77, 0.16), transparent 70%),
+                      radial-gradient(1400px 700px at 50% -20%, var(--wash), var(--bg) 70%);
+    background-repeat: no-repeat;
+    color: var(--ink); font-family: "Barlow", system-ui, sans-serif; line-height: 1.5;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 48px 20px 64px; }
+  .eyebrow { font-weight: 500; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--volt); }
+  h1, h2 { font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase; line-height: .95; }
+  h1 { font-size: clamp(56px, 11vw, 112px); margin: 10px 0 16px; }
+  h1 span { color: var(--volt); }
+  h2 { font-size: 30px; margin-bottom: 14px; }
+  p.lead { font-size: 19px; color: var(--mid); max-width: 600px; }
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 16px 26px; border-radius: 16px;
+         font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: .05em;
+         text-transform: uppercase; text-decoration: none; }
+  .btn.primary { background: var(--volt); color: var(--on-volt); }
+  .btn.ghost { border: 1px solid #34343B; color: var(--ink); }
+  .meta { margin-top: 12px; font-size: 14px; color: var(--low); }
+  .qr { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 18px; text-align: center; }
+  .qr img { width: 200px; height: 200px; border-radius: 12px; display: block; }
+  .qr div { margin-top: 10px; font-size: 14px; color: var(--mid); }
+  section { margin-top: 56px; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 20px; }
+  .step b { font-family: "Barlow Condensed", sans-serif; font-size: 34px; color: var(--volt); display: block; line-height: 1; margin-bottom: 8px; }
+  .step p { color: var(--mid); }
+  .shots { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+  .shots img { width: 200px; flex: none; border-radius: 18px; border: 1px solid var(--line); }
+  .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .feature { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 20px; }
+  .feature h3 { font-family: "Barlow Condensed", sans-serif; font-size: 22px; text-transform: uppercase; margin-bottom: 4px; }
+  .feature p { color: var(--mid); font-size: 15px; }
+  .coach { border-color: rgba(204, 255, 77, 0.35); background: linear-gradient(225deg, #20251A, var(--panel)); }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--low); font-size: 14px; }
+  a { color: var(--volt); }
+  @media (max-width: 720px) {
+    main { padding-top: 32px; }
+    .hero { grid-template-columns: 1fr; }
+    .qr { display: none; }
+    .steps, .features { grid-template-columns: 1fr; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Forge · by Hussein Al Herk</div>
+      <h1>Your plan.<br><span>Enforced.</span></h1>
+      <p class="lead">A training and nutrition app for Android that holds you to your plan. Pick a program or build your own, log every set, track food and weight, and share your progress.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk">Download for Android</a>
+        <a class="btn ghost" href="https://github.com/KIRAHERK/Forge">Source code</a>
+      </div>
+      <div class="meta">Free for personal use · Android 8.0 or newer · About 18 MB · Updates itself</div>
+    </div>
+    <div class="qr">
+      <img src="download-qr.png" alt="QR code that downloads Forge">
+      <div>On a computer? Scan with your phone.</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Install in three steps</h2>
+    <div class="steps">
+      <div class="step"><b>1</b><p>Tap <strong>Download for Android</strong> on your phone. Forge isn't on the Play Store, so it downloads as a file.</p></div>
+      <div class="step"><b>2</b><p>Open the file. If Android asks, allow your browser to install apps. It only asks once.</p></div>
+      <div class="step"><b>3</b><p>Done. Forge checks for updates itself and installs them over the old version, so your data stays.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Inside</h2>
+    <div class="shots">
+      <img src="screenshots/today.png" alt="Today screen">
+      <img src="screenshots/workout.png" alt="Workout screen">
+      <img src="screenshots/fuel.png" alt="Fuel screen">
+      <img src="screenshots/progress.png" alt="Progress screen">
+      <img src="screenshots/habits.png" alt="Habits screen">
+      <img src="screenshots/weight.png" alt="Weight screen">
+    </div>
+  </section>
+
+  <section>
+    <div class="features">
+      <div class="feature"><h3>Programs</h3><p>Six ready-made programs or build your own from 85 gym and home exercises. Share a program with a QR code.</p></div>
+      <div class="feature"><h3>Every set</h3><p>Tick sets, see last time's numbers, get told when to add weight. Personal records are spotted for you.</p></div>
+      <div class="feature"><h3>Food</h3><p>Calories and protein, food search, barcode and label scanning, and 35 Syrian dishes with sourced values.</p></div>
+      <div class="feature"><h3>Consequences</h3><p>Miss a workout and a penalty lands. Sick? Mark it and nothing is lost. Your data stays on your phone.</p></div>
+      <div class="feature coach"><h3>Gyms and coaches</h3><p>Want Forge with your brand and your own programs for your clients? <a href="https://www.linkedin.com/in/husseinalherk">Get in touch</a>.</p></div>
+      <div class="feature"><h3>Share</h3><p>Turn your progress, a day of eating or a workout into a clean image for Instagram or WhatsApp.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    Designed and developed by <a href="https://kiraherk.github.io">Hussein Al Herk</a> ·
+    <a href="https://github.com/KIRAHERK/Forge">GitHub</a> ·
+    Free for personal use under the PolyForm Noncommercial License. Commercial use needs a license.
+  </footer>
+</main>
+</body>
+</html>

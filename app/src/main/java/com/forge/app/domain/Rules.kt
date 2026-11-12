@@ -138,7 +138,7 @@ object Lines {
         "The version of you at 90 kg didn't skip today.",
         "Feelings are optional. Reps are not.",
         "Do it tired. Do it bored. Just do it.",
-        "Twelve weeks pass either way. Decide what you'll have to show for them.",
+        "The weeks pass either way. Decide what you'll have to show for them.",
         "Consistency first. Progress follows.",
     )
     private val preWorkout = listOf(

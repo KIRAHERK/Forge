@@ -201,9 +201,9 @@ fun FuelScreen(nav: Nav) {
                 }
                 Gap(16.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PrimaryButton("Add food", { sheetScan = false; sheet = true }, Modifier.weight(1f), icon = Icons.Rounded.Add, height = 48.dp)
-                    com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", { sheetScan = true; sheet = true })
+                    PrimaryButton("Add food", { sheetScan = false; sheet = true }, Modifier.weight(1.3f), icon = Icons.Rounded.Add, height = 48.dp)
                     SecondaryButton("Recipes", { nav.go("recipes") }, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
+                    com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", { sheetScan = true; sheet = true })
                 }
             }
             Gap(12.dp)

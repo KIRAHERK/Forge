@@ -1,17 +1,12 @@
-## Forge 1.8.0
+## Forge 1.9.0
 
-**Build your own program.**
+- **Share programs by QR code.** In Train → Programs, tap **Share** on any program to get a QR card. Show it on your screen or send it as an image. Others tap **Scan a program** and point the camera at it, or pick a screenshot of it from their photos. They see what's inside before adding it. Your own exercises travel with the program.
+- **Scan button** next to Recipes on the Fuel tab and the Today food card. It opens the barcode and label scanner directly.
+- **"+ Add food"** has more room, so the label no longer gets squeezed.
+- **Share Forge** in Settings → About sends friends the download link.
+- **Easier download:** one link that always gets the newest version, plus a download page with a QR code and install steps.
 
-- **Six ready-made programs:** the original 4-Day Home Muscle Program (by Hussein Al Herk), Full Body 3-Day, Upper / Lower 4-Day, Push Pull Legs, Dumbbell Home 3-Day and Bodyweight 3-Day. Use one as it is, or start from it and change anything.
-- **Program builder:** Train → Programs. Pick your training days, rename or add days, and add exercises with their sets and reps, or seconds for planks and holds. Reorder, remove, and save.
-- **85 exercises** for the gym and home: barbell, dumbbell, kettlebell, cable, machine, band and bodyweight. Each comes with a short how-to. Search them and filter by muscle or equipment.
-- **Your own exercises:** missing one? Create it with a name, equipment, muscle group and rest time.
-- **Several programs:** keep as many as you like and switch any time. Your workout history and PRs stay.
-- The 12-week limit is gone: programs run until you change them. Today shows "Week N".
-- New installs pick a program during setup.
-- License: from this version, Forge is free for personal use under the PolyForm Noncommercial License. Selling or rebranding it needs a commercial license.
-
-Your data is untouched: your current program, schedule and history carry over as they are.
+Your data is untouched.
 
 ---
 Forge is designed and developed by Hussein Al Herk.
