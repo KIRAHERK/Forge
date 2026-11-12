@@ -269,6 +269,7 @@ fun SecondaryButton(
     color: Color = C.Hi,
     border: Color = C.LineStrong,
     height: Dp = 52.dp,
+    hPad: Dp = 16.dp,
 ) {
     Row(
         modifier
@@ -276,7 +277,7 @@ fun SecondaryButton(
             .clip(RoundedCornerShape(16.dp))
             .border(1.dp, border, RoundedCornerShape(16.dp))
             .pressScale(onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = hPad),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {

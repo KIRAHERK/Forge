@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -472,7 +473,13 @@ fun SummaryScreen(nav: Nav, sessionId: Long) {
             style = T.H2, color = C.Hi,
         )
         Gap(36.dp)
+        var sharing by remember { mutableStateOf(false) }
+        if (ses.finishedAt != null) {
+            SecondaryButton("Share this workout", { sharing = true }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Share)
+            Gap(10.dp)
+        }
         PrimaryButton("Back to today", { nav.tab("today") })
+        if (sharing) com.forge.app.ui.share.ShareWorkoutDialog(ses.id) { sharing = false }
         Gap(24.dp)
     }
 }

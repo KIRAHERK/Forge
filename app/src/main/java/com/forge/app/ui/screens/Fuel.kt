@@ -117,14 +117,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 
-fun suggestions(kLeft: Int, pLeft: Double): List<Recipe> {
-    if (kLeft < 250) return emptyList()
-    return Recipes.all
-        .filter { it.perServing.kcal <= kLeft + 200 }
-        .sortedBy { abs(it.perServing.protein - min(pLeft, 45.0)) + abs(it.perServing.kcal - min(kLeft, 800)) / 25.0 }
-        .take(2)
-}
-
 @Composable
 fun FuelScreen(nav: Nav) {
     val repo = Graph.repo
@@ -138,6 +130,7 @@ fun FuelScreen(nav: Nav) {
     val m = Stats.sum(foods)
     var sheet by remember { mutableStateOf(false) }
     var planOpen by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
 
     LaunchedEffect(UiEvents.addFoodRequest.value) {
         if (UiEvents.addFoodRequest.value) { sheet = true; UiEvents.addFoodRequest.value = false }
@@ -176,6 +169,8 @@ fun FuelScreen(nav: Nav) {
                         Eyebrow("Left")
                         Text(Fmt.num((s.kcal - m.kcal).coerceAtLeast(0)), style = T.NumL, color = if (m.kcal >= s.kcal * 0.9) C.Volt else C.Hi)
                     }
+                    HGap(6.dp)
+                    com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 Gap(10.dp)
                 Bar(m.kcal.toFloat() / s.kcal, color = C.Hi, height = 8.dp)
@@ -209,29 +204,6 @@ fun FuelScreen(nav: Nav) {
             Gap(12.dp)
         }
 
-        val sugg = if (date == today) suggestions(s.kcal - m.kcal, s.protein - m.protein) else emptyList()
-        if (sugg.isNotEmpty()) {
-            item {
-                Panel {
-                    Eyebrow("What to eat next")
-                    sugg.forEach { r ->
-                        Gap(10.dp)
-                        Row(
-                            Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.S2).clickable { nav.recipe(r.id) }.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(r.name, style = T.BodyS, color = C.Hi)
-                                Text(macroText(r.perServing), style = T.Small, color = C.Mid)
-                            }
-                            SecondaryButton("Log", { scope.launch { repo.addFood(date, r.name, r.perServing, 1.0, "recipe:${r.id}") } }, height = 38.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f))
-                        }
-                    }
-                }
-                Gap(12.dp)
-            }
-        }
-
         item { SectionTitle("Logged · ${foods.size}") }
         if (foods.isEmpty()) {
             item {
@@ -257,6 +229,7 @@ fun FuelScreen(nav: Nav) {
     }
 
     if (sheet) AddFoodSheet(date) { sheet = false }
+    if (sharing) com.forge.app.ui.share.ShareFuelDialog(date) { sharing = false }
 }
 
 /** This week's calories or protein per day, with the daily average. */

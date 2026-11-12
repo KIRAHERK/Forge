@@ -87,6 +87,7 @@ fun ProgressScreen(nav: Nav) {
     val doneSets by repo.allDoneSets.collectAsState(emptyList())
     val measurements by repo.measurements.collectAsState(emptyList())
     var showWeigh by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
 
     val finished = sessions.filter { it.finishedAt != null && it.complete }
     val avgSeries = Stats.movingAverage(weights)
@@ -119,6 +120,8 @@ fun ProgressScreen(nav: Nav) {
                         Text(rate?.let { (if (it >= 0) "+" else "") + String.format(Locale.US, "%.2f", it) } ?: "—", style = T.NumL, color = col)
                         Text("target ${Plan.RATE_MIN}–${Plan.RATE_MAX}", style = T.Tiny, color = C.Lo)
                     }
+                    HGap(6.dp)
+                    com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 Gap(14.dp)
                 WeightChart(weights.map { it.date to it.kg }, avgSeries, goal = s.goalWeight)
@@ -151,14 +154,6 @@ fun ProgressScreen(nav: Nav) {
                     SecondaryButton("Weight log", { nav.go("weight") }, Modifier.weight(1f), height = 46.dp)
                 }
             }
-            Gap(12.dp)
-        }
-
-        // ---------------- body
-        item {
-            PhotosPanel()
-            Gap(12.dp)
-            MeasurementsPanel(measurements)
             Gap(12.dp)
         }
 
@@ -303,10 +298,19 @@ fun ProgressScreen(nav: Nav) {
                     }
                 }
             }
+            Gap(12.dp)
+        }
+
+        // ---------------- body (least used, so last)
+        item {
+            PhotosPanel()
+            Gap(12.dp)
+            MeasurementsPanel(measurements)
             BottomSpace()
         }
     }
 
+    if (sharing) com.forge.app.ui.share.ShareProgressDialog { sharing = false }
     if (showWeigh) {
         NumberDialog(
             title = "Morning weight",
