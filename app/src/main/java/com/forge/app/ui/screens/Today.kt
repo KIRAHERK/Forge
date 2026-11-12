@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
@@ -224,6 +225,7 @@ fun TodayScreen(nav: Nav) {
             FuelCard(s, macros.kcal, macros.protein, macros.fat, macros.carbs,
                 onOpen = { nav.tab("fuel") },
                 onAdd = { UiEvents.addFoodRequest.value = true; nav.tab("fuel") },
+                onScan = { UiEvents.scanFoodRequest.value = true; nav.tab("fuel") },
                 onRecipes = { nav.go("recipes") })
             Gap(12.dp)
         }
@@ -558,7 +560,7 @@ private fun SickRow(sick: SickCheck, label: String, onSick: () -> Unit) {
 }
 
 @Composable
-private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs: Double, onOpen: () -> Unit, onAdd: () -> Unit, onRecipes: () -> Unit) {
+private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs: Double, onOpen: () -> Unit, onAdd: () -> Unit, onScan: () -> Unit, onRecipes: () -> Unit) {
     Panel(onClick = onOpen) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Eyebrow("Fuel today", modifier = Modifier.weight(1f))
@@ -588,7 +590,8 @@ private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs
         Gap(16.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             PrimaryButton("Add food", onAdd, Modifier.weight(1f), icon = Icons.Rounded.Add, height = 48.dp)
-            SecondaryButton("Recipes", onRecipes, Modifier.weight(1f), height = 48.dp)
+            com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", onScan)
+            SecondaryButton("Recipes", onRecipes, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
         }
     }
 }

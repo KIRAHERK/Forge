@@ -129,11 +129,15 @@ fun FuelScreen(nav: Nav) {
     val weekFoods by remember(weekStart) { repo.foodBetween(weekStart, weekStart.plusDays(6)) }.collectAsState(emptyList())
     val m = Stats.sum(foods)
     var sheet by remember { mutableStateOf(false) }
+    var sheetScan by remember { mutableStateOf(false) }
     var planOpen by remember { mutableStateOf(false) }
     var sharing by remember { mutableStateOf(false) }
 
     LaunchedEffect(UiEvents.addFoodRequest.value) {
-        if (UiEvents.addFoodRequest.value) { sheet = true; UiEvents.addFoodRequest.value = false }
+        if (UiEvents.addFoodRequest.value) { sheetScan = false; sheet = true; UiEvents.addFoodRequest.value = false }
+    }
+    LaunchedEffect(UiEvents.scanFoodRequest.value) {
+        if (UiEvents.scanFoodRequest.value) { sheetScan = true; sheet = true; UiEvents.scanFoodRequest.value = false }
     }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
@@ -197,8 +201,9 @@ fun FuelScreen(nav: Nav) {
                 }
                 Gap(16.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PrimaryButton("Add food", { sheet = true }, Modifier.weight(1f), icon = Icons.Rounded.Add, height = 48.dp)
-                    SecondaryButton("Recipes", { nav.go("recipes") }, Modifier.weight(1f), height = 48.dp)
+                    PrimaryButton("Add food", { sheetScan = false; sheet = true }, Modifier.weight(1f), icon = Icons.Rounded.Add, height = 48.dp)
+                    com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", { sheetScan = true; sheet = true })
+                    SecondaryButton("Recipes", { nav.go("recipes") }, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
                 }
             }
             Gap(12.dp)
@@ -228,7 +233,7 @@ fun FuelScreen(nav: Nav) {
         }
     }
 
-    if (sheet) AddFoodSheet(date) { sheet = false }
+    if (sheet) AddFoodSheet(date, startScan = sheetScan) { sheet = false; sheetScan = false }
     if (sharing) com.forge.app.ui.share.ShareFuelDialog(date) { sharing = false }
 }
 
@@ -356,7 +361,7 @@ private fun recentPick(e: FoodEntity) = FoodPick(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddFoodSheet(date: LocalDate, onDismiss: () -> Unit) {
+fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> Unit) {
     val repo = Graph.repo
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -364,7 +369,7 @@ fun AddFoodSheet(date: LocalDate, onDismiss: () -> Unit) {
     var tab by remember { mutableIntStateOf(0) }
     var query by remember { mutableStateOf("") }
     var pick by remember { mutableStateOf<FoodPick?>(null) }
-    var scanning by remember { mutableStateOf(false) }
+    var scanning by remember { mutableStateOf(startScan) }
     val recent by repo.recentFoods.collectAsState(emptyList())
     val custom by repo.customFoods.collectAsState(emptyList())
     val book by Dishes.book.collectAsState()

@@ -311,6 +311,19 @@ fun SecondaryButton(
     }
 }
 
+/** Square icon button that sits in a row of 48dp buttons, e.g. the scanner next to Add food. */
+@Composable
+fun IconSquareButton(icon: ImageVector, desc: String, onClick: () -> Unit, modifier: Modifier = Modifier, size: Dp = 48.dp) {
+    Box(
+        modifier.size(size).clip(RoundedCornerShape(16.dp))
+            .border(1.dp, C.Volt.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+            .pressScale(onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = desc, tint = C.Volt, modifier = Modifier.size(22.dp))
+    }
+}
+
 @Composable
 fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, selectedColor: Color = C.Volt) {
     val bg by animateColorAsState(if (selected) selectedColor else C.S2, label = "chip")
