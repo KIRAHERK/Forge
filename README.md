@@ -79,6 +79,8 @@ Releases are built and signed by GitHub Actions when a `v*` tag is pushed, or fr
 
 Forge is designed, built and maintained by **Hussein Al Herk**.
 
+- Portfolio: [kiraherk.github.io](https://kiraherk.github.io)
+- LinkedIn: [husseinalherk](https://www.linkedin.com/in/husseinalherk)
 - GitHub: [@KIRAHERK](https://github.com/KIRAHERK)
 
 ## Credits

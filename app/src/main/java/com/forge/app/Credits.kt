@@ -8,7 +8,7 @@ object Credits {
     /** Label to URL. Links left blank are not shown. */
     val links: List<Pair<String, String>> = listOf(
         "GitHub" to "https://github.com/KIRAHERK",
-        "LinkedIn" to "",
-        "Portfolio" to "",
+        "LinkedIn" to "https://www.linkedin.com/in/husseinalherk",
+        "Portfolio" to "https://kiraherk.github.io",
     ).filter { it.second.isNotBlank() }
 }
