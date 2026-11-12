@@ -45,7 +45,7 @@ data class EvalResult(
 
 @Serializable
 data class Backup(
-    val version: Int = 2,
+    val version: Int = 3,
     val settings: String,
     val sessions: List<SessionEntity>,
     val sets: List<SetEntity>,
@@ -57,6 +57,10 @@ data class Backup(
     val habits: List<JsonObject> = emptyList(),
     val penalties: List<PenaltyEntity>,
     val xp: List<XpEntity>,
+    val programs: List<ProgramEntity> = emptyList(),
+    val programDays: List<ProgramDayEntity> = emptyList(),
+    val programExercises: List<ProgramExerciseEntity> = emptyList(),
+    val customExercises: List<CustomExerciseEntity> = emptyList(),
     val customFoods: List<CustomFoodEntity>,
     val measurements: List<MeasurementEntity> = emptyList(),
 )
@@ -124,6 +128,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
     }
 
     suspend fun startSession(dayId: String, date: LocalDate, makeUp: Boolean): Long {
+        ProgramStore.ensure(db, settings)
         db.sessions().activeNow()?.let { return it.id }
         val day = Program.day(dayId) ?: error("Unknown day $dayId")
         val id = db.sessions().insert(
@@ -176,7 +181,8 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
 
     suspend fun finishSession(id: Long): FinishSummary {
         val session = db.sessions().get(id) ?: error("No session")
-        val day = Program.day(session.dayId)!!
+        ProgramStore.ensure(db, settings)
+        val dayTitle = Program.day(session.dayId)?.title ?: "Workout"
         val sets = db.sets().forSessionNow(id)
         val done = sets.filter { it.done }
         val volume = done.sumOf { it.reps * it.weightKg }
@@ -203,11 +209,11 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         db.sessions().update(
             session.copy(finishedAt = finishedAt, xp = xp, volumeKg = volume, prs = prs.size, prNames = prs.joinToString("|"), complete = complete)
         )
-        award("session:$id", xp, (if (!complete) "Partial: " else if (session.makeUp) "Make-up: " else "") + day.title)
+        award("session:$id", xp, (if (!complete) "Partial: " else if (session.makeUp) "Make-up: " else "") + dayTitle)
         onChanged()
         return FinishSummary(
             sessionId = id,
-            dayTitle = day.title,
+            dayTitle = dayTitle,
             minutes = ((finishedAt - session.startedAt) / 60000).toInt(),
             setsDone = done.size,
             setsTotal = sets.size,
@@ -350,6 +356,116 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
     }
 
     /** Undo for a mis-tap: only removes a penalty nobody has acted on yet. */
+    // ------------------------------------------------------------- programs
+
+    private fun newId(prefix: String) = prefix + java.lang.Long.toString(nowMs(), 36)
+
+    /** Makes [id] the program in use: its weekly layout becomes the schedule, and the week count restarts. */
+    suspend fun activateProgram(id: String) {
+        ProgramStore.ensure(db, settings)
+        val p = ProgramStore.program(id) ?: return
+        settings.update { s ->
+            s.copy(
+                activeProgramId = id,
+                schedule = p.schedule,
+                programStart = s.weekStartOf(LocalDate.now()).toEpochDay(),
+            )
+        }
+        ProgramStore.reload(db, settings)
+        onChanged()
+    }
+
+    /** Copies a template into a new program of the user's own. Returns its id. */
+    suspend fun createFromTemplate(templateId: String?, name: String? = null): String {
+        val t = templateId?.let { com.forge.app.domain.Templates.byId(it) }
+        val pid = newId("p")
+        val days = t?.days ?: listOf(com.forge.app.domain.TemplateDay("Day 1", emptyList()))
+        val dayIds = days.indices.map { "$pid-d${it + 1}" }
+        val schedule = (t?.week ?: listOf(0, null, null, null, null, null, null)).map { i -> i?.let { dayIds[it] } ?: Program.REST }
+        db.programs().upsertProgram(
+            ProgramEntity(pid, name ?: t?.name ?: "My program", t?.note ?: "", t?.id ?: "", schedule.joinToString(","), createdAt = nowMs()),
+        )
+        db.programs().upsertDays(days.mapIndexed { i, d -> ProgramDayEntity(dayIds[i], pid, i, i + 1, d.name) })
+        days.forEachIndexed { i, d -> with(ProgramStore) { db.programs().insertExercises(d.exercises.toEntities(dayIds[i])) } }
+        ProgramStore.reload(db, settings)
+        return pid
+    }
+
+    /** Copies one of the user's programs. Returns the new id. */
+    suspend fun duplicateProgram(id: String): String? {
+        val p = ProgramStore.program(id) ?: return null
+        val pid = newId("p")
+        val map = p.days.mapIndexed { i, d -> d.id to "$pid-d${i + 1}" }.toMap()
+        db.programs().upsertProgram(
+            ProgramEntity(pid, "${p.name} (copy)", p.note, p.templateId, p.schedule.joinToString(",") { map[it] ?: Program.REST }, createdAt = nowMs()),
+        )
+        db.programs().upsertDays(p.days.mapIndexed { i, d -> ProgramDayEntity(map.getValue(d.id), pid, i, i + 1, d.name) })
+        p.days.forEach { d -> with(ProgramStore) { db.programs().insertExercises(d.exercises.toEntities(map.getValue(d.id))) } }
+        ProgramStore.reload(db, settings)
+        return pid
+    }
+
+    /** A day as the editor holds it. A null id is a new day. */
+    data class DayDraft(val id: String?, val name: String, val exercises: List<com.forge.app.domain.ProgramExercise>)
+
+    /**
+     * Saves an edited program. [schedule] holds, for Monday..Sunday, an index into [days] or null for rest.
+     * Removed days are kept (soft-deleted) so old sessions keep their names.
+     */
+    suspend fun saveProgram(id: String, name: String, note: String, days: List<DayDraft>, schedule: List<Int?>) {
+        ProgramStore.ensure(db, settings)
+        val old = ProgramStore.program(id) ?: return
+        val existing = db.programs().daysNow().filter { it.programId == id }
+        var next = (existing.maxOfOrNull { it.position } ?: -1) + 1
+        val keepNumbers = id == ProgramStore.ORIGINAL_ID
+        val saved = days.mapIndexed { i, d ->
+            val dayId = d.id ?: "$id-n${java.lang.Long.toString(nowMs(), 36)}${next++}"
+            val prev = existing.firstOrNull { it.id == dayId }
+            ProgramDayEntity(
+                id = dayId, programId = id, position = i,
+                number = if (keepNumbers && prev != null) prev.number else i + 1,
+                name = d.name.trim().ifBlank { "Day ${i + 1}" },
+            )
+        }
+        val keptIds = saved.map { it.id }.toSet()
+        db.programs().upsertDays(saved + existing.filter { it.id !in keptIds }.map { it.copy(deleted = true) })
+        saved.forEachIndexed { i, d ->
+            db.programs().clearDay(d.id)
+            with(ProgramStore) { db.programs().insertExercises(days[i].exercises.toEntities(d.id)) }
+        }
+        val sched = schedule.map { idx -> idx?.let { saved.getOrNull(it)?.id } ?: Program.REST }
+        db.programs().upsertProgram(
+            ProgramEntity(id, name.trim().ifBlank { old.name }, note, old.templateId, sched.joinToString(","), old.createdAt),
+        )
+        if (settings.current().activeProgramId == id) settings.update { it.copy(schedule = sched) }
+        ProgramStore.reload(db, settings)
+        onChanged()
+    }
+
+    /** Deletes a program that isn't in use. Its days stay behind for history. */
+    suspend fun deleteProgram(id: String) {
+        if (settings.current().activeProgramId == id) return
+        val p = db.programs().programsNow().firstOrNull { it.id == id } ?: return
+        db.programs().upsertProgram(p.copy(deleted = true))
+        db.programs().upsertDays(db.programs().daysNow().filter { it.programId == id }.map { it.copy(deleted = true) })
+        ProgramStore.reload(db, settings)
+    }
+
+    /** Adds a custom exercise. Returns its id. */
+    suspend fun addCustomExercise(name: String, equip: com.forge.app.domain.Equip, group: com.forge.app.domain.MuscleGroup, restSec: Int, notes: String): String {
+        val id = newId("c")
+        db.programs().upsertCustom(CustomExerciseEntity(id, name.trim(), equip.name, group.name, "", restSec, notes.trim()))
+        ProgramStore.reload(db, settings)
+        return id
+    }
+
+    /** Hides a custom exercise from the picker. History and programs that use it keep its name. */
+    suspend fun deleteCustomExercise(id: String) {
+        val c = db.programs().customNow().firstOrNull { it.id == id } ?: return
+        db.programs().upsertCustom(c.copy(deleted = true))
+        ProgramStore.reload(db, settings)
+    }
+
     /**
      * Marks or unmarks a training day as sick. Marking cancels that day's missed-workout
      * penalty (if it is still active) and gives the lost XP back. Unmarking removes the
@@ -410,6 +526,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
      * daily nutrition XP. Idempotent — safe to call as often as needed.
      */
     suspend fun evaluate(now: LocalDateTime = LocalDateTime.now()): EvalResult = evalLock.withLock {
+        ProgramStore.ensure(db, settings)
         val s = settings.current()
         if (!s.onboarded) return@withLock EvalResult()
         val today = now.toLocalDate()
@@ -489,6 +606,10 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             xp = db.xp().allNow(),
             customFoods = db.customFoods().allNow(),
             measurements = db.measurements().allNow(),
+            programs = db.programs().programsNow(),
+            programDays = db.programs().daysNow(),
+            programExercises = db.programs().exercisesNow(),
+            customExercises = db.programs().customNow(),
         )
         return json.encodeToString(Backup.serializer(), b)
     }
@@ -508,8 +629,14 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         b.xp.forEach { db.xp().insert(if (legacy) legacyXp(it) else it) }
         b.customFoods.forEach { db.customFoods().insert(it) }
         b.measurements.forEach { db.measurements().upsert(it) }
+        b.programs.forEach { db.programs().upsertProgram(it) }
+        db.programs().upsertDays(b.programDays)
+        db.programs().insertExercises(b.programExercises.map { it.copy(id = 0) })
+        b.customExercises.forEach { db.programs().upsertCustom(it) }
         val restored = settings.decode(b.settings)
         settings.update { restored }
+        // A backup from before programs existed gets the original program back, with its schedule.
+        ProgramStore.reload(db, settings)
         onChanged()
     }
 

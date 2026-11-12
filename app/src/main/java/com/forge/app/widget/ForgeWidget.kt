@@ -70,6 +70,7 @@ class ForgeWidget : GlanceAppWidget() {
 
     private suspend fun load(context: Context): WidgetData {
         Graph.init(context)
+        Graph.programsReady()
         val s = Graph.settings.current()
         val now = LocalDateTime.now()
         val today = now.toLocalDate()

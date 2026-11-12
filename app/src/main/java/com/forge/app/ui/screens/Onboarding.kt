@@ -79,6 +79,7 @@ fun OnboardingScreen() {
     val scope = rememberCoroutineScope()
     var step by remember { mutableIntStateOf(0) }
     var weekStart by remember { mutableStateOf(DayOfWeek.SATURDAY) }
+    var templateId by remember { mutableStateOf(com.forge.app.domain.Templates.forge.id) }
     var workoutTime by remember { mutableIntStateOf(17 * 60) }
     var deadline by remember { mutableIntStateOf(21 * 60 + 30) }
     val habits = remember { androidx.compose.runtime.mutableStateListOf<Pair<String, String>>() }
@@ -111,11 +112,14 @@ fun OnboardingScreen() {
                     protein = num(protein)?.toInt()?.coerceIn(30, 400) ?: it.protein,
                 ).copy(
                     weekStart = weekStart.value,
-                    schedule = Settings.cycleFrom(weekStart),
                     workoutTime = workoutTime,
                     deadline = deadline,
                 )
             }, weight.replace(',', '.').toDoubleOrNull(), habits.toList())
+            // The original program already exists; any other pick is copied in as the user's own.
+            val id = if (templateId == com.forge.app.domain.Templates.forge.id) com.forge.app.data.ProgramStore.ORIGINAL_ID
+            else Graph.repo.createFromTemplate(templateId)
+            Graph.repo.activateProgram(id)
         }
     }
 
@@ -142,8 +146,24 @@ fun OnboardingScreen() {
                         Gap(12.dp)
                         Eyebrow("Step 2 of 4")
                         Gap(6.dp)
-                        Text("WHEN DO\nYOU TRAIN?", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
-                        Gap(18.dp)
+                        Text("PICK YOUR\nPROGRAM.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
+                        Gap(6.dp)
+                        Text("Start from one of these. You can edit it or build your own any time.", style = T.Small, color = C.Mid)
+                        Gap(14.dp)
+                        com.forge.app.domain.Templates.all.forEach { t ->
+                            val sel = t.id == templateId
+                            Panel(
+                                onClick = { templateId = t.id },
+                                border = if (sel) C.Volt else C.Line,
+                                accent = sel,
+                                padding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                            ) {
+                                Text(t.name.uppercase(), style = T.H3, color = if (sel) C.Volt else C.Hi)
+                                Text("${t.daysPerWeek} days a week · ${t.equipment}" + (t.credit?.let { " · $it" } ?: ""), style = T.Small, color = C.Mid)
+                            }
+                            Gap(8.dp)
+                        }
+                        Gap(10.dp)
                         Eyebrow("Your week starts on")
                         Gap(8.dp)
                         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -155,14 +175,13 @@ fun OnboardingScreen() {
                         Panel {
                             Eyebrow("Your training week")
                             Gap(8.dp)
-                            val sched = Settings.cycleFrom(weekStart)
+                            val t = com.forge.app.domain.Templates.byId(templateId) ?: com.forge.app.domain.Templates.forge
                             (0..6).forEach { i ->
                                 val d = weekStart.plus(i.toLong())
-                                val slot = sched[d.value - 1]
-                                val day = Program.day(slot)
+                                val day = t.week[d.value - 1]?.let { t.days[it] }
                                 Row(Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
                                     Text(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), style = T.BodyM, color = C.Mid, modifier = Modifier.width(52.dp))
-                                    Text(day?.title ?: "Rest", style = T.BodyM, color = if (day != null) C.Hi else C.Lo)
+                                    Text(day?.name ?: "Rest", style = T.BodyM, color = if (day != null) C.Hi else C.Lo)
                                 }
                             }
                         }
@@ -286,17 +305,17 @@ private fun Intro() {
     Gap(8.dp)
     Text("YOUR PLAN.\nENFORCED.", style = T.Hero.copy(fontSize = 64.sp, lineHeight = 60.sp), color = C.Hi)
     Gap(14.dp)
-    Text("A 4-day home muscle program and a lean-bulk nutrition plan, with reminders, deadlines and consequences.", style = T.Body, color = C.Mid)
+    Text("Your training program and nutrition plan, with reminders, deadlines and consequences.", style = T.Body, color = C.Mid)
     Gap(24.dp)
     Panel {
         Row(Modifier.fillMaxWidth()) {
-            Stat("Workouts", "4", Modifier.weight(1f), unit = "/ week")
-            Stat("Calories", Fmt.num(Plan.KCAL), Modifier.weight(1f), unit = "/ day")
+            Stat("Programs", "${com.forge.app.domain.Templates.all.size}", Modifier.weight(1f), unit = "ready")
+            Stat("Exercises", "${com.forge.app.domain.Exercises.builtIn.size}", Modifier.weight(1f), unit = "with guides")
         }
         Gap(16.dp)
         Row(Modifier.fillMaxWidth()) {
             Stat("Protein", "${Plan.PROTEIN}", Modifier.weight(1f), unit = "g / day", color = C.Volt)
-            Stat("Milestone", "${Plan.START_WEIGHT.toInt()}→${Plan.MILESTONE.toInt()}", Modifier.weight(1f), unit = "kg")
+            Stat("Calories", Fmt.num(Plan.KCAL), Modifier.weight(1f), unit = "/ day")
         }
     }
     Gap(20.dp)

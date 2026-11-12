@@ -102,6 +102,9 @@ object UiEvents {
 
 val LocalSettings = compositionLocalOf { Settings() }
 
+/** The user's programs; reading it makes a screen redraw when a program changes. */
+val LocalPrograms = compositionLocalOf<com.forge.app.data.ProgramStore.Snapshot?> { null }
+
 class Nav(val controller: NavHostController) {
     fun tab(route: String) {
         // Today is the root: just pop back to it. Navigating to it with restoreState would
@@ -141,14 +144,18 @@ private val tabs = listOf(
 fun AppRoot(routeRequest: MutableState<String?>) {
     val repo = Graph.repo
     val settings by repo.settingsFlow.collectAsState(initial = null)
+    val programs by com.forge.app.data.ProgramStore.state.collectAsState()
+    LaunchedEffect(Unit) { Graph.programsReady() }
     val s = settings
 
     Box(Modifier.fillMaxSize().background(C.Bg)) {
         com.forge.app.ui.components.Glow(Modifier.fillMaxSize())
-        when {
-            s == null -> {}
-            !s.onboarded -> OnboardingScreen()
-            else -> MainShell(s, routeRequest)
+        CompositionLocalProvider(LocalPrograms provides programs) {
+            when {
+                s == null || programs == null -> {}
+                !s.onboarded -> OnboardingScreen()
+                else -> MainShell(s, routeRequest)
+            }
         }
     }
 }
@@ -210,6 +217,10 @@ private fun MainShell(s: Settings, routeRequest: MutableState<String?>) {
             composable("history") { HistoryScreen(nav) }
             composable("weight") { WeightScreen(nav) }
             composable("update") { UpdateScreen(nav) }
+            composable("programs") { com.forge.app.ui.screens.ProgramsScreen(nav) }
+            composable("program/{id}", listOf(navArgument("id") { type = NavType.StringType })) {
+                com.forge.app.ui.screens.ProgramEditorScreen(nav, it.arguments?.getString("id") ?: "")
+            }
             composable("plan/{id}", listOf(navArgument("id") { type = NavType.StringType })) {
                 PlanScreen(nav, it.arguments?.getString("id") ?: "")
             }

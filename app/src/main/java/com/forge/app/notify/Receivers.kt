@@ -53,6 +53,7 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val repo = Graph.repo
+        Graph.programsReady()
         val s = Graph.settings.current()
         if (!s.onboarded) return
         val now = LocalDateTime.now()
@@ -167,6 +168,7 @@ class AlarmReceiver : BroadcastReceiver() {
 }
 
 suspend fun notifyEval(ctx: Context, eval: EvalResult) {
+    Graph.programsReady()
     val s = Graph.settings.current()
     eval.newMisses.lastOrNull()?.let { p ->
         Notifier.post(

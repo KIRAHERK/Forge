@@ -5,9 +5,26 @@ package com.forge.app.domain
  * "4_Day_Home_Muscle_Program_Redesigned_v2.pdf". Do not edit sets, reps or order.
  */
 
-enum class RepUnit(val label: String) { NONE(""), SIDE("/ side"), LEG("/ leg") }
+enum class RepUnit(val label: String) {
+    NONE(""), SIDE("/ side"), LEG("/ leg"), SEC("s"), SEC_SIDE("s / side");
 
-enum class Equip { BODYWEIGHT, DUMBBELL, BARBELL }
+    /** Counted in seconds rather than reps. */
+    val timed: Boolean get() = this == SEC || this == SEC_SIDE
+    /** Each side or leg is done separately. */
+    val perSide: Boolean get() = this != NONE && this != SEC
+}
+
+enum class Equip(val label: String) {
+    BODYWEIGHT("Bodyweight"), DUMBBELL("Dumbbell"), BARBELL("Barbell"), KETTLEBELL("Kettlebell"),
+    CABLE("Cable"), MACHINE("Machine"), BAND("Band");
+
+    /** Gear you'd normally only find in a gym. */
+    val gymOnly: Boolean get() = this == CABLE || this == MACHINE
+}
+
+enum class MuscleGroup(val label: String) {
+    CHEST("Chest"), BACK("Back"), SHOULDERS("Shoulders"), ARMS("Arms"), LEGS("Legs"), CORE("Core"), FULL_BODY("Full body")
+}
 
 data class ProgramExercise(
     val exerciseId: String,
@@ -18,7 +35,7 @@ data class ProgramExercise(
     val tag: String? = null,
 ) {
     val exercise: Exercise get() = Exercises.byId(exerciseId)
-    val repsText: String get() = "$repMin–$repMax" + if (unit != RepUnit.NONE) " ${unit.label}" else ""
+    val repsText: String get() = (if (repMin == repMax) "$repMin" else "$repMin–$repMax") + if (unit != RepUnit.NONE) " ${unit.label}" else ""
     val prescription: String get() = "$sets × $repsText"
     val displayName: String get() = exercise.name + (tag?.let { " — $it" } ?: "")
 }
@@ -37,7 +54,7 @@ data class WorkoutDay(
         get() {
             var sec = 0
             exercises.forEach { pe ->
-                val sides = if (pe.unit != RepUnit.NONE) 2 else 1
+                val sides = if (pe.unit.perSide) 2 else 1
                 sec += pe.sets * (40 * sides + pe.exercise.restSec)
             }
             return (sec / 60.0).let { Math.round(it / 5.0).toInt() * 5 }.coerceAtLeast(20)
@@ -49,8 +66,6 @@ object Program {
     const val SUBTITLE = "Chest Priority • Legs • Back • Arms • Physique"
     const val REST_TITLE = "Day 3 — Rest"
     const val REST_NOTE = "Full recovery day. Light walking is fine."
-    const val WEEKS = 12
-    const val WORKOUTS_PER_WEEK = 4
     const val NOTES = "Consistency first. Progress follows."
 
     val D1 = WorkoutDay(
@@ -98,7 +113,8 @@ object Program {
 
     val days = listOf(D1, D2, D4, D5)
 
-    fun day(id: String?): WorkoutDay? = days.firstOrNull { it.id == id }
+    /** A day of any program, past or present. Falls back to the original days before the store loads. */
+    fun day(id: String?): WorkoutDay? = com.forge.app.data.ProgramStore.day(id) ?: days.firstOrNull { it.id == id }
 
     /** Order of the 7-day cycle as written in the PDF: Day 1, Day 2, Day 3 (rest), Day 4, Day 5, then rest. */
     val defaultCycle = listOf("D1", "D2", REST, "D4", "D5", REST, REST)
@@ -117,9 +133,17 @@ data class Exercise(
     val mistakes: List<String>,
     val homeTip: String? = null,
     val compound: Boolean = false,
+    val group: MuscleGroup = MuscleGroup.FULL_BODY,
+    /** Made by the user: no form guide, may be deleted. */
+    val custom: Boolean = false,
 ) {
-    val loaded: Boolean get() = equip != Equip.BODYWEIGHT
-    val weightStep: Double get() = if (equip == Equip.BARBELL) 2.5 else 1.0
+    val loaded: Boolean get() = equip != Equip.BODYWEIGHT && equip != Equip.BAND
+    val weightStep: Double get() = when (equip) {
+        Equip.BARBELL, Equip.CABLE, Equip.MACHINE -> 2.5
+        Equip.KETTLEBELL -> 4.0
+        else -> 1.0
+    }
+    val hasGuide: Boolean get() = steps.isNotEmpty()
 }
 
 /*
@@ -401,8 +425,35 @@ object Exercises {
         ),
     )
 
-    private val map = all.associateBy { it.id }
-    fun byId(id: String): Exercise = map.getValue(id)
+    /** The 18 original guides plus the library: 80 built-in exercises. */
+    val builtIn: List<Exercise> by lazy { all.map { it.copy(group = originalGroups[it.id] ?: it.group) } + ExerciseLibrary.more }
+    private val builtInMap by lazy { builtIn.associateBy { it.id } }
+
+    /** The user's own exercises, kept in sync with the database by [com.forge.app.data.ProgramStore]. */
+    @Volatile var custom: Map<String, Exercise> = emptyMap()
+
+    /** Built-in first, then custom. An id nothing knows (an exercise deleted long ago) still resolves. */
+    fun byId(id: String): Exercise = builtInMap[id] ?: custom[id] ?: Exercise(
+        id = id, name = "Removed exercise", equip = Equip.BODYWEIGHT, restSec = 90, muscles = "",
+        setup = emptyList(), steps = emptyList(), cues = emptyList(), mistakes = emptyList(), custom = true,
+    )
+
+    fun isBuiltIn(id: String) = id in builtInMap
+
+    /** Custom exercises the user deleted: still named in history, gone from the picker. */
+    @Volatile var retired: Set<String> = emptySet()
+
+    /** Everything the picker offers: built-in plus custom, by name. */
+    fun everything(): List<Exercise> = (builtIn + custom.values.filter { it.id !in retired }).sortedBy { it.name.lowercase() }
+
+    private val originalGroups = mapOf(
+        "pushup" to MuscleGroup.CHEST, "db_floor_press_1arm" to MuscleGroup.CHEST, "pushup_feet_elevated" to MuscleGroup.CHEST,
+        "db_squeeze_press" to MuscleGroup.CHEST, "pushup_close_grip" to MuscleGroup.ARMS, "barbell_squat" to MuscleGroup.LEGS,
+        "bulgarian_split_squat" to MuscleGroup.LEGS, "barbell_rdl" to MuscleGroup.LEGS, "sl_rdl" to MuscleGroup.LEGS,
+        "sl_calf_raise" to MuscleGroup.LEGS, "db_row_supported" to MuscleGroup.BACK, "db_reverse_fly" to MuscleGroup.SHOULDERS,
+        "db_curl" to MuscleGroup.ARMS, "hammer_curl" to MuscleGroup.ARMS, "oh_triceps_ext_1arm" to MuscleGroup.ARMS,
+        "reverse_lunge" to MuscleGroup.LEGS, "barbell_hip_thrust" to MuscleGroup.LEGS, "db_lateral_raise" to MuscleGroup.SHOULDERS,
+    )
 
     const val EFFORT_RULE = "Stop each set 1–2 reps before failure. The last reps should be slow and hard."
     const val PROGRESSION_RULE =

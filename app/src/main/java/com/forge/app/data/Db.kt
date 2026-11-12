@@ -282,9 +282,12 @@ interface CustomFoodDao {
         SessionEntity::class, SetEntity::class, FoodEntity::class, WeightEntity::class,
         HabitDef::class, HabitLog::class, PenaltyEntity::class, XpEntity::class, CustomFoodEntity::class,
         MeasurementEntity::class,
+        ProgramEntity::class, ProgramDayEntity::class, ProgramExerciseEntity::class, CustomExerciseEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
+    // v2 → v3 only adds the program tables; nothing existing changes.
+    autoMigrations = [androidx.room.AutoMigration(from = 2, to = 3)],
 )
 abstract class ForgeDb : RoomDatabase() {
     abstract fun sessions(): SessionDao
@@ -296,6 +299,7 @@ abstract class ForgeDb : RoomDatabase() {
     abstract fun xp(): XpDao
     abstract fun customFoods(): CustomFoodDao
     abstract fun measurements(): MeasurementDao
+    abstract fun programs(): ProgramDao
 
     companion object {
         fun create(context: Context): ForgeDb =
