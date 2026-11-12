@@ -17,7 +17,11 @@ It ships with a 4-day home muscle program and a lean-bulk nutrition plan, logs e
 
 Share your progress, a day of eating or a workout as a ready-to-post image:
 
-<p><img src="docs/screenshots/share-cards.png" width="100%" alt="Share cards for progress, fuel and a workout"></p>
+<p>
+  <img src="docs/screenshots/card-progress.png" width="32%" alt="Progress share card">
+  <img src="docs/screenshots/card-fuel.png" width="32%" alt="Fuel share card">
+  <img src="docs/screenshots/card-workout.png" width="32%" alt="Workout share card">
+</p>
 
 ## Install
 
@@ -38,7 +42,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, the last 4 weeks of each habit at a glance, an urge timer for quit habits, penalty record. Starts empty. |
 | **Progress** | 7-day average weight with a 1M / 3M / 1Y / All chart, kg per week vs target, ETA, 2-week check-in, workouts and training volume for the last 8 weeks, levels, lifts, progress photos (stored privately) and body measurements. |
 | **Weight** | Morning weigh-ins with a type-in reminder notification, streak, 30-day change, lowest and highest, weekly averages, editable history. |
-| **Share** | A share button on Progress, Fuel and every workout turns it into a 1080 × 1350 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
+| **Share** | A share button on Progress, Fuel and every workout turns it into a 1440 × 1800 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
 
 ### Consequences
 

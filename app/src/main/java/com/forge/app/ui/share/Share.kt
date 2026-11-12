@@ -88,10 +88,11 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-// The shared image is always 1080 × 1350 (4:5, the usual feed size), whatever the phone.
-private const val PX_W = 1080
-private const val PX_H = 1350
-private const val CARD_DENSITY = 3f // 360 × 450 dp at 3x
+// The shared image is always 1440 × 1800 (4:5), whatever the phone: the largest size
+// Instagram keeps, so it stays sharp after apps recompress it.
+private const val PX_W = 1440
+private const val PX_H = 1800
+const val CARD_DENSITY = 4f // the card is laid out at 360 × 450 dp
 
 /** Small share icon for the corner of a panel. */
 @Composable
@@ -120,7 +121,7 @@ private fun ShareDialog(name: String, onDismiss: () -> Unit, card: @Composable (
                     if (busy) return@PrimaryButton
                     busy = true
                     scope.launch {
-                        runCatching { shareBitmap(ctx, layer.toImageBitmap().asAndroidBitmap(), name) }
+                        runCatching { shareBitmap(ctx, layer.toImageBitmap().asAndroidBitmap(), name) }.onFailure { android.util.Log.e("Forge", "Share failed", it) }
                         busy = false
                         onDismiss()
                     }
@@ -233,6 +234,14 @@ private fun CardFrame(
 
 @Composable
 fun ShareWorkoutDialog(sessionId: Long, onDismiss: () -> Unit) {
+    ShareDialog("forge-workout", onDismiss) {
+        WorkoutCard(sessionId)
+    }
+}
+
+/** The workout card itself, laid out at 360 × 450 dp. */
+@Composable
+fun WorkoutCard(sessionId: Long) {
     val repo = Graph.repo
     val s = LocalSettings.current
     val ses by repo.session(sessionId).collectAsState(null)
@@ -248,43 +257,41 @@ fun ShareWorkoutDialog(sessionId: Long, onDismiss: () -> Unit) {
     val tops = done.groupBy { it.exerciseIndex }.toSortedMap().values.map { list ->
         list.maxBy { Progression.e1rm(it.reps, it.weightKg) }
     }
-    ShareDialog("forge-workout", onDismiss) {
-        CardFrame(
-            date = LocalDate.ofEpochDay(session.date),
-            eyebrow = day?.let { "Day ${it.number} · workout" } ?: "Workout",
-            title = day?.name ?: "Session",
-            badge = when {
-                prs.isNotEmpty() -> if (prs.size == 1) "New personal record" else "${prs.size} new personal records"
-                session.complete -> "Session complete"
-                else -> null
-            },
-            line = when {
-                prs.isNotEmpty() -> "Stronger than last time."
-                streak >= 3 -> "$streak sessions in a row."
-                session.complete -> Lines.done(session.id)
-                else -> null
-            },
-        ) {
-            Row(Modifier.fillMaxWidth()) {
-                Stat("Time", "$minutes", Modifier.weight(1f), unit = "min")
-                Stat("Volume", Fmt.num(session.volumeKg.roundToInt()), Modifier.weight(1.2f), unit = "kg")
-                Stat("Sets", "${done.size}", Modifier.weight(0.8f))
-                Stat("Streak", "$streak", Modifier.weight(0.9f), color = if (streak > 0) C.Volt else C.Hi)
-            }
-            Gap(12.dp)
-            Eyebrow("Top sets")
-            Gap(6.dp)
-            tops.take(5).forEach { st ->
-                val ex = runCatching { com.forge.app.domain.Exercises.byId(st.exerciseId) }.getOrNull()
-                val isPr = ex != null && prs.any { it.startsWith(ex.name) }
-                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(ex?.name ?: st.exerciseId, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f), maxLines = 1)
-                    if (isPr) { Tag("PR", color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
-                    Text(
-                        if (st.weightKg > 0) "${st.reps} × ${Progression.fmtKg(st.weightKg)} kg" else "${st.reps} reps",
-                        style = T.Small, color = if (isPr) C.Volt else C.Mid,
-                    )
-                }
+    CardFrame(
+        date = LocalDate.ofEpochDay(session.date),
+        eyebrow = day?.let { "Day ${it.number} · workout" } ?: "Workout",
+        title = day?.name ?: "Session",
+        badge = when {
+            prs.isNotEmpty() -> if (prs.size == 1) "New personal record" else "${prs.size} new personal records"
+            session.complete -> "Session complete"
+            else -> null
+        },
+        line = when {
+            prs.isNotEmpty() -> "Stronger than last time."
+            streak >= 3 -> "$streak sessions in a row."
+            session.complete -> Lines.done(session.id)
+            else -> null
+        },
+    ) {
+        Row(Modifier.fillMaxWidth()) {
+            Stat("Time", "$minutes", Modifier.weight(1f), unit = "min")
+            Stat("Volume", Fmt.num(session.volumeKg.roundToInt()), Modifier.weight(1.2f), unit = "kg")
+            Stat("Sets", "${done.size}", Modifier.weight(0.8f))
+            Stat("Streak", "$streak", Modifier.weight(0.9f), color = if (streak > 0) C.Volt else C.Hi)
+        }
+        Gap(12.dp)
+        Eyebrow("Top sets")
+        Gap(6.dp)
+        tops.take(5).forEach { st ->
+            val ex = runCatching { com.forge.app.domain.Exercises.byId(st.exerciseId) }.getOrNull()
+            val isPr = ex != null && prs.any { it.startsWith(ex.name) }
+            Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(ex?.name ?: st.exerciseId, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f), maxLines = 1)
+                if (isPr) { Tag("PR", color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
+                Text(
+                    if (st.weightKg > 0) "${st.reps} × ${Progression.fmtKg(st.weightKg)} kg" else "${st.reps} reps",
+                    style = T.Small, color = if (isPr) C.Volt else C.Mid,
+                )
             }
         }
     }
@@ -294,6 +301,14 @@ fun ShareWorkoutDialog(sessionId: Long, onDismiss: () -> Unit) {
 
 @Composable
 fun ShareFuelDialog(date: LocalDate, onDismiss: () -> Unit) {
+    ShareDialog("forge-fuel", onDismiss) {
+        FuelCard(date)
+    }
+}
+
+/** The fuel card itself, laid out at 360 × 450 dp. */
+@Composable
+fun FuelCard(date: LocalDate) {
     val repo = Graph.repo
     val s = LocalSettings.current
     val foods by remember(date) { repo.foodForDay(date) }.collectAsState(emptyList())
@@ -306,56 +321,54 @@ fun ShareFuelDialog(date: LocalDate, onDismiss: () -> Unit) {
     val weekProtein = days.map { d -> week.filter { it.date == d.toEpochDay() }.sumOf { it.protein }.toFloat() }
     val weekHits = weekProtein.count { it >= s.protein * 0.95f }
 
-    ShareDialog("forge-fuel", onDismiss) {
-        CardFrame(
-            date = date,
-            eyebrow = "Nutrition",
-            title = if (date == LocalDate.now()) "Today's fuel" else "Fuel",
-            badge = when {
-                proteinHit && kcalHit -> "Targets hit"
-                proteinHit -> "Protein target hit"
-                kcalHit -> "Calorie target hit"
-                else -> null
-            },
-            line = when {
-                proteinHit && kcalHit -> "Every gram accounted for."
-                weekHits >= 4 -> "Protein target hit $weekHits days this week."
-                proteinHit -> "Protein done. Muscle gets built on days like this."
-                else -> null
-            },
-        ) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Ring(m.kcal.toFloat() / s.kcal, size = 80.dp, stroke = 7.dp, color = C.Hi) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(Fmt.num(m.kcal), style = T.Num, color = C.Hi)
-                            Text("of ${Fmt.num(s.kcal)}", style = T.Tiny, color = C.Mid)
-                        }
+    CardFrame(
+        date = date,
+        eyebrow = "Nutrition",
+        title = if (date == LocalDate.now()) "Today's fuel" else "Fuel",
+        badge = when {
+            proteinHit && kcalHit -> "Targets hit"
+            proteinHit -> "Protein target hit"
+            kcalHit -> "Calorie target hit"
+            else -> null
+        },
+        line = when {
+            proteinHit && kcalHit -> "Every gram accounted for."
+            weekHits >= 4 -> "Protein target hit $weekHits days this week."
+            proteinHit -> "Protein done. Muscle gets built on days like this."
+            else -> null
+        },
+    ) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Ring(m.kcal.toFloat() / s.kcal, size = 80.dp, stroke = 7.dp, color = C.Hi) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(Fmt.num(m.kcal), style = T.Num, color = C.Hi)
+                        Text("of ${Fmt.num(s.kcal)}", style = T.Tiny, color = C.Mid)
                     }
-                    Gap(4.dp)
-                    Eyebrow("Calories")
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Ring((m.protein / s.protein).toFloat(), size = 80.dp, stroke = 7.dp, color = C.Volt) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("${Fmt.g(m.protein)} g", style = T.Num, color = C.Volt)
-                            Text("of ${s.protein} g", style = T.Tiny, color = C.Mid)
-                        }
-                    }
-                    Gap(4.dp)
-                    Eyebrow("Protein")
-                }
+                Gap(4.dp)
+                Eyebrow("Calories")
             }
-            Gap(8.dp)
-            Text(
-                "Fat ${Fmt.g(m.fat)} / ${s.fat} g  ·  Carbs ${Fmt.g(m.carbs)} / ${s.carbs} g",
-                style = T.Small, color = C.Mid, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            )
-            Gap(8.dp)
-            Eyebrow("Protein this week")
-            Gap(4.dp)
-            BarChart(weekProtein, days.map { Fmt.dowLetter(it) }, target = s.protein.toFloat(), highlight = days.indexOf(date), height = 44.dp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Ring((m.protein / s.protein).toFloat(), size = 80.dp, stroke = 7.dp, color = C.Volt) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("${Fmt.g(m.protein)} g", style = T.Num, color = C.Volt)
+                        Text("of ${s.protein} g", style = T.Tiny, color = C.Mid)
+                    }
+                }
+                Gap(4.dp)
+                Eyebrow("Protein")
+            }
         }
+        Gap(8.dp)
+        Text(
+            "Fat ${Fmt.g(m.fat)} / ${s.fat} g  ·  Carbs ${Fmt.g(m.carbs)} / ${s.carbs} g",
+            style = T.Small, color = C.Mid, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+        Gap(8.dp)
+        Eyebrow("Protein this week")
+        Gap(4.dp)
+        BarChart(weekProtein, days.map { Fmt.dowLetter(it) }, target = s.protein.toFloat(), highlight = days.indexOf(date), height = 44.dp)
     }
 }
 
@@ -363,6 +376,14 @@ fun ShareFuelDialog(date: LocalDate, onDismiss: () -> Unit) {
 
 @Composable
 fun ShareProgressDialog(onDismiss: () -> Unit) {
+    ShareDialog("forge-progress", onDismiss) {
+        ProgressCard()
+    }
+}
+
+/** The progress card itself, laid out at 360 × 450 dp. */
+@Composable
+fun ProgressCard() {
     val repo = Graph.repo
     val s = LocalSettings.current
     val weights by repo.weights.collectAsState(emptyList())
@@ -381,43 +402,41 @@ fun ShareProgressDialog(onDismiss: () -> Unit) {
     val progress = if (cur == null || s.goalWeight == s.startWeight) 0f else ((cur - s.startWeight) / (s.goalWeight - s.startWeight)).toFloat()
     val from = today.minusDays(90).toEpochDay()
 
-    ShareDialog("forge-progress", onDismiss) {
-        CardFrame(
-            date = today,
-            eyebrow = "Body weight · 7-day average",
-            title = cur?.let { "${Fmt.kg(it)} kg" } ?: "Progress",
-            badge = when {
-                goalReached -> "Goal reached"
-                toward(rate) -> "On track"
-                else -> null
-            },
-            line = when {
-                goalReached -> "${Fmt.kg(s.goalWeight)} kg. Done. Next target."
-                toward(month) -> "${signed(month!!)} kg in 30 days. Moving the right way."
-                toward(sinceStart) -> "${signed(sinceStart!!)} kg since day one."
-                else -> null
-            },
-        ) {
-            Row(Modifier.fillMaxWidth()) {
-                Stat("Since start", sinceStart?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = "kg", color = if (toward(sinceStart)) C.Volt else C.Hi)
-                Stat("30 days", month?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = "kg", color = if (toward(month)) C.Volt else C.Hi)
-                Stat("Per week", rate?.let { String.format(Locale.US, "%+.2f", it) } ?: "—", Modifier.weight(1f), unit = "kg")
-            }
-            Gap(14.dp)
-            LineChart(
-                weights.filter { it.date >= from }.map { it.date to it.kg },
-                avg.filter { it.first >= from },
-                goal = s.goalWeight, height = 84.dp,
-                empty = "Log a few mornings to see the trend.",
-            )
-            Gap(10.dp)
-            Row {
-                Text("Start ${Fmt.kg(s.startWeight)} kg", style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
-                Text("Goal ${Fmt.kg(s.goalWeight)} kg", style = T.Tiny, color = C.Volt)
-            }
-            Gap(5.dp)
-            Bar(progress, height = 7.dp)
+    CardFrame(
+        date = today,
+        eyebrow = "Body weight · 7-day average",
+        title = cur?.let { "${Fmt.kg(it)} kg" } ?: "Progress",
+        badge = when {
+            goalReached -> "Goal reached"
+            toward(rate) -> "On track"
+            else -> null
+        },
+        line = when {
+            goalReached -> "${Fmt.kg(s.goalWeight)} kg. Done. Next target."
+            toward(month) -> "${signed(month!!)} kg in 30 days. Moving the right way."
+            toward(sinceStart) -> "${signed(sinceStart!!)} kg since day one."
+            else -> null
+        },
+    ) {
+        Row(Modifier.fillMaxWidth()) {
+            Stat("Since start", sinceStart?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = "kg", color = if (toward(sinceStart)) C.Volt else C.Hi)
+            Stat("30 days", month?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = "kg", color = if (toward(month)) C.Volt else C.Hi)
+            Stat("Per week", rate?.let { String.format(Locale.US, "%+.2f", it) } ?: "—", Modifier.weight(1f), unit = "kg")
         }
+        Gap(14.dp)
+        LineChart(
+            weights.filter { it.date >= from }.map { it.date to it.kg },
+            avg.filter { it.first >= from },
+            goal = s.goalWeight, height = 84.dp,
+            empty = "Log a few mornings to see the trend.",
+        )
+        Gap(10.dp)
+        Row {
+            Text("Start ${Fmt.kg(s.startWeight)} kg", style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
+            Text("Goal ${Fmt.kg(s.goalWeight)} kg", style = T.Tiny, color = C.Volt)
+        }
+        Gap(5.dp)
+        Bar(progress, height = 7.dp)
     }
 }
 
