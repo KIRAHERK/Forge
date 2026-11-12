@@ -384,17 +384,31 @@ fun SettingsScreen(nav: Nav) {
             }
 
             Group("About") {
-                Text("Forge v${com.forge.app.update.Updater.currentVersion} · open source", style = T.BodyS, color = C.Hi)
-                Gap(4.dp)
-                Text(
-                    "Ships with a 4-day home muscle program and a lean-bulk nutrition plan; their sets, reps and targets are used as written. " +
-                        "Exercise cues were compiled from coaching references (ACE, NASM, Motra and others). Food values come from USDA FoodData Central.",
-                    style = T.Small, color = C.Mid,
-                )
-                Gap(10.dp)
-                SecondaryButton("Source code on GitHub", {
+                Text("Forge v${com.forge.app.update.Updater.currentVersion}", style = T.BodyS, color = C.Hi)
+                Gap(2.dp)
+                Text(com.forge.app.Credits.LINE, style = T.Small, color = C.Volt)
+                Gap(12.dp)
+                com.forge.app.Credits.links.chunked(3).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        row.forEach { (label, url) ->
+                            SecondaryButton(label, {
+                                runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                            }, Modifier.weight(1f), height = 46.dp)
+                        }
+                    }
+                    Gap(10.dp)
+                }
+                SecondaryButton("Source code", {
                     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/${com.forge.app.update.Updater.repo}"))) }
                 }, Modifier.fillMaxWidth(), height = 46.dp)
+                com.forge.app.ui.components.Details("Sources and license") {
+                    Text(
+                        "Ships with a 4-day home muscle program and a lean-bulk nutrition plan; their sets, reps and targets are used as written. " +
+                            "Exercise cues were compiled from coaching references (ACE, NASM, Motra and others). Food values come from USDA FoodData Central, " +
+                            "published dish studies and Open Food Facts.\n\nOpen source under the MIT license. Copyright ${com.forge.app.Credits.AUTHOR}.",
+                        style = T.Small, color = C.Mid,
+                    )
+                }
             }
             Gap(40.dp)
         }

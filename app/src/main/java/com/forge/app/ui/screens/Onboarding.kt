@@ -282,7 +282,7 @@ fun OnboardingScreen() {
 @Composable
 private fun Intro() {
     Gap(20.dp)
-    Eyebrow("Forge", color = C.Volt)
+    Eyebrow("Forge · by ${com.forge.app.Credits.AUTHOR}", color = C.Volt)
     Gap(8.dp)
     Text("YOUR PLAN.\nENFORCED.", style = T.Hero.copy(fontSize = 64.sp, lineHeight = 60.sp), color = C.Hi)
     Gap(14.dp)
