@@ -405,7 +405,8 @@ fun SettingsScreen(nav: Nav) {
                     Text(
                         "Ships with a 4-day home muscle program and a lean-bulk nutrition plan; their sets, reps and targets are used as written. " +
                             "Exercise cues were compiled from coaching references (ACE, NASM, Motra and others). Food values come from USDA FoodData Central, " +
-                            "published dish studies and Open Food Facts.\n\nOpen source under the MIT license. Copyright ${com.forge.app.Credits.AUTHOR}.",
+                            "published dish studies and Open Food Facts.\n\nSource-available under the PolyForm Noncommercial License 1.0.0. Free for personal use; " +
+                            "selling, rebranding or business use needs a commercial license. Copyright ${com.forge.app.Credits.AUTHOR}.",
                         style = T.Small, color = C.Mid,
                     )
                 }
