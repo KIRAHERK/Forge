@@ -185,55 +185,20 @@ fun SettingsScreen(nav: Nav) {
                     weekdays.forEach { d ->
                         Chip(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), s.weekStart == d.value, {
                             upd {
-                                val n = it.copy(weekStart = d.value, schedule = Settings.cycleFrom(d))
-                                n.copy(programStart = n.weekStartOf(LocalDate.ofEpochDay(it.trackingStart)).toEpochDay())
+                                val n = it.copy(weekStart = d.value)
+                                n.copy(programStart = n.weekStartOf(LocalDate.ofEpochDay(it.programStart)).toEpochDay())
                             }
                         })
                     }
                 }
-                Gap(14.dp)
-                Eyebrow("Each day")
-                Gap(4.dp)
-                weekdays.forEachIndexed { i, d ->
-                    val slot = s.schedule.getOrElse(d.value - 1) { Program.REST }
-                    var open by remember { mutableStateOf(false) }
-                    if (i > 0) Hairline()
-                    Box {
-                        Row(
-                            Modifier.fillMaxWidth().clickable { open = true }.padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), style = T.BodyM, color = C.Mid, modifier = Modifier.width(52.dp))
-                            Text(
-                                Program.day(slot)?.title ?: "Rest",
-                                style = T.BodyM, color = if (slot == Program.REST) C.Lo else C.Hi,
-                                modifier = Modifier.weight(1f), maxLines = 1,
-                            )
-                            Icon(Icons.Rounded.ExpandMore, null, tint = C.Mid)
-                        }
-                        DropdownMenu(open, { open = false }, containerColor = C.S2) {
-                            (Program.days.map { it.id } + Program.REST).forEach { opt ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            Program.day(opt)?.title ?: "Rest",
-                                            style = T.BodyM, color = if (opt == slot) C.Volt else C.Hi,
-                                        )
-                                    },
-                                    onClick = {
-                                        open = false
-                                        upd { st -> st.copy(schedule = st.schedule.toMutableList().also { it[d.value - 1] = opt }) }
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
-                val count = s.schedule.count { it != Program.REST }
-                if (count != Program.WORKOUTS_PER_WEEK) {
-                    Gap(6.dp)
-                    Text("The program is ${Program.WORKOUTS_PER_WEEK} workouts a week. You have $count scheduled.", style = T.Small, color = C.Amber)
-                }
+                Gap(10.dp)
+                Hairline()
+                val active = com.forge.app.ui.LocalPrograms.current?.active
+                ValueRow(
+                    "Program",
+                    active?.let { "${it.daysPerWeek} / week" } ?: "",
+                    active?.name ?: "None",
+                ) { nav.go("programs") }
             }
 
             // ------------------------------------------------ reminders

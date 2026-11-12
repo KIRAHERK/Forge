@@ -232,7 +232,9 @@ fun ProgressScreen(nav: Nav) {
         // ---------------- lifts
         item {
             SectionTitle("Lifts", action = if (finished.isNotEmpty()) "History" else null, onAction = { nav.go("history") })
-            val exIds = Program.days.flatMap { d -> d.exercises.map { it.exerciseId } }.distinct()
+            val active = com.forge.app.ui.LocalPrograms.current?.active
+            // Lifts in the current program first, then anything else ever logged.
+            val exIds = (active?.days.orEmpty().flatMap { d -> d.exercises.map { it.exerciseId } } + doneSets.map { it.exerciseId }).distinct()
             Panel(padding = PaddingValues(vertical = 6.dp)) {
                 exIds.forEachIndexed { i, id ->
                     val ex = com.forge.app.domain.Exercises.byId(id)
@@ -284,6 +286,7 @@ fun ProgressScreen(nav: Nav) {
 /** Workouts and volume for the last 8 weeks. */
 @Composable
 private fun WeeklyTrainingPanel(s: com.forge.app.data.Settings, finished: List<com.forge.app.data.SessionEntity>, today: LocalDate) {
+    val perWeek = s.schedule.count { it != Program.REST }.coerceAtLeast(1)
     var volume by remember { mutableStateOf(false) }
     val thisWeek = s.weekStartOf(today)
     val weeks = (7 downTo 0).map { thisWeek.minusWeeks(it.toLong()) }
@@ -303,14 +306,14 @@ private fun WeeklyTrainingPanel(s: com.forge.app.data.Settings, finished: List<c
         }
         Gap(14.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("This week", if (volume) String.format(Locale.US, "%.1f", values.last()) else "${values.last().toInt()}", Modifier.weight(1f), unit = if (volume) "t" else "/ ${Program.WORKOUTS_PER_WEEK}")
+            Stat("This week", if (volume) String.format(Locale.US, "%.1f", values.last()) else "${values.last().toInt()}", Modifier.weight(1f), unit = if (volume) "t" else "/ $perWeek")
             Stat("Weekly avg", if (past.isEmpty()) "—" else String.format(Locale.US, if (volume) "%.1f" else "%.1f", past.average()), Modifier.weight(1f), unit = if (volume && past.isNotEmpty()) "t" else null)
         }
         Gap(16.dp)
         BarChart(
             values = values,
             labels = weeks.map { "${it.dayOfMonth}/${it.monthValue}" },
-            target = if (volume) null else Program.WORKOUTS_PER_WEEK.toFloat(),
+            target = if (volume) null else perWeek.toFloat(),
             highlight = weeks.size - 1,
             valueText = { if (it <= 0f) "" else if (volume) String.format(Locale.US, "%.1f", it) else it.toInt().toString() },
         )

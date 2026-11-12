@@ -102,6 +102,8 @@ import kotlin.math.roundToInt
 fun TodayScreen(nav: Nav) {
     val repo = Graph.repo
     val s = LocalSettings.current
+    // Read so the screen redraws when a program is edited.
+    @Suppress("UNUSED_VARIABLE") val programs = com.forge.app.ui.LocalPrograms.current
     val scope = rememberCoroutineScope()
     val now by rememberNow(15_000)
     val today = now.toLocalDate()
@@ -149,7 +151,7 @@ fun TodayScreen(nav: Nav) {
             val week = s.programWeek(today)
             ScreenHeader(
                 eyebrow = Fmt.longDay(today),
-                title = if (week <= Program.WEEKS) "Week $week / ${Program.WEEKS}" else "Week $week",
+                title = "Week $week",
             ) {
                 Box(Modifier.clip(CircleShape).clickable { nav.tab("progress") }) {
                     Ring(level.progress, size = 46.dp, stroke = 3.dp) {

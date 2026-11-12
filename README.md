@@ -4,7 +4,7 @@
 
 A training and nutrition app for Android that holds you to your plan: reminders, deadlines, and real consequences for skipping.
 
-It ships with a 4-day home muscle program and a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
+Pick a ready-made program or build your own from 85 gym and home exercises. It comes with a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
 
 <p>
   <img src="docs/screenshots/today.png" width="16%" alt="Today">
@@ -36,7 +36,8 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | | |
 |---|---|
 | **Today** | Today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
-| **Train** | The program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
+| **Programs** | Six ready-made programs (the original 4-day home program, full body, upper/lower, push/pull/legs, dumbbell-only, bodyweight-only) or build your own: pick training days, add exercises from 85 gym and home exercises, set sets and reps (or seconds), reorder, and add your own exercises. Keep several programs and switch any time; your history stays. |
+| **Train** | The active program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |
 | **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. |
 | **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, the last 4 weeks of each habit at a glance, an urge timer for quit habits, penalty record. Starts empty. |

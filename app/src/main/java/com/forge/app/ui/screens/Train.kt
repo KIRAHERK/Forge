@@ -87,9 +87,15 @@ fun TrainScreen(nav: Nav) {
     val active by repo.activeSession.collectAsState(null)
     val done = Stats.doneDates(sessions)
     var pick by remember { mutableStateOf<WorkoutDay?>(null) }
+    val programs = com.forge.app.ui.LocalPrograms.current
+    val program = programs?.active
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
-        item { ScreenHeader(Program.TITLE, "Train") }
+        item {
+            ScreenHeader(program?.name ?: "Program", "Train") {
+                TextAction("Programs", { nav.go("programs") })
+            }
+        }
 
         item {
             WeekStrip(s.weekStartOf(today), today) { d -> Stats.dayStatus(s, d, now, done) to s.slotFor(d) }
@@ -109,18 +115,25 @@ fun TrainScreen(nav: Nav) {
             }
         }
 
-        item { SectionTitle("The program") }
+        item {
+            SectionTitle(
+                "The program · ${program?.daysPerWeek ?: 0} days a week",
+                action = if (program != null) "Edit" else null,
+                onAction = { program?.let { nav.go("program/${it.id}") } },
+            )
+        }
 
-        val order = Program.defaultCycle
-        items(order.distinct().filter { it != Program.REST } + Program.REST, key = { it }) { slot ->
-            if (slot == Program.REST) {
-                Panel {
-                    Text(Program.REST_TITLE.uppercase(), style = T.H2, color = C.Hi)
+        items(program?.days.orEmpty(), key = { it.id }) { day ->
+            DayCard(day, onExercise = { nav.exercise(it) }, onStart = { pick = day })
+            Gap(12.dp)
+        }
+        if (program != null && program.days.isEmpty()) {
+            item {
+                Panel(onClick = { nav.go("program/${program.id}") }) {
+                    Text("NO WORKOUTS YET", style = T.H3, color = C.Hi)
+                    Gap(4.dp)
+                    Text("Add days and exercises to this program.", style = T.Small, color = C.Mid)
                 }
-                Gap(12.dp)
-            } else {
-                val day = Program.day(slot)!!
-                DayCard(day, onExercise = { nav.exercise(it) }, onStart = { pick = day })
                 Gap(12.dp)
             }
         }
@@ -167,7 +180,7 @@ fun TrainScreen(nav: Nav) {
             val msg = when {
                 isMakeUp -> "This counts as the make-up for ${Fmt.day(creditDate)} and restores your streak."
                 todaySlot == day.id -> "This is today's scheduled session."
-                todaySlot == Program.REST -> "Today is a rest day. The PDF says full recovery, light walking. This is logged as an extra session."
+                todaySlot == Program.REST -> "Today is a rest day. This is logged as an extra session."
                 else -> "Today's scheduled session is ${s.dayFor(today)?.title}. This one is logged in its place for today."
             }
             Text(msg, style = T.Body, color = C.Mid)
@@ -199,7 +212,7 @@ fun WeekStrip(weekStart: LocalDate, today: LocalDate, info: (LocalDate) -> Pair<
                     Icon(Icons.Rounded.Sick, "Sick day", tint = fg, modifier = Modifier.padding(vertical = 2.dp).size(20.dp))
                 } else {
                     Text(
-                        if (slot == Program.REST) "–" else slot.removePrefix("D"),
+                        if (slot == Program.REST) "–" else (Program.day(slot)?.number?.toString() ?: "•"),
                         style = T.Num.copy(fontSize = T.Num.fontSize * 0.9f), color = fg, textAlign = TextAlign.Center,
                     )
                 }

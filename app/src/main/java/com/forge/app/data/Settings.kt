@@ -57,6 +57,9 @@ data class Settings(
     val lastCheckInAck: Long = -1,
     val lastSeenLevel: Int = 1,
 
+    /** The program in use; its weekly layout is mirrored in [schedule]. Empty until the first load. */
+    val activeProgramId: String = "",
+
     /** Training days marked as sick (epoch days): no penalty, no XP lost, streak paused. */
     val sickDays: List<Long> = emptyList(),
 

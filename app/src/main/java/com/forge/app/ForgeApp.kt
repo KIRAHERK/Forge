@@ -30,6 +30,9 @@ object Graph {
         if (!::appContext.isInitialized) appContext = context.applicationContext
     }
 
+    /** Programs loaded (and the original one created on first run). Call before reading any day. */
+    suspend fun programsReady() = com.forge.app.data.ProgramStore.ensure(db, settings)
+
     private var refreshJob: Job? = null
 
     /** Debounced: refresh widget and reminders after data changes. */
@@ -52,6 +55,7 @@ class ForgeApp : Application() {
         // Evaluation happens where its result is shown (alarm receiver, boot, activity resume),
         // so a "missed" notification is never swallowed by a background evaluation.
         Graph.scope.launch {
+            runCatching { Graph.programsReady() }
             runCatching { Scheduler.rescheduleAll(this@ForgeApp) }
         }
     }

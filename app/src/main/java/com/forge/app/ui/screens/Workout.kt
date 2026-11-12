@@ -132,13 +132,16 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
         Box(Modifier.fillMaxSize().background(C.Bg))
         return
     }
-    val day = Program.day(ses.dayId) ?: return
+    val programs = com.forge.app.ui.LocalPrograms.current
+    val savedDay = remember(ses.dayId, programs) { Program.day(ses.dayId) }
+    val plan = remember(sets, savedDay) { com.forge.app.data.ProgramStore.sessionPlan(savedDay, sets) }
+    val day = (savedDay ?: com.forge.app.domain.WorkoutDay(ses.dayId, 0, "Workout", plan)).copy(exercises = plan)
     if (ses.finishedAt != null) {
         LaunchedEffect(Unit) { nav.summary(ses.id) }
         return
     }
 
-    val history by produceState(emptyMap<Int, List<SetRecord>>(), sessionId) {
+    val history by produceState(emptyMap<Int, List<SetRecord>>(), sessionId, plan.size) {
         value = day.exercises.mapIndexed { i, pe -> i to repo.lastPerformance(pe.exerciseId, excludeSession = sessionId) }.toMap()
     }
 
@@ -162,9 +165,11 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
                 val next = ordered.firstOrNull { it.id != set.id && !it.done && (it.exerciseIndex > set.exerciseIndex || (it.exerciseIndex == set.exerciseIndex && it.setIndex > set.setIndex)) }
                     ?: ordered.firstOrNull { it.id != set.id && !it.done }
                 if (next != null) {
-                    val pe = day.exercises[set.exerciseIndex]
-                    val nextPe = day.exercises[next.exerciseIndex]
-                    RestTimer.start(ctx, pe.exercise.restSec, "Next: ${nextPe.exercise.name} · set ${next.setIndex + 1} of ${nextPe.sets}")
+                    val pe = day.exercises.getOrNull(set.exerciseIndex)
+                    val nextPe = day.exercises.getOrNull(next.exerciseIndex)
+                    if (pe != null && nextPe != null) {
+                        RestTimer.start(ctx, pe.exercise.restSec, "Next: ${nextPe.exercise.name} · set ${next.setIndex + 1} of ${nextPe.sets}")
+                    }
                 } else {
                     RestTimer.stop(ctx)
                 }
@@ -334,7 +339,13 @@ private fun ExerciseCard(
             Text("SET", style = T.Tiny, color = C.Lo, modifier = Modifier.width(24.dp))
             Text("PREV", style = T.Tiny, color = C.Lo, modifier = Modifier.width(46.dp))
             Text("KG", style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1.15f).padding(start = 6.dp))
-            Text("REPS${if (pe.unit != com.forge.app.domain.RepUnit.NONE) " " + pe.unit.label.uppercase() else ""}", style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f).padding(start = 6.dp))
+            Text(
+                when {
+                    pe.unit == com.forge.app.domain.RepUnit.SEC_SIDE -> "SECONDS / SIDE"
+                    pe.unit.timed -> "SECONDS"
+                    pe.unit != com.forge.app.domain.RepUnit.NONE -> "REPS " + pe.unit.label.uppercase()
+                    else -> "REPS"
+                }, style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f).padding(start = 6.dp))
             Spacer(Modifier.width(44.dp))
         }
         Gap(6.dp)
@@ -500,11 +511,16 @@ fun GuideContent(ex: Exercise, pe: ProgramExercise? = null) {
         }
     }
     Gap(14.dp)
-    GuideSection("How to do it", ex.steps, numbered = true, initiallyOpen = true)
-    GuideSection("Setup", ex.setup, numbered = true)
-    GuideBullets("Cues", ex.cues, C.Volt, C.Hi)
-    GuideBullets("Common mistakes", ex.mistakes, C.Red, C.Mid)
-    ex.homeTip?.let { tip ->
+    if (!ex.hasGuide) {
+        Text("Your own exercise. There's no form guide for it.", style = T.Body, color = C.Mid)
+        ex.homeTip?.let { Gap(8.dp); Text(it, style = T.Body, color = C.Hi) }
+        Gap(12.dp)
+    }
+    if (ex.hasGuide) GuideSection("How to do it", ex.steps, numbered = true, initiallyOpen = true)
+    if (ex.setup.isNotEmpty()) GuideSection("Setup", ex.setup, numbered = true)
+    if (ex.cues.isNotEmpty()) GuideBullets("Cues", ex.cues, C.Volt, C.Hi)
+    if (ex.mistakes.isNotEmpty()) GuideBullets("Common mistakes", ex.mistakes, C.Red, C.Mid)
+    ex.homeTip?.takeIf { ex.hasGuide }?.let { tip ->
         Hairline()
         Details("Note") { Text(tip, style = T.Body, color = C.Hi) }
     }
