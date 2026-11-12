@@ -451,6 +451,31 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         ProgramStore.reload(db, settings)
     }
 
+    /**
+     * Adds a program received as a QR code. Its custom exercises are added as the user's own,
+     * reusing one with the same name and equipment if it already exists. Returns the new id.
+     */
+    suspend fun importProgram(shared: ProgramCode.Shared): String {
+        ProgramStore.ensure(db, settings)
+        val existing = db.programs().customNow().filter { !it.deleted }
+        val idMap = shared.c.associate { c ->
+            val same = existing.firstOrNull { it.name.equals(c.n, ignoreCase = true) && it.equip == c.q }
+            c.id to (same?.id ?: newId("c") + c.id.hashCode().toUInt().toString(36).take(4)).also { id ->
+                if (same == null) db.programs().upsertCustom(CustomExerciseEntity(id, c.n, c.q, c.g, "", c.r))
+            }
+        }
+        val pid = newId("p")
+        val dayIds = shared.d.indices.map { "$pid-d${it + 1}" }
+        val schedule = shared.w.map { i -> if (i >= 0) dayIds[i] else Program.REST }
+        db.programs().upsertProgram(ProgramEntity(pid, shared.n, "Shared with you", "", schedule.joinToString(","), createdAt = nowMs()))
+        db.programs().upsertDays(shared.d.mapIndexed { i, d -> ProgramDayEntity(dayIds[i], pid, i, i + 1, d.n) })
+        shared.d.forEachIndexed { i, d ->
+            with(ProgramStore) { db.programs().insertExercises(ProgramCode.toExercises(d, idMap).toEntities(dayIds[i])) }
+        }
+        ProgramStore.reload(db, settings)
+        return pid
+    }
+
     /** Adds a custom exercise. Returns its id. */
     suspend fun addCustomExercise(name: String, equip: com.forge.app.domain.Equip, group: com.forge.app.domain.MuscleGroup, restSec: Int, notes: String): String {
         val id = newId("c")

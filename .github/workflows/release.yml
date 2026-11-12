@@ -74,11 +74,15 @@ jobs:
           ./gradlew testDebugUnitTest assembleRelease \
             -PforgeVersion="$VERSION" -PforgeRepo="$GITHUB_REPOSITORY" --no-daemon
           cp app/build/outputs/apk/release/app-release.apk "Forge-$VERSION.apk"
+          # Same file under a fixed name, so releases/latest/download/Forge.apk always gets the newest.
+          cp "Forge-$VERSION.apk" Forge.apk
 
       - name: Publish the release
         uses: softprops/action-gh-release@v2
         with:
-          files: Forge-*.apk
+          files: |
+            Forge-*.apk
+            Forge.apk
           tag_name: v${{ env.VERSION }}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true

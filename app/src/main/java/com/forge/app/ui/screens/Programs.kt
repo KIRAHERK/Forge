@@ -30,6 +30,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -102,11 +104,24 @@ fun ProgramsScreen(nav: Nav) {
     val activeId = snap?.active?.id
     var addTemplate by remember { mutableStateOf<ProgramTemplate?>(null) }
     var deleting by remember { mutableStateOf<UserProgram?>(null) }
+    var sharing by remember { mutableStateOf<UserProgram?>(null) }
+    var scanning by remember { mutableStateOf(false) }
+    var received by remember { mutableStateOf<com.forge.app.data.ProgramCode.Shared?>(null) }
 
     Column(Modifier.fillMaxSize()) {
         TopBar("Programs", "Pick one, edit it, or build your own", onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
-            item { SectionTitle("Your programs") }
+            item {
+                Gap(4.dp)
+                Panel(padding = PaddingValues(16.dp)) {
+                    Text("GOT A PROGRAM FROM SOMEONE?", style = T.H3, color = C.Hi)
+                    Text("Scan the QR code a coach or friend shared, or pick a screenshot of it.", style = T.Small, color = C.Mid)
+                    Gap(12.dp)
+                    PrimaryButton("Scan a program", { scanning = true }, height = 46.dp, icon = Icons.Rounded.QrCodeScanner)
+                }
+                Gap(6.dp)
+                SectionTitle("Your programs")
+            }
             items(programs, key = { it.id }) { p ->
                 val inUse = p.id == activeId
                 Panel(accent = inUse, border = if (inUse) C.Volt.copy(alpha = 0.45f) else C.Line, onClick = { nav.go("program/${p.id}") }, padding = PaddingValues(16.dp)) {
@@ -124,8 +139,12 @@ fun ProgramsScreen(nav: Nav) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (!inUse) SecondaryButton("Use", { scope.launch { repo.activateProgram(p.id) } }, Modifier.weight(1f), height = 42.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f), hPad = 6.dp)
                         SecondaryButton("Edit", { nav.go("program/${p.id}") }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp)
-                        SecondaryButton("Copy", { scope.launch { repo.duplicateProgram(p.id) } }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp)
-                        if (!inUse) SecondaryButton("Delete", { deleting = p }, Modifier.weight(1f), height = 42.dp, color = C.Red, border = C.Red.copy(alpha = 0.4f), hPad = 6.dp)
+                        SecondaryButton("Share", { sharing = p }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp, icon = Icons.Rounded.QrCode2)
+                    }
+                    Gap(4.dp)
+                    Row {
+                        TextAction("Make a copy", { scope.launch { repo.duplicateProgram(p.id) } }, color = C.Mid, style = T.Small)
+                        if (!inUse) TextAction("Delete", { deleting = p }, color = C.Red, style = T.Small)
                     }
                 }
                 Gap(10.dp)
@@ -183,6 +202,19 @@ fun ProgramsScreen(nav: Nav) {
                 addTemplate = null
                 scope.launch { repo.createFromTemplate(t.id) }
             }, color = C.Mid, style = T.Small)
+        }
+    }
+    sharing?.let { p -> com.forge.app.ui.share.ShareProgramDialog(p) { sharing = null } }
+    if (scanning) {
+        com.forge.app.ui.share.ScanProgramDialog(onDismiss = { scanning = false }) { shared -> scanning = false; received = shared }
+    }
+    received?.let { shared ->
+        com.forge.app.ui.share.ImportProgramDialog(shared, onDismiss = { received = null }) { use ->
+            received = null
+            scope.launch {
+                val id = repo.importProgram(shared)
+                if (use) repo.activateProgram(id)
+            }
         }
     }
     deleting?.let { p ->

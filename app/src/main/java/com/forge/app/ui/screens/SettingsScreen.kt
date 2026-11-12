@@ -363,9 +363,22 @@ fun SettingsScreen(nav: Nav) {
                     }
                     Gap(10.dp)
                 }
-                SecondaryButton("Source code", {
-                    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/${com.forge.app.update.Updater.repo}"))) }
-                }, Modifier.fillMaxWidth(), height = 46.dp)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    SecondaryButton("Share Forge", {
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Forge: a training and nutrition app for Android that holds you to your plan. Free for personal use.\n" +
+                                    "Download: ${com.forge.app.Credits.DOWNLOAD_PAGE}",
+                            )
+                        }
+                        runCatching { ctx.startActivity(Intent.createChooser(send, "Share Forge")) }
+                    }, Modifier.weight(1f), height = 46.dp, hPad = 6.dp)
+                    SecondaryButton("Source code", {
+                        runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/${com.forge.app.update.Updater.repo}"))) }
+                    }, Modifier.weight(1f), height = 46.dp, hPad = 6.dp)
+                }
                 com.forge.app.ui.components.Details("Sources and license") {
                     Text(
                         "Ships with a 4-day home muscle program and a lean-bulk nutrition plan; their sets, reps and targets are used as written. " +

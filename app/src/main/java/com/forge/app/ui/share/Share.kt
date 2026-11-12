@@ -101,7 +101,7 @@ fun ShareIcon(onClick: () -> Unit) = IconBtn(Icons.Rounded.Share, "Share", onCli
 // ------------------------------------------------------------------ dialog
 
 @Composable
-private fun ShareDialog(name: String, onDismiss: () -> Unit, card: @Composable () -> Unit) {
+internal fun ShareDialog(name: String, onDismiss: () -> Unit, card: @Composable () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val layer = rememberGraphicsLayer()
@@ -182,7 +182,7 @@ private val cardDate = DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.ENGL
 
 /** Shared layout of every card: brand, title, optional badge, content, a line, the credit. */
 @Composable
-private fun CardFrame(
+internal fun CardFrame(
     date: LocalDate,
     eyebrow: String,
     title: String,

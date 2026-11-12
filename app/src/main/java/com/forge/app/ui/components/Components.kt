@@ -278,7 +278,7 @@ fun PrimaryButton(
             Icon(icon, null, tint = if (enabled) textColor else C.Lo, modifier = Modifier.size(20.dp))
             HGap(8.dp)
         }
-        Text(text.uppercase(), style = T.Button, color = if (enabled) textColor else C.Lo)
+        Text(text.uppercase(), style = T.Button, color = if (enabled) textColor else C.Lo, maxLines = 1, softWrap = false)
     }
 }
 
@@ -308,6 +308,19 @@ fun SecondaryButton(
             HGap(8.dp)
         }
         Text(text.uppercase(), style = T.Button.copy(fontSize = T.Button.fontSize * 0.9f), color = color, maxLines = 1)
+    }
+}
+
+/** Square icon button that sits in a row of 48dp buttons, e.g. the scanner next to Add food. */
+@Composable
+fun IconSquareButton(icon: ImageVector, desc: String, onClick: () -> Unit, modifier: Modifier = Modifier, size: Dp = 48.dp) {
+    Box(
+        modifier.size(size).clip(RoundedCornerShape(16.dp))
+            .border(1.dp, C.Volt.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+            .pressScale(onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = desc, tint = C.Volt, modifier = Modifier.size(22.dp))
     }
 }
 

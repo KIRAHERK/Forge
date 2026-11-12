@@ -96,6 +96,8 @@ import java.time.LocalDate
 object UiEvents {
     val weighRequest = mutableStateOf(false)
     val addFoodRequest = mutableStateOf(false)
+    /** Open Add food straight on the barcode/label scanner. */
+    val scanFoodRequest = mutableStateOf(false)
     /** A full-screen moment is showing; hold other reveals until it's gone. */
     val overlayOpen = mutableStateOf(false)
 }

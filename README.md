@@ -23,11 +23,21 @@ Share your progress, a day of eating or a workout as a ready-to-post image:
   <img src="docs/screenshots/card-workout.png" width="32%" alt="Workout share card">
 </p>
 
-## Install
+## Download
 
-1. Download `Forge-x.y.z.apk` from the [latest release](../../releases/latest) on your phone.
-2. Open it and allow installs from your browser or file manager when Android asks.
+<p>
+  <a href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk"><b>Download Forge for Android</b></a> (always the newest version) · <a href="https://kiraherk.github.io/Forge/">download page</a>
+</p>
+
+<img src="docs/download-qr.png" width="140" alt="QR code that downloads Forge">
+
+On a computer? Scan the code with your phone.
+
+1. Tap the download link on your phone. Forge isn't on the Play Store, so it downloads as a file.
+2. Open it and allow installs from your browser or file manager when Android asks. It only asks once.
 3. After that the app updates itself: **Settings → Updates**, or the daily "new version" notification. Updates install over the existing app, so your data stays.
+
+Android 8.0 or newer.
 
 Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) works with this repo too.
 
@@ -36,7 +46,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | | |
 |---|---|
 | **Today** | Today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
-| **Programs** | Six ready-made programs (the original 4-day home program, full body, upper/lower, push/pull/legs, dumbbell-only, bodyweight-only) or build your own: pick training days, add exercises from 85 gym and home exercises, set sets and reps (or seconds), reorder, and add your own exercises. Keep several programs and switch any time; your history stays. |
+| **Programs** | Six ready-made programs (the original 4-day home program, full body, upper/lower, push/pull/legs, dumbbell-only, bodyweight-only) or build your own: pick training days, add exercises from 85 gym and home exercises, set sets and reps (or seconds), reorder, and add your own exercises. Keep several programs and switch any time; your history stays. Share a program as a QR code: others scan it with the camera or from a screenshot. |
 | **Train** | The active program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |
 | **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. |
