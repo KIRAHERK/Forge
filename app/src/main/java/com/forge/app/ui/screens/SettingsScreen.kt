@@ -393,7 +393,7 @@ fun SettingsScreen(nav: Nav) {
                         row.forEach { (label, url) ->
                             SecondaryButton(label, {
                                 runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-                            }, Modifier.weight(1f), height = 46.dp)
+                            }, Modifier.weight(1f), height = 46.dp, hPad = 4.dp)
                         }
                     }
                     Gap(10.dp)

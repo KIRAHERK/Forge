@@ -284,6 +284,8 @@ private fun HeroCard(
     onTrain: () -> Unit,
 ) {
     val today = now.toLocalDate()
+    var sharing by remember { mutableStateOf(false) }
+    if (sharing && todaySession != null) com.forge.app.ui.share.ShareWorkoutDialog(todaySession.id) { sharing = false }
     val next = (1..7).map { today.plusDays(it.toLong()) }.firstOrNull { s.isTraining(it) }
     val nextText = next?.let { "Next: ${s.dayFor(it)?.title} · ${Fmt.dow(it)}" }
 
@@ -311,10 +313,11 @@ private fun HeroCard(
                         Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.size(22.dp))
                     }
                     HGap(12.dp)
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Eyebrow("Today · done", color = C.Volt)
                         Text((day?.title ?: todaySession?.let { Program.day(it.dayId)?.title } ?: "Session").uppercase(), style = T.H2, color = C.Hi)
                     }
+                    if (todaySession != null) com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 todaySession?.let { ts ->
                     Gap(16.dp)

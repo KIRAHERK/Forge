@@ -232,6 +232,7 @@ private fun DayCard(day: WorkoutDay, onExercise: (String) -> Unit, onStart: () -
 @Composable
 fun SessionRow(ses: SessionEntity) {
     val day = Program.day(ses.dayId)
+    var sharing by remember { mutableStateOf(false) }
     Panel(padding = PaddingValues(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -245,8 +246,11 @@ fun SessionRow(ses: SessionEntity) {
             if (ses.makeUp) { Tag("Make-up", color = C.Amber, bg = C.AmberSoft); HGap(6.dp) }
             if (ses.prs > 0) { Tag("${ses.prs} PR", color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
             Text("+${ses.xp}", style = T.Num.copy(fontSize = T.Num.fontSize * 0.8f), color = C.Volt)
+            HGap(2.dp)
+            com.forge.app.ui.share.ShareIcon { sharing = true }
         }
     }
+    if (sharing) com.forge.app.ui.share.ShareWorkoutDialog(ses.id) { sharing = false }
 }
 
 @Composable
