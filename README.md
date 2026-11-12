@@ -1,5 +1,7 @@
 # Forge
 
+**Designed and developed by Hussein Al Herk.**
+
 A training and nutrition app for Android that holds you to your plan: reminders, deadlines, and real consequences for skipping.
 
 It ships with a 4-day home muscle program and a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
@@ -71,7 +73,13 @@ JDK 17 and the Android SDK (platform 35).
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-Releases are built and signed by GitHub Actions when a `v*` tag is pushed. See [RELEASING.md](RELEASING.md). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+Releases are built and signed by GitHub Actions when a `v*` tag is pushed, or from **Actions → Release → Run workflow**. See [RELEASING.md](RELEASING.md). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## About the developer
+
+Forge is designed, built and maintained by **Hussein Al Herk**.
+
+- GitHub: [@KIRAHERK](https://github.com/KIRAHERK)
 
 ## Credits
 
@@ -79,4 +87,4 @@ Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Stren
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). Copyright (c) 2026 Hussein Al Herk. If you reuse the code, keep the copyright notice.
