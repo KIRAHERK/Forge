@@ -55,6 +55,7 @@ import com.forge.app.data.HabitLog
 import com.forge.app.data.PenaltyEntity
 import com.forge.app.data.SessionEntity
 import com.forge.app.data.Settings
+import com.forge.app.data.SickCheck
 import com.forge.app.data.Stats
 import com.forge.app.domain.Lines
 import com.forge.app.domain.PenaltyKind
@@ -135,6 +136,8 @@ fun TodayScreen(nav: Nav) {
 
     var showWeigh by remember { mutableStateOf(false) }
     var habitDialog by remember { mutableStateOf<HabitDef?>(null) }
+    var sickAsk by remember { mutableStateOf<LocalDate?>(null) }
+    fun sickCheck(date: LocalDate) = Stats.canMarkSick(s, date, today, done)
 
 
     fun start(dayId: String, date: LocalDate, makeUp: Boolean) {
@@ -163,6 +166,7 @@ fun TodayScreen(nav: Nav) {
             val seed = today.toEpochDay()
             val line = when {
                 activePenalties.isNotEmpty() -> Lines.missed(seed)
+                status == DayStatus.SICK -> "Sick day. Rest, eat, drink water. Back at it when you're well."
                 status == DayStatus.DONE -> Lines.done(seed)
                 status == DayStatus.PENDING && day != null -> Lines.preWorkout(seed, day.name)
                 now.hour >= 18 && macros.protein < s.protein * 0.7 -> Lines.proteinLow(seed, (s.protein - macros.protein).roundToInt())
@@ -189,7 +193,10 @@ fun TodayScreen(nav: Nav) {
         items(makeUps.filter { it != today || status == DayStatus.MAKEUP_OPEN }, key = { "mk$it" }) { date ->
             val d = s.dayFor(date) ?: return@items
             if (active == null) {
-                MakeUpCard(d, date, now, s) { start(d.id, date, true) }
+                MakeUpCard(
+                    d, date, now, s, onStart = { start(d.id, date, true) },
+                    sick = sickCheck(date), onSick = { sickAsk = date },
+                )
                 Gap(12.dp)
             }
         }
@@ -204,6 +211,9 @@ fun TodayScreen(nav: Nav) {
                 onStart = { if (day != null) start(day.id, today, false) },
                 onResume = { active?.let { nav.workout(it.id) } },
                 onTrain = { nav.tab("train") },
+                sick = sickCheck(today),
+                onSick = { sickAsk = today },
+                onUndoSick = { scope.launch { repo.setSick(today, false) } },
             )
             Gap(12.dp)
         }
@@ -263,6 +273,26 @@ fun TodayScreen(nav: Nav) {
             onSave = { d, kg -> scope.launch { repo.logWeight(d, kg) }; showWeigh = false },
         )
     }
+    sickAsk?.let { date ->
+        val left = Penalties.SICK_LIMIT - s.sickDays.count { it > today.toEpochDay() - Penalties.SICK_WINDOW_DAYS && it <= today.toEpochDay() }
+        ForgeDialog(
+            title = if (date == today) "Sick today?" else "Sick yesterday?",
+            onDismiss = { sickAsk = null },
+            confirm = "Mark sick",
+            onConfirm = { sickAsk = null; scope.launch { repo.setSick(date, true) } },
+        ) {
+            Text(
+                "${s.dayFor(date)?.title ?: "The workout"} is skipped with no penalty and no XP lost. " +
+                    "Your streak pauses instead of resetting.",
+                style = T.Body, color = C.Mid,
+            )
+            Gap(10.dp)
+            Text(
+                "Use it only when you're actually sick. After this you have ${left - 1} of ${Penalties.SICK_LIMIT} left in the next ${Penalties.SICK_WINDOW_DAYS} days.",
+                style = T.Small, color = C.Lo,
+            )
+        }
+    }
     habitDialog?.let { def ->
         HabitDayDialog(def, today, habitLogs.firstOrNull { it.habitId == def.id && it.date == today.toEpochDay() }, onDismiss = { habitDialog = null })
     }
@@ -282,6 +312,9 @@ private fun HeroCard(
     onStart: () -> Unit,
     onResume: () -> Unit,
     onTrain: () -> Unit,
+    sick: SickCheck,
+    onSick: () -> Unit,
+    onUndoSick: () -> Unit,
 ) {
     val today = now.toLocalDate()
     var sharing by remember { mutableStateOf(false) }
@@ -327,6 +360,25 @@ private fun HeroCard(
                         Stat("Time", "${((ts.finishedAt ?: ts.startedAt) - ts.startedAt) / 60000}", Modifier.weight(1f), unit = "min")
                     }
                 }
+                if (nextText != null) {
+                    Gap(14.dp)
+                    Hairline()
+                    Gap(12.dp)
+                    Text(nextText, style = T.Small, color = C.Mid)
+                }
+            }
+        }
+
+        status == DayStatus.SICK -> {
+            Panel {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Eyebrow("Today · sick day", modifier = Modifier.weight(1f))
+                    TextAction("Undo", onUndoSick, color = C.Mid, style = T.Small)
+                }
+                Gap(8.dp)
+                Text("REST UP.", style = T.Display, color = C.Hi)
+                Gap(6.dp)
+                Text("${day?.title ?: "Today's workout"} is skipped. No penalty, and your streak is paused, not lost.", style = T.Body, color = C.Mid)
                 if (nextText != null) {
                     Gap(14.dp)
                     Hairline()
@@ -385,6 +437,7 @@ private fun HeroCard(
                 }
                 Gap(8.dp)
                 PrimaryButton("Start workout", onStart, icon = Icons.Rounded.PlayArrow)
+                SickRow(sick, "I'm sick today", onSick)
             }
         }
 
@@ -395,6 +448,7 @@ private fun HeroCard(
                 Text(day.name.uppercase(), style = T.Display, color = C.Hi)
                 Gap(6.dp)
                 Text("Missed at ${Fmt.time(s.deadline)}. You can still make it up.", style = T.Body, color = C.Mid)
+                SickRow(sick, "I was sick today", onSick)
             }
         }
     }
@@ -463,7 +517,7 @@ private fun PenaltyCard(p: PenaltyEntity, now: LocalDateTime, onSeen: () -> Unit
 }
 
 @Composable
-private fun MakeUpCard(day: WorkoutDay, date: LocalDate, now: LocalDateTime, s: Settings, onStart: () -> Unit) {
+private fun MakeUpCard(day: WorkoutDay, date: LocalDate, now: LocalDateTime, s: Settings, onStart: () -> Unit, sick: SickCheck, onSick: () -> Unit) {
     val closes = s.deadlineAt(date).plusHours(Penalties.MAKE_UP_HOURS)
     Panel(color = Color(0xFF1C1810), border = C.Amber.copy(alpha = 0.45f)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -476,6 +530,28 @@ private fun MakeUpCard(day: WorkoutDay, date: LocalDate, now: LocalDateTime, s: 
         Text("Missed ${Fmt.day(date)}. Restores your streak.", style = T.Small, color = C.Mid)
         Gap(14.dp)
         PrimaryButton("Make it up", onStart, color = C.Amber, height = 48.dp)
+        SickRow(sick, if (date == now.toLocalDate()) "I was sick today" else "I was sick yesterday", onSick)
+    }
+}
+
+/** The sick-day action under a workout card, or why it isn't available. */
+@Composable
+private fun SickRow(sick: SickCheck, label: String, onSick: () -> Unit) {
+    when (sick) {
+        SickCheck.Allowed -> {
+            Gap(4.dp)
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TextAction(label, onSick, color = C.Mid, style = T.Small)
+            }
+        }
+        is SickCheck.LimitReached -> {
+            Gap(8.dp)
+            Text(
+                "Sick days used: ${Penalties.SICK_LIMIT} of ${Penalties.SICK_LIMIT}. Next one frees up ${Fmt.day(sick.nextFree)}.",
+                style = T.Tiny, color = C.Lo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        SickCheck.NotAllowed -> {}
     }
 }
 

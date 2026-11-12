@@ -9,7 +9,14 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.roundToInt
 
-enum class DayStatus { BEFORE, REST, DONE, PENDING, MISSED, MAKEUP_OPEN, FUTURE }
+enum class DayStatus { BEFORE, REST, DONE, PENDING, MISSED, MAKEUP_OPEN, FUTURE, SICK }
+
+/** Whether a sick day can be marked for [date], and if not, why. */
+sealed interface SickCheck {
+    data object Allowed : SickCheck
+    data class LimitReached(val nextFree: LocalDate) : SickCheck
+    data object NotAllowed : SickCheck
+}
 
 data class CheckIn(val rate: Double, val recentAvg: Double, val priorAvg: Double, val verdict: Verdict) {
     enum class Verdict { NOT_RISING, ON_TRACK, TOO_FAST }
@@ -29,6 +36,7 @@ object Stats {
         if (date.toEpochDay() < s.trackingStart) return if (date.toEpochDay() in done) DayStatus.DONE else DayStatus.BEFORE
         if (date.toEpochDay() in done) return DayStatus.DONE
         if (!s.isTraining(date)) return DayStatus.REST
+        if (s.isSick(date)) return DayStatus.SICK
         if (date.isAfter(today)) return DayStatus.FUTURE
         val deadline = s.deadlineAt(date)
         if (now.isBefore(deadline)) return DayStatus.PENDING
@@ -45,7 +53,8 @@ object Stats {
             if (s.isTraining(d) || d.toEpochDay() in done) {
                 when (dayStatus(s, d, now, done)) {
                     DayStatus.DONE -> n++
-                    DayStatus.PENDING, DayStatus.FUTURE -> {}
+                    // A sick day pauses the streak: it neither counts nor breaks it.
+                    DayStatus.PENDING, DayStatus.FUTURE, DayStatus.SICK -> {}
                     DayStatus.BEFORE -> return n
                     else -> return n
                 }
@@ -72,6 +81,21 @@ object Stats {
             d = d.plusDays(1)
         }
         return maxOf(best, cur)
+    }
+
+    /**
+     * A sick day can be marked for today or yesterday, on a training day not already done,
+     * and only [Penalties.SICK_LIMIT] times in any [Penalties.SICK_WINDOW_DAYS] days.
+     */
+    fun canMarkSick(s: Settings, date: LocalDate, today: LocalDate, done: Set<Long>): SickCheck {
+        if (date != today && date != today.minusDays(1)) return SickCheck.NotAllowed
+        if (!s.isTraining(date) || date.toEpochDay() in done || s.isSick(date)) return SickCheck.NotAllowed
+        if (date.toEpochDay() < s.trackingStart) return SickCheck.NotAllowed
+        val window = Penalties.SICK_WINDOW_DAYS
+        val recent = s.sickDays.filter { it > date.toEpochDay() - window && it <= today.toEpochDay() }.sorted()
+        if (recent.size < Penalties.SICK_LIMIT) return SickCheck.Allowed
+        // The oldest one in the window frees up a slot once it ages out.
+        return SickCheck.LimitReached(LocalDate.ofEpochDay(recent.first() + window))
     }
 
     /** Missed sessions that can still be made up. */

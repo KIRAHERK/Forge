@@ -256,6 +256,7 @@ interface PenaltyDao {
     @Query("SELECT * FROM penalties WHERE status = 'ACTIVE' ORDER BY dueAt") suspend fun activeNow(): List<PenaltyEntity>
     @Query("SELECT * FROM penalties WHERE id = :id") suspend fun get(id: Long): PenaltyEntity?
     @Query("SELECT * FROM penalties WHERE `key` = :key") suspend fun byKey(key: String): PenaltyEntity?
+    @Query("DELETE FROM penalties WHERE id = :id") suspend fun delete(id: Long)
 }
 
 @Dao

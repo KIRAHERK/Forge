@@ -71,7 +71,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 postWeighIn(ctx, "Still no weigh-in today", "Haven't eaten yet? Weigh in now. Already eaten? Skip today and do it first thing tomorrow.")
             }
 
-            Rem.WORKOUT, Rem.NUDGE, Rem.FINAL -> if (s.isTraining(today) && !doneToday && day != null) {
+            Rem.WORKOUT, Rem.NUDGE, Rem.FINAL -> if (s.isTraining(today) && !s.isSick(today) && !doneToday && day != null) {
                 val left = Fmt.left(now, s.deadlineAt(today))
                 val (title, text) = when (r) {
                     Rem.WORKOUT -> day.title to Lines.reminder("${day.exercises.size} exercises, ${day.totalSets} sets, about ${day.estMinutes} min.", Fmt.time(s.deadline))

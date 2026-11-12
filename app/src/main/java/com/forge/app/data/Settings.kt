@@ -57,6 +57,9 @@ data class Settings(
     val lastCheckInAck: Long = -1,
     val lastSeenLevel: Int = 1,
 
+    /** Training days marked as sick (epoch days): no penalty, no XP lost, streak paused. */
+    val sickDays: List<Long> = emptyList(),
+
     /** Free-text notes from your own plan (e.g. a doctor's limit). Kept on the phone, never in the code. */
     val planNote: String = "",
 
@@ -68,6 +71,7 @@ data class Settings(
 ) {
     fun slotFor(date: LocalDate): String = schedule.getOrElse(date.dayOfWeek.value - 1) { Program.REST }
     fun isTraining(date: LocalDate) = slotFor(date) != Program.REST
+    fun isSick(date: LocalDate) = date.toEpochDay() in sickDays
     fun dayFor(date: LocalDate) = Program.day(slotFor(date))
 
     fun deadlineAt(date: LocalDate): LocalDateTime = date.atTime(LocalTime.of(deadline / 60, deadline % 60))

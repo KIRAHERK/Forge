@@ -56,6 +56,10 @@ data class PenaltyTask(val amount: Int, val unit: String, val what: String) {
 }
 
 object Penalties {
+    /** Sick days: at most this many in any rolling window of [SICK_WINDOW_DAYS]. */
+    const val SICK_LIMIT = 3
+    const val SICK_WINDOW_DAYS = 30L
+
     /** Missed workout — heavier. */
     private val heavy = listOf(
         PenaltyTask(100, "", "push-ups, any number of sets"),

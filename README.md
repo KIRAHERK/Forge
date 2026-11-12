@@ -49,6 +49,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 - Miss the daily deadline on a training day: the streak resets, you lose XP, and a random penalty lands (e.g. 100 push-ups) that's due in 24 hours.
 - Ignore the penalty and it doubles. Ignore it again and it's recorded as failed.
 - Make the session up within 48 hours to restore the streak. The penalty still stands.
+- Actually sick? Tap **I'm sick today** (or mark yesterday) to skip with no penalty and no XP lost. The streak pauses instead of resetting. Up to 3 sick days in any 30.
 - Optional penalty jar: a money amount you owe yourself for every miss or slip.
 
 ## Your data
