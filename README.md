@@ -100,4 +100,9 @@ Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Stren
 
 ## License
 
-[MIT](LICENSE). Copyright (c) 2026 Hussein Al Herk. If you reuse the code, keep the copyright notice.
+Source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). Copyright (c) 2026 Hussein Al Herk.
+
+- **Free for personal use.** Download it, use it, read the code, change it for yourself.
+- **Commercial use needs a license.** Selling Forge, rebranding it, or running it for a gym, coaching business or any other company requires a commercial license. Gyms and coaches who want Forge with their own brand and programs: get in touch via [LinkedIn](https://www.linkedin.com/in/husseinalherk) or [kiraherk.github.io](https://kiraherk.github.io).
+
+Versions up to and including 1.7.0 were released under the MIT license and stay under it.
