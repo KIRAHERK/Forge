@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FitnessCenter
@@ -142,6 +144,7 @@ fun AppRoot(routeRequest: MutableState<String?>) {
     val s = settings
 
     Box(Modifier.fillMaxSize().background(C.Bg)) {
+        com.forge.app.ui.components.Glow(Modifier.fillMaxSize())
         when {
             s == null -> {}
             !s.onboarded -> OnboardingScreen()
@@ -225,7 +228,13 @@ private fun MainShell(s: Settings, routeRequest: MutableState<String?>) {
         }
 
         // Solid strip behind the status bar so scrolled content never runs under the clock.
-        Box(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(C.Bg))
+        // It repeats the top of the glow so the strip doesn't show as a band.
+        Box(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(C.Bg).clipToBounds()) {
+            com.forge.app.ui.components.Glow(
+                Modifier.fillMaxWidth().wrapContentHeight(Alignment.Top, unbounded = true)
+                    .height(androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp),
+            )
+        }
 
         if (current in tabs.map { it.first }) {
             BottomBar(current ?: "today", Modifier.align(Alignment.BottomCenter)) { nav.tab(it) }

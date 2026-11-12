@@ -7,12 +7,17 @@ A training and nutrition app for Android that holds you to your plan: reminders,
 It ships with a 4-day home muscle program and a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
 
 <p>
-  <img src="docs/screenshots/today.png" width="19%" alt="Today">
-  <img src="docs/screenshots/workout.png" width="19%" alt="Workout">
-  <img src="docs/screenshots/fuel.png" width="19%" alt="Fuel">
-  <img src="docs/screenshots/habits.png" width="19%" alt="Habits">
-  <img src="docs/screenshots/weight.png" width="19%" alt="Weight">
+  <img src="docs/screenshots/today.png" width="16%" alt="Today">
+  <img src="docs/screenshots/workout.png" width="16%" alt="Workout">
+  <img src="docs/screenshots/fuel.png" width="16%" alt="Fuel">
+  <img src="docs/screenshots/progress.png" width="16%" alt="Progress">
+  <img src="docs/screenshots/habits.png" width="16%" alt="Habits">
+  <img src="docs/screenshots/weight.png" width="16%" alt="Weight">
 </p>
+
+Share your progress, a day of eating or a workout as a ready-to-post image:
+
+<p><img src="docs/screenshots/share-cards.png" width="100%" alt="Share cards for progress, fuel and a workout"></p>
 
 ## Install
 
@@ -27,12 +32,13 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | | |
 |---|---|
 | **Today** | Today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
-| **Train** | The program, form guides for every exercise (setup, cues, common mistakes), session history. |
+| **Train** | The program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |
-| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans, "what to eat next" suggestions. |
-| **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, an urge timer for quit habits, penalty record. Starts empty. |
-| **Progress** | 7-day average weight, kg per week vs target, ETA, 2-week check-in, progress photos (stored privately), body measurements, 12-week tracker, levels, lifts. |
-| **Weight** | Morning weigh-ins with a type-in reminder notification, streak, weekly averages, editable history. |
+| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. |
+| **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, the last 4 weeks of each habit at a glance, an urge timer for quit habits, penalty record. Starts empty. |
+| **Progress** | 7-day average weight with a 1M / 3M / 1Y / All chart, kg per week vs target, ETA, 2-week check-in, workouts and training volume for the last 8 weeks, levels, lifts, progress photos (stored privately) and body measurements. |
+| **Weight** | Morning weigh-ins with a type-in reminder notification, streak, 30-day change, lowest and highest, weekly averages, editable history. |
+| **Share** | A share button on Progress, Fuel and every workout turns it into a 1080 × 1350 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
 
 ### Consequences
 

@@ -69,7 +69,7 @@ fun UpdateScreen(nav: Nav) {
     }
     val canInstall = remember(refresh) { Updater.canInstall(ctx) }
 
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar("Updates", "By ${com.forge.app.Credits.AUTHOR} · github.com/${Updater.repo}", onBack = { nav.back() })
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             Gap(6.dp)

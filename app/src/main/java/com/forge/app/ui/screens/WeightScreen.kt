@@ -142,11 +142,11 @@ fun WeightScreen(nav: Nav) {
 
     fun upd(t: (Settings) -> Settings) { scope.launch { Graph.settings.update(t); Scheduler.rescheduleAll(ctx) } }
 
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar("Weight", "Morning weigh-ins · ${s.startWeight.toInt()} → ${s.goalWeight.toInt()} kg", onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
             item {
-                Panel(border = if (todayEntry == null) C.Volt.copy(alpha = 0.45f) else C.Line) {
+                Panel(border = if (todayEntry == null) C.Volt.copy(alpha = 0.45f) else C.Line, accent = true) {
                     Row(verticalAlignment = Alignment.Bottom) {
                         Column(Modifier.weight(1f)) {
                             Eyebrow(if (todayEntry == null) "Today · not logged" else "Today", color = if (todayEntry == null) C.Volt else C.Mid)

@@ -291,7 +291,7 @@ private fun HeroCard(
 
     if (active != null) {
         val activeDay = Program.day(active.dayId)
-        Panel(border = C.Volt.copy(alpha = 0.5f)) {
+        Panel(border = C.Volt.copy(alpha = 0.5f), accent = true) {
             Eyebrow(if (active.makeUp) "Make-up in progress" else "In progress", color = C.Volt)
             Gap(8.dp)
             Text(activeDay?.name?.uppercase() ?: "", style = T.Display, color = C.Hi)
@@ -307,7 +307,7 @@ private fun HeroCard(
 
     when {
         status == DayStatus.DONE -> {
-            Panel(border = C.Volt.copy(alpha = 0.45f)) {
+            Panel(border = C.Volt.copy(alpha = 0.45f), accent = true) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(C.Volt), contentAlignment = Alignment.Center) {
                         Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.size(22.dp))
@@ -337,7 +337,7 @@ private fun HeroCard(
         }
 
         day == null -> {
-            Panel {
+            Panel(accent = true) {
                 Eyebrow("Today")
                 Gap(8.dp)
                 Text("REST DAY", style = T.Display, color = C.Hi)
@@ -361,7 +361,7 @@ private fun HeroCard(
                 minsLeft <= 120 -> C.Amber
                 else -> C.Volt
             }
-            Panel {
+            Panel(accent = true) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Eyebrow("Today · Day ${day.number}", modifier = Modifier.weight(1f))
                     Tag("Due ${Fmt.time(s.deadline)}", color = urgency, bg = urgency.copy(alpha = 0.14f))

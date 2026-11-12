@@ -172,7 +172,7 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
         }
     }
 
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar(
             title = day.title,
             subtitle = (if (ses.makeUp) "Make-up · " else "") + Fmt.clock(elapsedSec) + " elapsed",
@@ -425,7 +425,7 @@ fun SummaryScreen(nav: Nav, sessionId: Long) {
     BackHandler { nav.tab("today") }
 
     Column(
-        Modifier.fillMaxSize().background(C.Bg).verticalScroll(rememberScrollState())
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .statusBarsPadding().navigationBarsPadding().padding(horizontal = 24.dp),
     ) {
         Gap(36.dp)

@@ -156,7 +156,7 @@ fun FuelScreen(nav: Nav) {
         }
 
         item {
-            Panel {
+            Panel(accent = true) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
                         Eyebrow("Calories")
@@ -570,7 +570,7 @@ private fun QuickAdd(onAdd: (String, Macros, Boolean) -> Unit) {
 @Composable
 fun RecipesScreen(nav: Nav) {
     var filter by remember { mutableStateOf<String?>(null) }
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar("Recipes", "Budget, high-protein, from your plan's food list", onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
             item {
@@ -657,7 +657,7 @@ fun RecipeScreen(nav: Nav, id: String) {
     val checked = remember { mutableStateListOf<Int>() }
     var logged by remember { mutableIntStateOf(0) }
 
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar(r.name, "${r.type.label} · ${r.minutes} min", onBack = { nav.back() })
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)) {
             Gap(6.dp)
@@ -730,7 +730,7 @@ fun PlanScreen(nav: Nav, id: String) {
     val scope = rememberCoroutineScope()
     val loggedIds = remember { mutableStateListOf<String>() }
     val t = p.total
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar(p.name, p.note, onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
             item {
