@@ -57,7 +57,7 @@ object Scheduler {
             val d = now.toLocalDate().plusDays(i.toLong())
             if (d.toEpochDay() < s.trackingStart) continue
             val t = atMinutes(d, minutes)
-            if (t.isAfter(now) && s.isTraining(d)) return t
+            if (t.isAfter(now) && s.isTraining(d) && !s.isSick(d)) return t
         }
         return null
     }

@@ -81,6 +81,7 @@ class ForgeWidget : GlanceAppWidget() {
         val (status, color) = when {
             !s.onboarded -> "Open the app to set up" to 0
             st == DayStatus.DONE -> "Done. Recover and eat." to 1
+            st == DayStatus.SICK -> "Sick day. Rest up." to 0
             day == null -> Program.REST_NOTE to 0
             st == DayStatus.PENDING -> "Due ${Fmt.time(s.deadline)} · ${Fmt.left(now, s.deadlineAt(today))} left" to 1
             else -> "Missed. Penalty active." to 2

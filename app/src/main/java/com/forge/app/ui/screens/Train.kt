@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Sick
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -183,6 +185,7 @@ fun WeekStrip(weekStart: LocalDate, today: LocalDate, info: (LocalDate) -> Pair<
             val (bg, fg, border) = when (st) {
                 DayStatus.DONE -> Triple(C.Volt, C.OnVolt, C.Volt)
                 DayStatus.MISSED, DayStatus.MAKEUP_OPEN -> Triple(C.RedSoft, C.Red, C.Red.copy(alpha = 0.6f))
+                DayStatus.SICK -> Triple(C.S3, C.Mid, if (isToday) C.Hi else C.LineStrong)
                 else -> Triple(C.S1, if (slot == Program.REST) C.Lo else C.Hi, if (isToday) C.Hi else C.Line)
             }
             Column(
@@ -192,10 +195,14 @@ fun WeekStrip(weekStart: LocalDate, today: LocalDate, info: (LocalDate) -> Pair<
             ) {
                 Text(Fmt.dowLetter(d), style = T.Tiny, color = if (st == DayStatus.DONE) C.OnVolt else C.Mid)
                 Gap(4.dp)
-                Text(
-                    if (slot == Program.REST) "–" else slot.removePrefix("D"),
-                    style = T.Num.copy(fontSize = T.Num.fontSize * 0.9f), color = fg, textAlign = TextAlign.Center,
-                )
+                if (st == DayStatus.SICK) {
+                    Icon(Icons.Rounded.Sick, "Sick day", tint = fg, modifier = Modifier.padding(vertical = 2.dp).size(20.dp))
+                } else {
+                    Text(
+                        if (slot == Program.REST) "–" else slot.removePrefix("D"),
+                        style = T.Num.copy(fontSize = T.Num.fontSize * 0.9f), color = fg, textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }

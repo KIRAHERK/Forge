@@ -350,6 +350,31 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
     }
 
     /** Undo for a mis-tap: only removes a penalty nobody has acted on yet. */
+    /**
+     * Marks or unmarks a training day as sick. Marking cancels that day's missed-workout
+     * penalty (if it is still active) and gives the lost XP back. Unmarking removes the
+     * cancelled penalty so evaluation can issue the miss again if the deadline has passed.
+     */
+    suspend fun setSick(date: LocalDate, sick: Boolean) {
+        val d = date.toEpochDay()
+        val keepFrom = LocalDate.now().minusDays(400).toEpochDay()
+        settings.update { s ->
+            val days = if (sick) s.sickDays + d else s.sickDays - d
+            s.copy(sickDays = days.distinct().filter { it >= keepFrom }.sorted())
+        }
+        val key = "miss:$d"
+        if (sick) {
+            db.xp().deleteKey(key)
+            db.penalties().byKey(key)?.let { p ->
+                if (p.status == "ACTIVE") db.penalties().update(p.copy(status = "VOID", jarAmount = 0))
+            }
+        } else {
+            db.penalties().byKey(key)?.takeIf { it.status == "VOID" }?.let { db.penalties().delete(it.id) }
+            evaluate()
+        }
+        onChanged()
+    }
+
     private suspend fun dropPenaltyIfActive(key: String) {
         val p = db.penalties().byKey(key) ?: return
         if (p.status == "ACTIVE" && !p.escalated) {
@@ -398,7 +423,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         val newMisses = mutableListOf<PenaltyEntity>()
         for (d in from..today.toEpochDay()) {
             val date = LocalDate.ofEpochDay(d)
-            if (!s.isTraining(date) || d in done || d in inProgress) continue
+            if (!s.isTraining(date) || s.isSick(date) || d in done || d in inProgress) continue
             if (now.isBefore(s.deadlineAt(date))) continue
             val day = s.dayFor(date) ?: continue
             val key = "miss:$d"

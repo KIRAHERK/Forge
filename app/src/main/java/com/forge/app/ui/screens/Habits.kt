@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Sick
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -88,7 +89,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-private enum class Cell { HIT, MISS, REST, OPEN, UNKNOWN, BLANK }
+private enum class Cell { HIT, MISS, REST, OPEN, UNKNOWN, BLANK, SICK }
 
 @Composable
 fun HabitsScreen(nav: Nav) {
@@ -194,6 +195,7 @@ fun HabitsScreen(nav: Nav) {
                         DayStatus.DONE -> Cell.HIT
                         DayStatus.MISSED, DayStatus.MAKEUP_OPEN -> Cell.MISS
                         DayStatus.REST -> Cell.REST
+                        DayStatus.SICK -> Cell.SICK
                         DayStatus.PENDING, DayStatus.FUTURE -> Cell.OPEN
                         DayStatus.BEFORE -> Cell.BLANK
                     } to null
@@ -335,6 +337,7 @@ private fun HabitCell(c: Cell, text: String?, onClick: (() -> Unit)?) {
         Cell.MISS -> base.background(C.RedSoft).border(1.dp, C.Red.copy(alpha = 0.6f), shape)
         Cell.OPEN -> base.border(1.dp, C.LineStrong, shape)
         Cell.UNKNOWN -> base.border(1.dp, C.Line, shape)
+        Cell.SICK -> base.background(C.S3)
         Cell.REST, Cell.BLANK -> base
     }
     Box((if (onClick != null) m.clickable(onClick = onClick) else m), contentAlignment = Alignment.Center) {
@@ -342,6 +345,7 @@ private fun HabitCell(c: Cell, text: String?, onClick: (() -> Unit)?) {
             Cell.HIT -> Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.size(16.dp))
             Cell.MISS -> if (text != null) Text(text, style = T.Tiny.copy(fontSize = 12.sp), color = C.Red) else Icon(Icons.Rounded.Close, null, tint = C.Red, modifier = Modifier.size(14.dp))
             Cell.REST -> Text("–", style = T.Small, color = C.Lo)
+            Cell.SICK -> Icon(Icons.Rounded.Sick, "Sick day", tint = C.Mid, modifier = Modifier.size(16.dp))
             Cell.UNKNOWN -> Text("?", style = T.Tiny, color = C.Lo)
             else -> {}
         }
