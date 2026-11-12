@@ -18,6 +18,10 @@ import com.forge.app.R
 // misses, slips and penalties. Everything else is neutral.
 object C {
     val Bg = Color(0xFF0B0B0D)
+    /** Top of the background wash and the share cards. */
+    val BgTop = Color(0xFF15170E)
+    /** Top corner of accent panels. */
+    val AccentTop = Color(0xFF20251A)
     val S1 = Color(0xFF141417)
     val S2 = Color(0xFF1B1B1F)
     val S3 = Color(0xFF26262B)

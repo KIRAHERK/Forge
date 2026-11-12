@@ -173,7 +173,7 @@ fun SettingsScreen(nav: Nav) {
         }
     }
 
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar("Settings", onBack = { nav.back() })
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
 

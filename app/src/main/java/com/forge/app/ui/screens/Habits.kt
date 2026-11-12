@@ -153,7 +153,7 @@ fun HabitsScreen(nav: Nav) {
         }
 
         item {
-            Panel {
+            Panel(accent = true) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val col = when { score.score >= 80 -> C.Volt; score.score >= 55 -> C.Hi; else -> C.Red }
                     Ring(score.score / 100f, size = 112.dp, stroke = 9.dp, color = col) {
@@ -571,7 +571,7 @@ fun UrgeScreen(nav: Nav) {
         "Go outside, call someone, or keep your hands busy until the timer ends.",
     )
 
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar("Urge timer", "Wait it out. It passes.", onBack = { nav.back() })
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp),

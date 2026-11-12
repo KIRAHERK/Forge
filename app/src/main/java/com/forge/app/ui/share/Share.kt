@@ -191,7 +191,7 @@ private fun CardFrame(
 ) {
     Box(Modifier.size(360.dp, 450.dp).background(C.Bg)) {
         Canvas(Modifier.fillMaxSize()) {
-            drawRect(Brush.verticalGradient(listOf(Color(0xFF17190F), C.Bg), endY = size.height * 0.6f))
+            drawRect(Brush.verticalGradient(listOf(C.BgTop, C.Bg), endY = size.height * 0.6f))
             drawCircle(
                 Brush.radialGradient(
                     listOf(C.Volt.copy(alpha = if (badge != null) 0.22f else 0.10f), Color.Transparent),
@@ -407,10 +407,10 @@ fun ShareProgressDialog(onDismiss: () -> Unit) {
             LineChart(
                 weights.filter { it.date >= from }.map { it.date to it.kg },
                 avg.filter { it.first >= from },
-                goal = s.goalWeight, height = 110.dp,
+                goal = s.goalWeight, height = 84.dp,
                 empty = "Log a few mornings to see the trend.",
             )
-            Gap(12.dp)
+            Gap(10.dp)
             Row {
                 Text("Start ${Fmt.kg(s.startWeight)} kg", style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
                 Text("Goal ${Fmt.kg(s.goalWeight)} kg", style = T.Tiny, color = C.Volt)

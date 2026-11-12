@@ -100,7 +100,7 @@ fun ProgressScreen(nav: Nav) {
 
         // ---------------- weight
         item {
-            Panel {
+            Panel(accent = true) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
                         Eyebrow("7-day average")
@@ -177,48 +177,6 @@ fun ProgressScreen(nav: Nav) {
                 )
                 Gap(12.dp)
             }
-        }
-
-        // ---------------- 12-week tracker
-        item {
-            val week = s.programWeek(today)
-            Panel {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Eyebrow("12-week progress tracker")
-                        Gap(2.dp)
-                        Text("Week ${week.coerceAtMost(Program.WEEKS)} of ${Program.WEEKS}", style = T.H3, color = C.Hi)
-                    }
-                    val total = (1..Program.WEEKS).sumOf { w -> weekCount(finished.map { it.date }, s.programStart, w) }
-                    Text("$total / ${Program.WEEKS * Program.WORKOUTS_PER_WEEK}", style = T.Num, color = C.Volt)
-                }
-                Gap(14.dp)
-                Row(Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-                    Text("", modifier = Modifier.width(44.dp))
-                    (1..4).forEach { Text("WORKOUT $it", style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 1) }
-                }
-                (1..Program.WEEKS).forEach { w ->
-                    val count = weekCount(finished.map { it.date }, s.programStart, w)
-                    val isCur = w == week
-                    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("WEEK $w", style = T.Tiny, color = if (isCur) C.Volt else if (w < week) C.Mid else C.Lo, modifier = Modifier.width(44.dp))
-                        (0 until 4).forEach { k ->
-                            Box(Modifier.weight(1f).padding(horizontal = 4.dp)) {
-                                val filled = k < count
-                                Box(
-                                    Modifier.fillMaxWidth().height(20.dp).clip(RoundedCornerShape(6.dp))
-                                        .background(if (filled) C.Volt else Color.Transparent)
-                                        .border(1.dp, if (filled) C.Volt else if (isCur) C.LineStrong else C.Line, RoundedCornerShape(6.dp)),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    if (filled) Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.height(14.dp))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            Gap(12.dp)
         }
 
         // ---------------- weekly training charts
@@ -359,11 +317,6 @@ private fun WeeklyTrainingPanel(s: com.forge.app.data.Settings, finished: List<c
     }
 }
 
-private fun weekCount(doneDates: List<Long>, programStart: Long, week: Int): Int {
-    val from = programStart + (week - 1) * 7L
-    val to = from + 6
-    return doneDates.count { it in from..to }.coerceAtMost(Program.WORKOUTS_PER_WEEK)
-}
 
 @Composable
 private fun CheckInPanel(ci: CheckIn?, onAdjust: (Int) -> Unit, onAck: () -> Unit) {

@@ -158,6 +158,23 @@ fun HGap(w: Dp) = Spacer(Modifier.width(w))
 
 // ------------------------------------------------------------------ surfaces
 
+/**
+ * The app's background light: a dark olive wash at the top and a soft volt glow in
+ * the top-right corner, the same look as the share cards.
+ */
+@Composable
+fun Glow(modifier: Modifier = Modifier, strength: Float = 1f) {
+    Canvas(modifier) {
+        drawRect(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.BgTop, C.Bg), endY = size.height * 0.45f))
+        val r = size.width * 1.0f
+        val c = Offset(size.width * 0.98f, -size.width * 0.05f)
+        drawCircle(
+            androidx.compose.ui.graphics.Brush.radialGradient(listOf(C.Volt.copy(alpha = 0.13f * strength), Color.Transparent), center = c, radius = r),
+            radius = r, center = c,
+        )
+    }
+}
+
 @Composable
 fun Panel(
     modifier: Modifier = Modifier,
@@ -165,14 +182,19 @@ fun Panel(
     border: Color = C.Line,
     onClick: (() -> Unit)? = null,
     padding: PaddingValues = PaddingValues(18.dp),
+    /** Hero panels get a faint volt-tinted gradient, like the share cards. */
+    accent: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(22.dp)
     val base = modifier
         .fillMaxWidth()
         .clip(shape)
-        .background(color)
-        .border(1.dp, border, shape)
+        .then(
+            if (accent) Modifier.background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(C.AccentTop, color), start = Offset(Float.POSITIVE_INFINITY, 0f), end = Offset(0f, Float.POSITIVE_INFINITY)))
+            else Modifier.background(color),
+        )
+        .border(1.dp, if (accent && border == C.Line) C.Volt.copy(alpha = 0.22f) else border, shape)
     Column((if (onClick != null) base.pressScale(onClick, scaleTo = 0.985f) else base).padding(padding), content = content)
 }
 
@@ -748,16 +770,15 @@ fun WeightChart(points: List<Pair<Long, Double>>, avg: List<Pair<Long, Double>>,
     val from = range.days?.let { d -> last?.minus(d) }
     fun cut(l: List<Pair<Long, Double>>) = if (from == null) l else l.filter { it.first >= from }
     Column(modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                LegendItem("Average", C.Volt, line = true)
-                LegendItem("Daily", C.Mid)
-                if (goal != null) LegendItem("Goal", C.Hi.copy(alpha = 0.5f), line = true, dashed = true)
-            }
-            RangePicker(range, { range = it })
-        }
+        RangePicker(range, { range = it }, Modifier.align(Alignment.End))
         Gap(12.dp)
         LineChart(cut(points), cut(avg), goal = goal, empty = "Log at least two mornings to see the trend.")
+        Gap(10.dp)
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            LegendItem("Average", C.Volt, line = true)
+            LegendItem("Daily", C.Mid)
+            if (goal != null) LegendItem("Goal", C.Hi.copy(alpha = 0.5f), line = true, dashed = true)
+        }
     }
 }
 

@@ -96,7 +96,7 @@ fun TrainScreen(nav: Nav) {
 
         if (active != null) {
             item {
-                Panel(border = C.Volt.copy(alpha = 0.5f), onClick = { nav.workout(active!!.id) }) {
+                Panel(border = C.Volt.copy(alpha = 0.5f), onClick = { nav.workout(active!!.id) }, accent = true) {
                     Eyebrow("In progress", color = C.Volt)
                     Gap(6.dp)
                     Text(Program.day(active!!.dayId)?.title?.uppercase() ?: "", style = T.H2, color = C.Hi)
@@ -257,7 +257,7 @@ fun SessionRow(ses: SessionEntity) {
 fun HistoryScreen(nav: Nav) {
     val sessionsN by Graph.repo.sessions.collectAsState(null)
     val sessions = sessionsN ?: return Loading()
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar("Session history", "${sessions.count { it.finishedAt != null }} sessions", onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)) {
             items(sessions.filter { it.finishedAt != null }, key = { it.id }) { SessionRow(it); Gap(8.dp) }
@@ -275,7 +275,7 @@ fun ExerciseScreen(nav: Nav, exerciseId: String) {
         val sessions = repo.db.sessions().allNow().associateBy { it.id }
         value = sets to sessions
     }
-    Column(Modifier.fillMaxSize().background(C.Bg)) {
+    Column(Modifier.fillMaxSize()) {
         TopBar(ex.name, ex.muscles, onBack = { nav.back() })
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)) {
             Gap(8.dp)

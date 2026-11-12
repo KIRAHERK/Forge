@@ -1,12 +1,9 @@
-## Forge 1.5.0
+## Forge 1.6.0
 
-- **Share cards.** Tap the share icon to turn your progress, today's food or a workout into a clean 1080 × 1350 image, ready for Instagram, WhatsApp or anywhere else.
-  - **Progress** (Progress tab, weight panel): 7-day average, change since start and over 30 days, the trend chart and your goal bar. Shows "On track" or "Goal reached" when the numbers are moving the right way.
-  - **Fuel** (Fuel tab, top panel): calories and protein rings, fat and carbs, and this week's protein. Shows "Targets hit" when you hit them.
-  - **Workout** (end of a workout, today's finished card, or any session in Train): time, volume, sets, streak and your top sets. New personal records get a PR badge.
-- **Fuel:** "What to eat next" is gone.
-- **Progress:** photos and measurements moved to the bottom.
-- **Settings → About:** the Portfolio button label no longer gets cut off.
+- **More life.** The app now has the same look as the share cards: a dark olive wash at the top and a soft green glow behind every screen. The main panel on each tab (today's session, calories, weight, week score) gets a matching gradient.
+- **Progress:** the 12-week tracker is gone. The weight chart's legend moved under the chart so it no longer squeezes on small phones.
+- **Share cards:** the progress card no longer cuts off the start-to-goal bar.
+- **GitHub:** new screenshots and an updated feature list in the README.
 
 Your data is untouched.
 
