@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DocumentScanner
@@ -159,7 +160,8 @@ fun TodayScreen(nav: Nav) {
                         Text("${level.level}", style = T.Num.copy(fontSize = T.Num.fontSize * 0.85f), color = C.Hi)
                     }
                 }
-                HGap(6.dp)
+                HGap(2.dp)
+                IconBtn(Icons.AutoMirrored.Rounded.HelpOutline, "Guide", { com.forge.app.ui.UiEvents.guideRequest.value = true }, tint = C.Mid)
                 IconBtn(Icons.Rounded.Settings, "Settings", { nav.go("settings") }, tint = C.Mid)
             }
         }
