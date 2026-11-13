@@ -54,6 +54,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Progress** | 7-day average weight with a 1M / 3M / 1Y / All chart, kg per week vs target, ETA, 2-week check-in, workouts and training volume for the last 8 weeks, levels, lifts, progress photos (stored privately) and body measurements. |
 | **Weight** | Morning weigh-ins with a type-in reminder notification, streak, 30-day change, lowest and highest, weekly averages, editable history. |
 | **Share** | A share button on Progress, Fuel and every workout turns it into a 1440 × 1800 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
+| **Color** | Pick the main color when you set up: green, red, purple, pink or blue. It changes the whole app, the widget and the share images. Change it any time in Settings. |
 
 ### Consequences
 

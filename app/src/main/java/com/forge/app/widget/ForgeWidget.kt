@@ -43,8 +43,8 @@ import java.time.LocalDateTime
 private val BG = ColorProvider(Color(0xFF141417))
 private val HI = ColorProvider(Color(0xFFF2F2F3))
 private val MID = ColorProvider(Color(0xFF9B9BA4))
-private val VOLT = ColorProvider(Color(0xFFCCFF4D))
-private val RED = ColorProvider(Color(0xFFFF4D3D))
+private val VOLT: ColorProvider get() = ColorProvider(Color(com.forge.app.domain.Accent.current.argb))
+private val RED: ColorProvider get() = ColorProvider(Color(com.forge.app.domain.Accent.current.miss))
 private val TRACK = ColorProvider(Color(0xFF26262B))
 
 data class WidgetData(

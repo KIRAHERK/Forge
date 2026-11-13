@@ -24,6 +24,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -67,6 +69,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -894,4 +897,41 @@ fun BottomSpace() = Spacer(Modifier.navigationBarsPadding().height(96.dp))
 @Composable
 fun TextAction(text: String, onClick: () -> Unit, color: Color = C.Volt, style: TextStyle = T.BodyS) {
     Text(text, style = style, color = color, modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 6.dp))
+}
+
+/** Five color swatches. Tapping one applies it right away so the whole app previews it. */
+@Composable
+fun AccentPicker(selected: com.forge.app.domain.Accent, onPick: (com.forge.app.domain.Accent) -> Unit, modifier: Modifier = Modifier, swatch: Dp = 52.dp) {
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        com.forge.app.domain.Accent.entries.forEach { a ->
+            val color = Color(a.argb)
+            val sel = a == selected
+            Column(
+                Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable { onPick(a) }.padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // Shares the width evenly, never wider than [swatch], so all five always fit.
+                Box(
+                    Modifier.widthIn(max = swatch + 10.dp).fillMaxWidth().aspectRatio(1f).clip(CircleShape)
+                        .border(2.dp, if (sel) color else Color.Transparent, CircleShape)
+                        .padding(5.dp).clip(CircleShape).background(color),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (sel) Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.fillMaxSize(0.5f))
+                }
+                Gap(6.dp)
+                Text(a.label, style = T.Small, color = if (sel) C.Hi else C.Mid, maxLines = 1)
+            }
+        }
+    }
+}
+
+/** Saves the color and marks it as chosen. */
+fun pickAccent(scope: kotlinx.coroutines.CoroutineScope, a: com.forge.app.domain.Accent) {
+    C.accent = a
+    scope.launch {
+        com.forge.app.Graph.settings.update { it.copy(accent = a.name, accentChosen = true) }
+        com.forge.app.domain.Accent.current = a
+        runCatching { com.forge.app.widget.ForgeWidget.refresh(com.forge.app.Graph.appContext) }
+    }
 }

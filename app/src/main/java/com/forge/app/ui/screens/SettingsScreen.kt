@@ -60,7 +60,9 @@ import com.forge.app.notify.Notifier
 import com.forge.app.notify.Scheduler
 import com.forge.app.ui.LocalSettings
 import com.forge.app.ui.Nav
+import com.forge.app.ui.components.AccentPicker
 import com.forge.app.ui.components.Chip
+import com.forge.app.ui.components.pickAccent
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.ForgeDialog
 import com.forge.app.ui.components.ForgeField
@@ -176,6 +178,13 @@ fun SettingsScreen(nav: Nav) {
     Column(Modifier.fillMaxSize()) {
         TopBar("Settings", onBack = { nav.back() })
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
+
+            // ------------------------------------------------ look
+            Group("Color") {
+                AccentPicker(C.accent, { pickAccent(scope, it) })
+                Gap(6.dp)
+                Text("Changes the whole app, the widget and the pictures you share.", style = T.Small, color = C.Lo)
+            }
 
             // ------------------------------------------------ schedule
             Group("Schedule") {

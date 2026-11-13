@@ -1,10 +1,8 @@
-## Forge 1.9.0
+## Forge 1.10.0
 
-- **Share programs by QR code.** In Train → Programs, tap **Share** on any program to get a QR card. Show it on your screen or send it as an image. Others tap **Scan a program** and point the camera at it, or pick a screenshot of it from their photos. They see what's inside before adding it. Your own exercises travel with the program.
-- **Scan button** next to Recipes on the Fuel tab and the Today food card. It opens the barcode and label scanner directly.
-- **"+ Add food"** has more room, so the label no longer gets squeezed.
-- **Share Forge** in Settings → About sends friends the download link.
-- **Easier download:** one link that always gets the newest version, plus a download page with a QR code and install steps.
+- **Pick your color.** Forge now comes in green, red, purple, pink or blue. New installs choose during setup, with a live preview. Already using Forge? You'll be asked once when you open the app. Change it any time in **Settings → Color**.
+- The color runs through everything: buttons, rings, charts, the glow, the home-screen widget, notifications and the images you share.
+- With red as your color, misses and penalties show in amber so they never look like progress.
 
 Your data is untouched.
 

@@ -52,7 +52,11 @@ import com.forge.app.data.Settings
 import com.forge.app.domain.Plan
 import com.forge.app.domain.Program
 import com.forge.app.notify.Notifier
+import com.forge.app.ui.components.AccentPicker
+import com.forge.app.ui.components.Bar
 import com.forge.app.ui.components.Chip
+import com.forge.app.ui.components.Ring
+import com.forge.app.ui.components.pickAccent
 import com.forge.app.ui.components.Eyebrow
 import com.forge.app.ui.components.ForgeField
 import com.forge.app.ui.components.Gap
@@ -114,6 +118,8 @@ fun OnboardingScreen() {
                     weekStart = weekStart.value,
                     workoutTime = workoutTime,
                     deadline = deadline,
+                    accent = C.accent.name,
+                    accentChosen = true,
                 )
             }, weight.replace(',', '.').toDoubleOrNull(), habits.toList())
             // The original program already exists; any other pick is copied in as the user's own.
@@ -125,7 +131,7 @@ fun OnboardingScreen() {
 
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            (0..3).forEach { i ->
+            (0..4).forEach { i ->
                 Box(Modifier.weight(1f).height(3.dp).clip(RoundedCornerShape(2.dp)).background(if (i <= step) C.Volt else C.S3))
             }
         }
@@ -142,9 +148,10 @@ fun OnboardingScreen() {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
                 when (st) {
                     0 -> Intro()
-                    1 -> {
+                    1 -> ColorStep(scope)
+                    2 -> {
                         Gap(12.dp)
-                        Eyebrow("Step 2 of 4")
+                        Eyebrow("Step 3 of 5")
                         Gap(6.dp)
                         Text("PICK YOUR\nPROGRAM.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
                         Gap(6.dp)
@@ -194,9 +201,9 @@ fun OnboardingScreen() {
                         Gap(8.dp)
                         Text("You can change all of this later in Settings.", style = T.Small, color = C.Lo)
                     }
-                    2 -> {
+                    3 -> {
                         Gap(12.dp)
-                        Eyebrow("Step 3 of 4")
+                        Eyebrow("Step 4 of 5")
                         Gap(6.dp)
                         Text("YOUR NUMBERS.\nYOUR HABITS.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
                         Gap(18.dp)
@@ -247,7 +254,7 @@ fun OnboardingScreen() {
                         val notifOk = remember(refresh) { Notifier.canPost(ctx) }
                         val batteryOk = remember(refresh) { isIgnoringBattery(ctx) }
                         Gap(12.dp)
-                        Eyebrow("Step 4 of 4")
+                        Eyebrow("Step 5 of 5")
                         Gap(6.dp)
                         Text("LET IT\nPUSH YOU.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
                         Gap(14.dp)
@@ -276,8 +283,8 @@ fun OnboardingScreen() {
                 HGap(12.dp)
             }
             PrimaryButton(
-                when (step) { 0 -> "Set it up"; 3 -> "Start"; else -> "Continue" },
-                { if (step < 3) step++ else finish() },
+                when (step) { 0 -> "Set it up"; 4 -> "Start"; else -> "Continue" },
+                { if (step < 4) step++ else finish() },
                 Modifier.weight(1f),
             )
         }
@@ -331,6 +338,43 @@ private fun Intro() {
             HGap(12.dp)
             Text(it, style = T.Body, color = C.Hi)
         }
+    }
+}
+
+@Composable
+private fun ColorStep(scope: kotlinx.coroutines.CoroutineScope) {
+    Gap(12.dp)
+    Eyebrow("Step 2 of 5")
+    Gap(6.dp)
+    Text("PICK YOUR\nCOLOR.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
+    Gap(6.dp)
+    Text("It runs through the whole app and the pictures you share. You can change it any time in Settings.", style = T.Small, color = C.Mid)
+    Gap(18.dp)
+    Panel { AccentPicker(C.accent, { pickAccent(scope, it) }) }
+    Gap(14.dp)
+    Eyebrow("Preview")
+    Gap(8.dp)
+    AccentPreview()
+}
+
+/** A small slice of the Today screen in the chosen color. */
+@Composable
+fun AccentPreview() {
+    Panel(accent = true) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Ring(0.72f, size = 76.dp, stroke = 7.dp, color = C.Volt) {
+                Text("94 g", style = T.Num, color = C.Volt)
+            }
+            HGap(16.dp)
+            Column(Modifier.weight(1f)) {
+                Text("PROTEIN TODAY", style = T.H3, color = C.Hi)
+                Text("94 of 130 g · 36 g to go", style = T.Small, color = C.Mid)
+                Gap(10.dp)
+                Bar(0.72f)
+            }
+        }
+        Gap(16.dp)
+        PrimaryButton("Start workout", {}, Modifier.fillMaxWidth())
     }
 }
 
