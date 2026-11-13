@@ -567,7 +567,11 @@ private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs
         Row(verticalAlignment = Alignment.CenterVertically) {
             Eyebrow("Fuel today", modifier = Modifier.weight(1f))
             val left = s.kcal - kcal
-            Text(if (left > 0) "${Fmt.num(left)} kcal left" else "Target hit", style = T.Small, color = if (left > 0) C.Mid else C.Volt)
+            when {
+                Stats.kcalOver(kcal, s.kcal) -> Text("${Fmt.num(-left)} kcal over", style = T.Small, color = C.Amber)
+                left > 0 -> Text("${Fmt.num(left)} kcal left", style = T.Small, color = C.Mid)
+                else -> Text("Target hit", style = T.Small, color = C.Volt)
+            }
         }
         Gap(16.dp)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {

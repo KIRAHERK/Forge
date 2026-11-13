@@ -170,8 +170,13 @@ fun FuelScreen(nav: Nav) {
                         }
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Eyebrow("Left")
-                        Text(Fmt.num((s.kcal - m.kcal).coerceAtLeast(0)), style = T.NumL, color = if (m.kcal >= s.kcal * 0.9) C.Volt else C.Hi)
+                        if (Stats.kcalOver(m.kcal, s.kcal)) {
+                            Eyebrow("Over", color = C.Amber)
+                            Text("+" + Fmt.num(m.kcal - s.kcal), style = T.NumL, color = C.Amber)
+                        } else {
+                            Eyebrow("Left")
+                            Text(Fmt.num((s.kcal - m.kcal).coerceAtLeast(0)), style = T.NumL, color = if (Stats.kcalHit(m.kcal, s.kcal)) C.Volt else C.Hi)
+                        }
                     }
                     HGap(6.dp)
                     com.forge.app.ui.share.ShareIcon { sharing = true }
