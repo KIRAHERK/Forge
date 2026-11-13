@@ -186,6 +186,13 @@ fun SettingsScreen(nav: Nav) {
                 Text("Changes the whole app, the widget and the pictures you share.", style = T.Small, color = C.Lo)
             }
 
+            Group("Help") {
+                ValueRow("Guide", "Show", "A quick tour of every tab") {
+                    com.forge.app.ui.UiEvents.guideRequest.value = true
+                    nav.tab("today")
+                }
+            }
+
             // ------------------------------------------------ schedule
             Group("Schedule") {
                 Eyebrow("Week starts on")

@@ -6,6 +6,10 @@ A training and nutrition app for Android that holds you to your plan: reminders,
 
 Pick a ready-made program or build your own from 85 gym and home exercises. It comes with a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
 
+<img src="docs/screenshots/colors.png" alt="Forge in green, red, purple, pink and blue">
+
+Pick your color when you set up: green, red, purple, pink or blue. It runs through the whole app, the widget and the pictures you share, and you can change it any time in Settings.
+
 <p>
   <img src="docs/screenshots/today.png" width="16%" alt="Today">
   <img src="docs/screenshots/workout.png" width="16%" alt="Workout">
@@ -14,6 +18,10 @@ Pick a ready-made program or build your own from 85 gym and home exercises. It c
   <img src="docs/screenshots/habits.png" width="16%" alt="Habits">
   <img src="docs/screenshots/weight.png" width="16%" alt="Weight">
 </p>
+
+New here? A short guide walks you through every tab the first time you open the app, so nothing gets missed. Replay it any time from **Settings → Help**.
+
+<img src="docs/screenshots/guide.png" width="80%" alt="The first-run guide: Today, Fuel and the final step">
 
 Share your progress, a day of eating or a workout as a ready-to-post image:
 
@@ -55,6 +63,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Weight** | Morning weigh-ins with a type-in reminder notification, streak, 30-day change, lowest and highest, weekly averages, editable history. |
 | **Share** | A share button on Progress, Fuel and every workout turns it into a 1440 × 1800 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
 | **Color** | Pick the main color when you set up: green, red, purple, pink or blue. It changes the whole app, the widget and the share images. Change it any time in Settings. |
+| **Guide** | A tour of every tab on first open: what each one is for and the one thing not to miss. Skip it, or replay it from Settings. |
 
 ### Consequences
 
