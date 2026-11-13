@@ -315,8 +315,9 @@ fun FuelCard(date: LocalDate) {
     val weekStart = s.weekStartOf(date)
     val week by remember(weekStart) { repo.foodBetween(weekStart, weekStart.plusDays(6)) }.collectAsState(emptyList())
     val m = Stats.sum(foods)
-    val proteinHit = m.protein >= s.protein * 0.95
-    val kcalHit = m.kcal >= s.kcal * 0.95
+    // Same rules as the Habits grid and XP, so the card never says "hit" for a day the grid marks missed.
+    val proteinHit = Stats.proteinHit(m.protein, s.protein)
+    val kcalHit = Stats.kcalHit(m.kcal, s.kcal)
     val days = (0..6).map { weekStart.plusDays(it.toLong()) }
     val weekProtein = days.map { d -> week.filter { it.date == d.toEpochDay() }.sumOf { it.protein }.toFloat() }
     val weekHits = weekProtein.count { it >= s.protein * 0.95f }

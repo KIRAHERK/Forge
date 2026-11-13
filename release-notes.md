@@ -1,7 +1,9 @@
-## Forge 1.11.0
+## Forge 1.11.1
 
-- **A guide to every tab.** The first time you open Forge, a short tour walks you through Today, Train, Fuel, Habits and Progress: what each tab is for, and the one thing people tend to miss (sick days, scanning food, sharing programs by QR, share cards). Skip it if you like, and replay it any time from **Settings → Help → Guide**.
-- Already using Forge? You'll see the guide once after updating.
+- **Calories add up the same everywhere.** The share card called a day "Targets hit" even when you'd eaten far more than your target, while the Habits grid marked it missed. Both now use the same rule: 90% to 115% of your target counts as hit (2,430 to 3,105 kcal on a 2,700 target).
+- **Over your calories?** Fuel and Today now say so in amber ("Over +622", "622 kcal over"), so you see it while logging, not only in Habits.
+- **Guide:** Back on every step, so a mistaken Next is one tap to undo. Skip moved to the card's corner.
+- **? button** next to Settings on Today opens the guide any time.
 
 Your data is untouched.
 

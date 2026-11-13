@@ -167,6 +167,14 @@ fun GuideOverlay(nav: Nav, onDone: () -> Unit) {
                 .padding(start = 16.dp, end = 16.dp, bottom = navBottom + if (last) 24.dp else 84.dp),
         ) {
             Panel(accent = true, border = C.Volt.copy(alpha = 0.45f)) {
+                Box {
+                if (step > 0 && !last) {
+                    Text(
+                        "SKIP", style = T.Button.copy(fontSize = T.Button.fontSize * 0.8f), color = C.Mid,
+                        modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-6).dp).clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onDone).padding(horizontal = 8.dp, vertical = 6.dp),
+                    )
+                }
                 AnimatedContent(
                     targetState = step,
                     transitionSpec = {
@@ -201,10 +209,12 @@ fun GuideOverlay(nav: Nav, onDone: () -> Unit) {
                         }
                     }
                 }
+                }
                 Gap(16.dp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (!last) TextAction("Skip", onDone, color = C.Mid, style = T.Button)
-                    else if (step > 0) TextAction("Back", { step-- }, color = C.Mid, style = T.Button)
+                    // Back on every step after the first, so a mistaken Next is one tap away from undone.
+                    if (step > 0) TextAction("Back", { step-- }, color = C.Mid, style = T.Button)
+                    else TextAction("Skip", onDone, color = C.Mid, style = T.Button)
                     HGap(12.dp)
                     Dots(step, steps.size, Modifier.weight(1f))
                     PrimaryButton(

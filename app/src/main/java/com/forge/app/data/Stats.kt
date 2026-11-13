@@ -165,7 +165,14 @@ object Stats {
         foods.fold(Macros.ZERO) { acc, f -> acc + Macros(f.kcal, f.protein, f.fat, f.carbs) }
 
     fun proteinHit(total: Double, target: Int) = total >= target * 0.95
-    fun kcalHit(total: Int, target: Int) = total >= target * 0.9 && total <= target * 1.15
+    /** The calorie window: 90% to 115% of the target, in whole calories (2,700 → 2,430..3,105). */
+    fun kcalLow(target: Int) = Math.round(target * 0.9).toInt()
+    fun kcalHigh(target: Int) = Math.round(target * 1.15).toInt()
+    fun kcalHit(total: Int, target: Int) = total in kcalLow(target)..kcalHigh(target)
+    /** Above the calorie window: a lean bulk counts this as a miss, not a win. */
+    fun kcalOver(total: Int, target: Int) = total > kcalHigh(target)
+    /** Calories above the top of the window. */
+    fun kcalOverBy(total: Int, target: Int) = (total - kcalHigh(target)).coerceAtLeast(0)
 
     // ------------------------------------------------------------- weight
 
