@@ -17,7 +17,8 @@ import kotlinx.coroutines.launch
 
 /** Tiny service locator. One database, one settings store, one repo. */
 object Graph {
-    private lateinit var appContext: Context
+    lateinit var appContext: Context
+        private set
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     val db: ForgeDb by lazy { ForgeDb.create(appContext) }

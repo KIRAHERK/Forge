@@ -37,7 +37,7 @@ object Notifier {
     const val ID_TIMER = 1008
     const val ID_TEST = 1009
 
-    private const val ACCENT = 0xFFCCFF4D.toInt()
+    private val ACCENT: Int get() = com.forge.app.domain.Accent.current.argbInt
 
     fun createChannels(ctx: Context) {
         val nm = ctx.getSystemService(NotificationManager::class.java)

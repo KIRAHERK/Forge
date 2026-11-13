@@ -149,9 +149,12 @@ fun AppRoot(routeRequest: MutableState<String?>) {
     val programs by com.forge.app.data.ProgramStore.state.collectAsState()
     LaunchedEffect(Unit) { Graph.programsReady() }
     val s = settings
+    // Follow the saved color. Keyed on the saved value so a live pick isn't overwritten mid-save.
+    val savedAccent = s?.accent
+    remember(savedAccent) { if (savedAccent != null) C.accent = com.forge.app.domain.Accent.of(savedAccent); 0 }
 
     Box(Modifier.fillMaxSize().background(C.Bg)) {
-        com.forge.app.ui.components.Glow(Modifier.fillMaxSize())
+        if (s != null) com.forge.app.ui.components.Glow(Modifier.fillMaxSize())
         CompositionLocalProvider(LocalPrograms provides programs) {
             when {
                 s == null || programs == null -> {}
@@ -207,6 +210,8 @@ private fun MainShell(s: Settings, routeRequest: MutableState<String?>) {
 
     CompositionLocalProvider(LocalSettings provides s) {
     Box(Modifier.fillMaxSize()) {
+        // People who installed before colors existed get asked once.
+        if (!s.accentChosen) NewColorDialog()
         NavHost(controller, startDestination = "today", modifier = Modifier.fillMaxSize()) {
             composable("today") { TodayScreen(nav) }
             composable("train") { TrainScreen(nav) }
@@ -332,5 +337,22 @@ private fun LevelUp(level: Int, title: String, onDismiss: () -> Unit) {
             Gap(32.dp)
             PrimaryButton("Keep going", onDismiss, Modifier.width(220.dp))
         }
+    }
+}
+
+@Composable
+private fun NewColorDialog() {
+    val scope = rememberCoroutineScope()
+    fun done() = com.forge.app.ui.components.pickAccent(scope, C.accent)
+    com.forge.app.ui.components.ForgeDialog(
+        title = "New: pick your color",
+        onDismiss = { done() },
+        confirm = "Done",
+        onConfirm = { done() },
+        dismiss = "",
+    ) {
+        Text("Forge isn't only green any more. Tap one to try it. You can change it later in Settings.", style = T.Body, color = C.Mid)
+        com.forge.app.ui.components.Gap(16.dp)
+        com.forge.app.ui.components.AccentPicker(C.accent, { C.accent = it }, swatch = 34.dp)
     }
 }

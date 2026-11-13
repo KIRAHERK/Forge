@@ -66,6 +66,11 @@ data class Settings(
     /** Free-text notes from your own plan (e.g. a doctor's limit). Kept on the phone, never in the code. */
     val planNote: String = "",
 
+    /** Main color, an [com.forge.app.domain.Accent] name. */
+    val accent: String = "GREEN",
+    /** False until the person has picked a color (new installs pick during setup). */
+    val accentChosen: Boolean = false,
+
     val autoUpdateCheck: Boolean = true,
     val lastNotifiedVersion: String = "",
     val autoBackup: Boolean = true,
@@ -107,7 +112,8 @@ class SettingsStore(private val context: Context) {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
     val flow: Flow<Settings> = context.dataStore.data.map { prefs ->
-        prefs[key]?.let { runCatching { json.decodeFromString(Settings.serializer(), it) }.getOrNull() } ?: Settings()
+        (prefs[key]?.let { runCatching { json.decodeFromString(Settings.serializer(), it) }.getOrNull() } ?: Settings())
+            .also { com.forge.app.domain.Accent.current = com.forge.app.domain.Accent.of(it.accent) }
     }
 
     suspend fun current(): Settings = flow.first()
