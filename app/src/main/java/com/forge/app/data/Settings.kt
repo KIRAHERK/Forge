@@ -70,6 +70,8 @@ data class Settings(
     val accent: String = "GREEN",
     /** False until the person has picked a color (new installs pick during setup). */
     val accentChosen: Boolean = false,
+    /** The tab-by-tab guide has been shown (or skipped). */
+    val guideSeen: Boolean = false,
 
     val autoUpdateCheck: Boolean = true,
     val lastNotifiedVersion: String = "",

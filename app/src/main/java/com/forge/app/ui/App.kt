@@ -100,6 +100,8 @@ object UiEvents {
     val scanFoodRequest = mutableStateOf(false)
     /** A full-screen moment is showing; hold other reveals until it's gone. */
     val overlayOpen = mutableStateOf(false)
+    /** Replay the guide (from Settings). */
+    val guideRequest = mutableStateOf(false)
 }
 
 val LocalSettings = compositionLocalOf { Settings() }
@@ -260,6 +262,16 @@ private fun MainShell(s: Settings, routeRequest: MutableState<String?>) {
 
         // Level-up moment
         val showLevel = xpN != null && level.level > s.lastSeenLevel && xp > 0
+
+        // First-run guide: after the color is picked, once; or whenever Settings asks for it.
+        val showGuide = !showLevel && s.accentChosen && (!s.guideSeen || UiEvents.guideRequest.value)
+        AnimatedVisibility(showGuide, enter = fadeIn(tween(300)), exit = fadeOut(tween(250))) {
+            GuideOverlay(nav) {
+                UiEvents.guideRequest.value = false
+                nav.tab("today")
+                if (!s.guideSeen) scope.launch { Graph.settings.update { it.copy(guideSeen = true) } }
+            }
+        }
         UiEvents.overlayOpen.value = showLevel
         AnimatedVisibility(showLevel, enter = fadeIn(tween(300)), exit = fadeOut(tween(250))) {
             LevelUp(level.level, level.title) {

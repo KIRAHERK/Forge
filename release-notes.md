@@ -1,8 +1,7 @@
-## Forge 1.10.0
+## Forge 1.11.0
 
-- **Pick your color.** Forge now comes in green, red, purple, pink or blue. New installs choose during setup, with a live preview. Already using Forge? You'll be asked once when you open the app. Change it any time in **Settings → Color**.
-- The color runs through everything: buttons, rings, charts, the glow, the home-screen widget, notifications and the images you share.
-- With red as your color, misses and penalties show in amber so they never look like progress.
+- **A guide to every tab.** The first time you open Forge, a short tour walks you through Today, Train, Fuel, Habits and Progress: what each tab is for, and the one thing people tend to miss (sick days, scanning food, sharing programs by QR, share cards). Skip it if you like, and replay it any time from **Settings → Help → Guide**.
+- Already using Forge? You'll see the guide once after updating.
 
 Your data is untouched.
 
