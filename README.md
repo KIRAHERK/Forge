@@ -68,7 +68,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Share** | A share button on Progress, Fuel and every workout turns it into a 1440 × 1800 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
 | **Color** | Pick the main color when you set up: green, red, purple, pink or blue. It changes the whole app, the widget and the share images. Change it any time in Settings. |
 | **Guide** | A tour of every tab on first open: what each one is for and the one thing not to miss. Go back a step any time, skip it, or replay it with the **?** button on Today. |
-| **Arabic** | The whole app in Arabic, right to left, in clear Modern Standard Arabic that any Arabic reader understands. Exercise names are in Arabic with the English name underneath, and the motivation lines were written in Arabic, not translated. It follows your phone's language, or pick English or العربية in Settings. Exercise how-to guides, recipes and the basic food list are still in English. |
+| **Arabic** | The whole app in Arabic, right to left, in clear Modern Standard Arabic that any Arabic reader understands. Exercise names are in Arabic with the English name underneath, and the motivation lines were written in Arabic, not translated. It follows your phone's language, or pick English or العربية in Settings. Exercise how-to guides and recipes are in Arabic too; only the basic food list is still in English. |
 
 ### Consequences
 

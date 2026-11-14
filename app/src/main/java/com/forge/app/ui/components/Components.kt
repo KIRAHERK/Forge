@@ -191,6 +191,8 @@ fun Panel(
     padding: PaddingValues = PaddingValues(18.dp),
     /** Hero panels get a faint volt-tinted gradient, like the share cards. */
     accent: Boolean = false,
+    /** Puts a share button in the card's top corner (top right, or top left in Arabic). */
+    onShare: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(22.dp)
@@ -202,7 +204,15 @@ fun Panel(
             else Modifier.background(color),
         )
         .border(1.dp, if (accent && border == C.Line) C.Volt.copy(alpha = 0.22f) else border, shape)
-    Column((if (onClick != null) base.pressScale(onClick, scaleTo = 0.985f) else base).padding(padding), content = content)
+    val outer = if (onClick != null) base.pressScale(onClick, scaleTo = 0.985f) else base
+    if (onShare == null) {
+        Column(outer.padding(padding), content = content)
+    } else {
+        Box(outer) {
+            Column(Modifier.fillMaxWidth().padding(padding), content = content)
+            Box(Modifier.align(Alignment.TopEnd).padding(10.dp)) { com.forge.app.ui.share.ShareIcon(onShare) }
+        }
+    }
 }
 
 @Composable

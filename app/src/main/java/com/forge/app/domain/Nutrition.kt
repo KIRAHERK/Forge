@@ -1,5 +1,7 @@
 package com.forge.app.domain
 
+import com.forge.app.i18n.t
+
 import kotlin.math.roundToInt
 
 data class Macros(val kcal: Int, val protein: Double, val fat: Double, val carbs: Double) {
@@ -25,30 +27,31 @@ object Plan {
 
     const val RATE_MIN = 0.2 // kg per week
     const val RATE_MAX = 0.4
-    const val TIMELINE = "About 6–11 months to reach 90 kg"
-    const val GOAL_TEXT = "Build muscle and move from 81 kg to 90 kg, then reassess before deciding whether to continue toward 95–100 kg."
-    const val RATE_NOTE = "The timeline is an estimate, not a promise. Early scale increases can include water and glycogen, not just muscle."
+    val TIMELINE get() = t("About 6–11 months to reach 90 kg")
+    val GOAL_TEXT get() = t("Build muscle and move from 81 kg to 90 kg, then reassess before deciding whether to continue toward 95–100 kg.")
+    val RATE_NOTE get() = t("The timeline is an estimate, not a promise. Early scale increases can include water and glycogen, not just muscle.")
 
-    val checkIn = listOf(
-        "Aim for about 2,700 calories daily and keep protein near 130 g, unless your clinician gives you a different protein limit.",
-        "Weigh yourself each morning after using the bathroom and before eating.",
-        "Compare weekly average weights, not individual readings.",
-        "After two weeks: if average weight is not rising, add 150–200 calories/day. If it rises much faster than 0.2–0.4 kg/week, reduce intake slightly.",
+    val checkIn get() = listOf(
+        t("Aim for about 2,700 calories daily and keep protein near 130 g, unless your clinician gives you a different protein limit."),
+        t("Weigh yourself each morning after using the bathroom and before eating."),
+        t("Compare weekly average weights, not individual readings."),
+        t("After two weeks: if average weight is not rising, add 150–200 calories/day. If it rises much faster than 0.2–0.4 kg/week, reduce intake slightly."),
     )
 
 
-    const val MEDICAL_NOTE =
-        "These targets are a starting estimate, not medical advice. If you have a medical condition, " +
-            "check protein and calorie limits with your clinician. Add anything they tell you under Settings → Plan notes."
+    val MEDICAL_NOTE get() = t("These targets are a starting estimate, not medical advice. If you have a medical condition, check protein and calorie limits with your clinician. Add anything they tell you under Settings → Plan notes.")
 
-    val lowCost = listOf(
-        "Calories" to "Rice, oats, potatoes, bread, pasta, and other affordable grains.",
-        "Protein" to "Lentils, beans, chickpeas, eggs, milk, yogurt, and affordable meat or canned fish.",
-        "Easy calorie additions" to "Peanut butter, nuts, and measured cooking oil.",
+    val lowCost get() = listOf(
+        t("Calories") to t("Rice, oats, potatoes, bread, pasta, and other affordable grains."),
+        t("Protein") to t("Lentils, beans, chickpeas, eggs, milk, yogurt, and affordable meat or canned fish."),
+        t("Easy calorie additions") to t("Peanut butter, nuts, and measured cooking oil."),
     )
 }
 
-enum class FoodGroup(val label: String) { PROTEIN("Protein"), CARB("Carbs"), DAIRY("Dairy"), FAT("Fats & nuts"), FRUIT_VEG("Fruit & veg"), MEAL("Meals") }
+enum class FoodGroup(private val en: String) { PROTEIN("Protein"), CARB("Carbs"), DAIRY("Dairy"), FAT("Fats & nuts"), FRUIT_VEG("Fruit & veg"), MEAL("Meals");
+
+    val label: String get() = t(en)
+}
 
 data class Food(val id: String, val name: String, val serving: String, val m: Macros, val group: FoodGroup)
 
@@ -107,7 +110,11 @@ object Foods {
     fun byId(id: String) = map[id]
 }
 
-enum class MealType(val label: String) { BREAKFAST("Breakfast"), MAIN("Lunch / Dinner"), SNACK("Snack"), SHAKE("Shake") }
+enum class MealType(private val en: String) {
+    BREAKFAST("Breakfast"), MAIN("Lunch / Dinner"), SNACK("Snack"), SHAKE("Shake");
+
+    val label: String get() = t(en)
+}
 
 data class Recipe(
     val id: String,
@@ -129,173 +136,173 @@ data class Recipe(
 object Recipes {
     val all = listOf(
         Recipe(
-            "pb_oats", "Peanut Butter Oats", MealType.BREAKFAST, 1, 8,
+            "pb_oats", t("Peanut Butter Oats"), MealType.BREAKFAST, 1, 8,
             Macros(785, 29.0, 32.0, 102.0),
-            listOf("80 g oats", "300 ml whole milk", "2 tbsp peanut butter (32 g)", "1 banana, sliced", "Pinch of salt, cinnamon"),
+            listOf(t("80 g oats"), t("300 ml whole milk"), t("2 tbsp peanut butter (32 g)"), t("1 banana, sliced"), t("Pinch of salt, cinnamon")),
             listOf(
-                "Simmer oats in the milk with a pinch of salt for 4–5 minutes, stirring.",
-                "Take off the heat and stir in the peanut butter.",
-                "Top with banana and cinnamon.",
+                t("Simmer oats in the milk with a pinch of salt for 4–5 minutes, stirring."),
+                t("Take off the heat and stir in the peanut butter."),
+                t("Top with banana and cinnamon."),
             ),
-            "Almost 800 kcal in one bowl. The easiest way to put a dent in 2,700.",
+            t("Almost 800 kcal in one bowl. The easiest way to put a dent in 2,700."),
         ),
         Recipe(
-            "egg_potato_hash", "Egg & Potato Hash", MealType.BREAKFAST, 1, 20,
+            "egg_potato_hash", t("Egg & Potato Hash"), MealType.BREAKFAST, 1, 20,
             Macros(690, 32.0, 33.0, 66.0),
-            listOf("4 eggs", "300 g potatoes, diced", "1 tbsp oil", "½ onion", "Salt, pepper, paprika"),
+            listOf(t("4 eggs"), t("300 g potatoes, diced"), t("1 tbsp oil"), t("½ onion"), t("Salt, pepper, paprika")),
             listOf(
-                "Boil or microwave the diced potato until just soft (6–8 min).",
-                "Fry with the onion in the oil until browned at the edges.",
-                "Make four gaps, crack in the eggs, cover and cook until the whites set.",
+                t("Boil or microwave the diced potato until just soft (6–8 min)."),
+                t("Fry with the onion in the oil until browned at the edges."),
+                t("Make four gaps, crack in the eggs, cover and cook until the whites set."),
             ),
-            "Cheap, filling and 32 g protein before noon.",
+            t("Cheap, filling and 32 g protein before noon."),
         ),
         Recipe(
-            "foul_eggs", "Foul with Eggs & Pita", MealType.BREAKFAST, 1, 10,
+            "foul_eggs", t("Foul with Eggs & Pita"), MealType.BREAKFAST, 1, 10,
             Macros(815, 39.0, 25.0, 106.0),
-            listOf("200 g foul medames (canned fava beans)", "1 tbsp olive oil", "2 eggs", "2 pita breads", "Lemon, cumin, garlic, salt"),
+            listOf(t("200 g foul medames (canned fava beans)"), t("1 tbsp olive oil"), t("2 eggs"), t("2 pita breads"), t("Lemon, cumin, garlic, salt")),
             listOf(
-                "Warm the beans with a splash of water, mash half of them.",
-                "Season with lemon, cumin, garlic and salt; finish with the olive oil.",
-                "Serve with boiled or fried eggs and the pita.",
+                t("Warm the beans with a splash of water, mash half of them."),
+                t("Season with lemon, cumin, garlic and salt; finish with the olive oil."),
+                t("Serve with boiled or fried eggs and the pita."),
             ),
-            "Plant and egg protein together, very low cost per gram.",
+            t("Plant and egg protein together, very low cost per gram."),
         ),
         Recipe(
-            "tuna_rice", "Tuna Rice Bowl", MealType.MAIN, 1, 10,
+            "tuna_rice", t("Tuna Rice Bowl"), MealType.MAIN, 1, 10,
             Macros(650, 40.0, 16.0, 84.0),
-            listOf("1 can tuna in water, drained", "250 g cooked rice", "100 g frozen peas", "1 tbsp olive oil", "Soy sauce or lemon, chilli"),
+            listOf(t("1 can tuna in water, drained"), t("250 g cooked rice"), t("100 g frozen peas"), t("1 tbsp olive oil"), t("Soy sauce or lemon, chilli")),
             listOf(
-                "Microwave the peas for 2 minutes.",
-                "Mix rice, peas and tuna; dress with oil and soy sauce or lemon.",
-                "Eat hot or cold — it keeps 2 days in the fridge.",
+                t("Microwave the peas for 2 minutes."),
+                t("Mix rice, peas and tuna; dress with oil and soy sauce or lemon."),
+                t("Eat hot or cold — it keeps 2 days in the fridge."),
             ),
-            "40 g protein for the price of one can.",
+            t("40 g protein for the price of one can."),
         ),
         Recipe(
-            "dal_rice", "Red Lentil Dal, Rice & Eggs", MealType.MAIN, 4, 35,
+            "dal_rice", t("Red Lentil Dal, Rice & Eggs"), MealType.MAIN, 4, 35,
             Macros(770, 38.0, 19.0, 113.0),
             listOf(
-                "300 g dry red lentils", "1 onion, chopped", "2 tbsp oil", "400 g canned tomatoes",
-                "Garlic, cumin, turmeric, chilli", "800 g cooked rice (200 g per serving)", "8 eggs, boiled (2 per serving)",
+                t("300 g dry red lentils"), t("1 onion, chopped"), t("2 tbsp oil"), t("400 g canned tomatoes"),
+                t("Garlic, cumin, turmeric, chilli"), t("800 g cooked rice (200 g per serving)"), t("8 eggs, boiled (2 per serving)"),
             ),
             listOf(
-                "Fry onion and garlic in the oil, add spices for 30 seconds.",
-                "Add rinsed lentils, tomatoes and 900 ml water. Simmer 20–25 min until soft.",
-                "Serve each portion with 200 g rice and 2 boiled eggs.",
+                t("Fry onion and garlic in the oil, add spices for 30 seconds."),
+                t("Add rinsed lentils, tomatoes and 900 ml water. Simmer 20–25 min until soft."),
+                t("Serve each portion with 200 g rice and 2 boiled eggs."),
             ),
-            "Batch-cook on Sunday, four lunches done.",
+            t("Batch-cook on Sunday, four lunches done."),
             batch = true,
         ),
         Recipe(
-            "chicken_rice_pot", "Chicken Thigh Rice Pot", MealType.MAIN, 4, 40,
+            "chicken_rice_pot", t("Chicken Thigh Rice Pot"), MealType.MAIN, 4, 40,
             Macros(714, 48.0, 16.0, 90.0),
             listOf(
-                "800 g boneless skinless chicken thighs", "400 g dry rice", "1 onion", "2 tbsp oil",
-                "200 g frozen mixed vegetables", "1 L stock", "Paprika, cumin, garlic, salt",
+                t("800 g boneless skinless chicken thighs"), t("400 g dry rice"), t("1 onion"), t("2 tbsp oil"),
+                t("200 g frozen mixed vegetables"), t("1 L stock"), t("Paprika, cumin, garlic, salt"),
             ),
             listOf(
-                "Brown the seasoned chicken in the oil, set aside.",
-                "Soften the onion, add rice and stir for 1 minute.",
-                "Add stock, vegetables and chicken. Cover and cook on low 18–20 min until the rice is done.",
+                t("Brown the seasoned chicken in the oil, set aside."),
+                t("Soften the onion, add rice and stir for 1 minute."),
+                t("Add stock, vegetables and chicken. Cover and cook on low 18–20 min until the rice is done."),
             ),
-            "Thighs are cheaper than breast and stay juicy when reheated.",
+            t("Thighs are cheaper than breast and stay juicy when reheated."),
             batch = true,
         ),
         Recipe(
-            "beef_lentil_bolognese", "Beef & Lentil Bolognese", MealType.MAIN, 4, 45,
+            "beef_lentil_bolognese", t("Beef & Lentil Bolognese"), MealType.MAIN, 4, 45,
             Macros(775, 45.0, 16.0, 113.0),
             listOf(
-                "400 g beef mince (10% fat)", "150 g dry brown lentils", "700 g passata", "1 onion",
-                "1 tbsp oil", "Garlic, oregano, salt", "400 g dry pasta",
+                t("400 g beef mince (10% fat)"), t("150 g dry brown lentils"), t("700 g passata"), t("1 onion"),
+                t("1 tbsp oil"), t("Garlic, oregano, salt"), t("400 g dry pasta"),
             ),
             listOf(
-                "Brown the mince with onion and garlic in the oil.",
-                "Add lentils, passata and 400 ml water. Simmer 30–35 min until the lentils are soft.",
-                "Cook the pasta and split everything into 4 portions.",
+                t("Brown the mince with onion and garlic in the oil."),
+                t("Add lentils, passata and 400 ml water. Simmer 30–35 min until the lentils are soft."),
+                t("Cook the pasta and split everything into 4 portions."),
             ),
-            "Lentils stretch the meat and add protein and fibre.",
+            t("Lentils stretch the meat and add protein and fibre."),
             batch = true,
         ),
         Recipe(
-            "bean_chili", "Beef & Bean Chili with Rice", MealType.MAIN, 4, 40,
+            "bean_chili", t("Beef & Bean Chili with Rice"), MealType.MAIN, 4, 40,
             Macros(615, 32.0, 12.0, 92.0),
             listOf(
-                "300 g beef mince (10% fat)", "2 cans kidney beans, drained (480 g)", "400 g canned tomatoes",
-                "1 onion", "1 tbsp oil", "Chilli, cumin, paprika", "800 g cooked rice",
+                t("300 g beef mince (10% fat)"), t("2 cans kidney beans, drained (480 g)"), t("400 g canned tomatoes"),
+                t("1 onion"), t("1 tbsp oil"), t("Chilli, cumin, paprika"), t("800 g cooked rice"),
             ),
             listOf(
-                "Brown the mince and onion in the oil, add spices.",
-                "Add beans and tomatoes, simmer 25 min.",
-                "Serve over 200 g rice per portion.",
+                t("Brown the mince and onion in the oil, add spices."),
+                t("Add beans and tomatoes, simmer 25 min."),
+                t("Serve over 200 g rice per portion."),
             ),
-            "Freezes well. Make double.",
+            t("Freezes well. Make double."),
             batch = true,
         ),
         Recipe(
-            "egg_fried_rice", "Egg Fried Rice", MealType.MAIN, 1, 12,
+            "egg_fried_rice", t("Egg Fried Rice"), MealType.MAIN, 1, 12,
             Macros(810, 34.0, 29.0, 100.0),
-            listOf("300 g cooked rice (day-old is best)", "3 eggs", "100 g frozen peas", "1 tbsp oil", "1 tbsp soy sauce", "Spring onion"),
+            listOf(t("300 g cooked rice (day-old is best)"), t("3 eggs"), t("100 g frozen peas"), t("1 tbsp oil"), t("1 tbsp soy sauce"), t("Spring onion")),
             listOf(
-                "Scramble the eggs in half the oil, set aside.",
-                "Fry the rice and peas in the rest of the oil on high heat for 3–4 min.",
-                "Add eggs and soy sauce, toss for 1 minute.",
+                t("Scramble the eggs in half the oil, set aside."),
+                t("Fry the rice and peas in the rest of the oil on high heat for 3–4 min."),
+                t("Add eggs and soy sauce, toss for 1 minute."),
             ),
-            "Uses leftover rice. Add a can of tuna for +28 g protein.",
+            t("Uses leftover rice. Add a can of tuna for +28 g protein."),
         ),
         Recipe(
-            "sardine_pasta", "Sardine Garlic Pasta", MealType.MAIN, 1, 15,
+            "sardine_pasta", t("Sardine Garlic Pasta"), MealType.MAIN, 1, 15,
             Macros(680, 36.0, 26.0, 75.0),
-            listOf("100 g dry pasta", "1 can sardines in oil, drained", "1 tbsp olive oil", "2 garlic cloves", "Lemon, chilli flakes, parsley"),
+            listOf(t("100 g dry pasta"), t("1 can sardines in oil, drained"), t("1 tbsp olive oil"), t("2 garlic cloves"), t("Lemon, chilli flakes, parsley")),
             listOf(
-                "Cook the pasta.",
-                "Warm garlic and chilli in the oil, add sardines and break them up.",
-                "Toss with the pasta, a splash of pasta water and lemon.",
+                t("Cook the pasta."),
+                t("Warm garlic and chilli in the oil, add sardines and break them up."),
+                t("Toss with the pasta, a splash of pasta water and lemon."),
             ),
-            "Canned fish is among the cheapest protein per gram.",
+            t("Canned fish is among the cheapest protein per gram."),
         ),
         Recipe(
-            "chicken_pita", "Chicken Hummus Pita", MealType.MAIN, 1, 10,
+            "chicken_pita", t("Chicken Hummus Pita"), MealType.MAIN, 1, 10,
             Macros(700, 63.0, 13.0, 79.0),
-            listOf("150 g cooked chicken breast", "2 pita breads", "60 g hummus", "Tomato, cucumber, lettuce"),
+            listOf(t("150 g cooked chicken breast"), t("2 pita breads"), t("60 g hummus"), t("Tomato, cucumber, lettuce")),
             listOf(
-                "Warm the pita.",
-                "Spread hummus, add sliced chicken and vegetables.",
-                "Roll tight and eat. Pack it for later in foil.",
+                t("Warm the pita."),
+                t("Spread hummus, add sliced chicken and vegetables."),
+                t("Roll tight and eat. Pack it for later in foil."),
             ),
-            "63 g protein — the highest-protein option here.",
+            t("63 g protein — the highest-protein option here."),
         ),
         Recipe(
-            "shakshuka", "Chickpea Shakshuka", MealType.MAIN, 2, 25,
+            "shakshuka", t("Chickpea Shakshuka"), MealType.MAIN, 2, 25,
             Macros(490, 26.0, 21.0, 52.0),
-            listOf("4 eggs", "200 g canned chickpeas, drained", "400 g canned tomatoes", "1 onion", "1 tbsp oil", "Cumin, paprika, chilli", "2 slices wholewheat bread"),
+            listOf(t("4 eggs"), t("200 g canned chickpeas, drained"), t("400 g canned tomatoes"), t("1 onion"), t("1 tbsp oil"), t("Cumin, paprika, chilli"), t("2 slices wholewheat bread")),
             listOf(
-                "Soften onion in oil, add spices, tomatoes and chickpeas. Simmer 10 min.",
-                "Make 4 wells, crack in the eggs, cover and cook 5–7 min.",
-                "Serve with the bread. Eat both portions if you're short on calories.",
+                t("Soften onion in oil, add spices, tomatoes and chickpeas. Simmer 10 min."),
+                t("Make 4 wells, crack in the eggs, cover and cook 5–7 min."),
+                t("Serve with the bread. Eat both portions if you're short on calories."),
             ),
-            "One pan, two portions.",
+            t("One pan, two portions."),
         ),
         Recipe(
-            "yogurt_bowl", "Greek Yogurt Bowl", MealType.SNACK, 1, 3,
+            "yogurt_bowl", t("Greek Yogurt Bowl"), MealType.SNACK, 1, 3,
             Macros(510, 35.0, 17.0, 58.0),
-            listOf("250 g plain Greek yogurt", "40 g oats", "1 tbsp honey", "20 g peanuts"),
-            listOf("Mix it all in a bowl. Done."),
-            "35 g protein in three minutes.",
+            listOf(t("250 g plain Greek yogurt"), t("40 g oats"), t("1 tbsp honey"), t("20 g peanuts")),
+            listOf(t("Mix it all in a bowl. Done.")),
+            t("35 g protein in three minutes."),
         ),
         Recipe(
-            "pb_toast_milk", "Peanut Butter Toast & Milk", MealType.SNACK, 1, 4,
+            "pb_toast_milk", t("Peanut Butter Toast & Milk"), MealType.SNACK, 1, 4,
             Macros(540, 25.0, 28.0, 49.0),
-            listOf("2 slices wholewheat bread", "2 tbsp peanut butter", "300 ml whole milk"),
-            listOf("Toast, spread, drink the milk with it."),
-            "The fallback snack when nothing is prepared.",
+            listOf(t("2 slices wholewheat bread"), t("2 tbsp peanut butter"), t("300 ml whole milk")),
+            listOf(t("Toast, spread, drink the milk with it.")),
+            t("The fallback snack when nothing is prepared."),
         ),
         Recipe(
-            "mass_shake", "Homemade Mass Shake", MealType.SHAKE, 1, 3,
+            "mass_shake", t("Homemade Mass Shake"), MealType.SHAKE, 1, 3,
             Macros(835, 32.0, 37.0, 99.0),
-            listOf("500 ml whole milk", "60 g oats", "2 tbsp peanut butter", "1 banana", "Ice, cinnamon (optional)"),
-            listOf("Blend the oats first until fine, then add everything else and blend 30 seconds."),
-            "835 kcal you can drink in five minutes. For days with no appetite.",
+            listOf(t("500 ml whole milk"), t("60 g oats"), t("2 tbsp peanut butter"), t("1 banana"), t("Ice, cinnamon (optional)")),
+            listOf(t("Blend the oats first until fine, then add everything else and blend 30 seconds.")),
+            t("835 kcal you can drink in five minutes. For days with no appetite."),
         ),
     )
 
@@ -310,9 +317,9 @@ data class DayPlan(val id: String, val name: String, val note: String, val recip
 
 object DayPlans {
     val all = listOf(
-        DayPlan("budget", "Budget staples", "Oats, lentils, yogurt, tuna. The cheapest day.", listOf("pb_oats", "dal_rice", "yogurt_bowl", "tuna_rice")),
-        DayPlan("home", "Home cooking", "Foul, chicken rice pot, toast, chili.", listOf("foul_eggs", "chicken_rice_pot", "pb_toast_milk", "bean_chili")),
-        DayPlan("quick", "Little cooking", "Ten minutes or less per meal.", listOf("pb_oats", "tuna_rice", "egg_fried_rice", "yogurt_bowl")),
-        DayPlan("low_appetite", "Low appetite", "Drink part of it. Shake, tuna, bolognese, toast.", listOf("mass_shake", "tuna_rice", "beef_lentil_bolognese", "pb_toast_milk")),
+        DayPlan("budget", t("Budget staples"), t("Oats, lentils, yogurt, tuna. The cheapest day."), listOf("pb_oats", "dal_rice", "yogurt_bowl", "tuna_rice")),
+        DayPlan("home", t("Home cooking"), t("Foul, chicken rice pot, toast, chili."), listOf("foul_eggs", "chicken_rice_pot", "pb_toast_milk", "bean_chili")),
+        DayPlan("quick", t("Little cooking"), t("Ten minutes or less per meal."), listOf("pb_oats", "tuna_rice", "egg_fried_rice", "yogurt_bowl")),
+        DayPlan("low_appetite", t("Low appetite"), t("Drink part of it. Shake, tuna, bolognese, toast."), listOf("mass_shake", "tuna_rice", "beef_lentil_bolognese", "pb_toast_milk")),
     )
 }

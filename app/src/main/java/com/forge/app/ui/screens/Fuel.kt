@@ -162,8 +162,8 @@ fun FuelScreen(nav: Nav) {
         }
 
         item {
-            Panel(accent = true) {
-                Row(verticalAlignment = Alignment.Bottom) {
+            Panel(accent = true, onShare = { sharing = true }) {
+                Row(Modifier.padding(end = 40.dp), verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
                         Eyebrow(t("Calories"))
                         Row(verticalAlignment = Alignment.Bottom) {
@@ -180,8 +180,6 @@ fun FuelScreen(nav: Nav) {
                             Text(Fmt.num((s.kcal - m.kcal).coerceAtLeast(0)), style = T.NumL, color = if (Stats.kcalHit(m.kcal, s.kcal)) C.Volt else C.Hi)
                         }
                     }
-                    HGap(6.dp)
-                    com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 Gap(10.dp)
                 Bar(m.kcal.toFloat() / s.kcal, color = C.Hi, height = 8.dp)

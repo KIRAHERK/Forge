@@ -102,8 +102,8 @@ fun ProgressScreen(nav: Nav) {
 
         // ---------------- weight
         item {
-            Panel(accent = true) {
-                Row(verticalAlignment = Alignment.Bottom) {
+            Panel(accent = true, onShare = { sharing = true }) {
+                Row(Modifier.padding(end = 40.dp), verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
                         Eyebrow(t("7-day average"))
                         Row(verticalAlignment = Alignment.Bottom) {
@@ -122,8 +122,6 @@ fun ProgressScreen(nav: Nav) {
                         Text(rate?.let { (if (it >= 0) "+" else "") + String.format(Locale.US, "%.2f", it) } ?: "—", style = T.NumL, color = col)
                         Text(t("target %1${'$'}s–%2${'$'}s", Plan.RATE_MIN, Plan.RATE_MAX), style = T.Tiny, color = C.Lo)
                     }
-                    HGap(6.dp)
-                    com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 Gap(14.dp)
                 WeightChart(weights.map { it.date to it.kg }, avgSeries, goal = s.goalWeight)
@@ -143,7 +141,7 @@ fun ProgressScreen(nav: Nav) {
                 Text(t("%1${'$'}s kg so far · %2${'$'}s kg to go", (if (gained >= 0) "+" else "") + Fmt.kg(gained), Fmt.kg(toGo)), style = T.Small, color = C.Hi)
                 val eta = if (rate != null && rate > 0.05 && toGo > 0) {
                     val weeks = ceil(toGo / rate).toLong()
-                    "At this rate: about $weeks weeks (${today.plusWeeks(weeks).format(DateTimeFormatter.ofPattern("MMM yyyy", com.forge.app.i18n.Lang.locale))}). Plan estimate: ${Plan.TIMELINE.lowercase()}."
+                    t("At this rate: about %1${'$'}s weeks (%2${'$'}s). Plan estimate: %3${'$'}s.", weeks, today.plusWeeks(weeks).format(DateTimeFormatter.ofPattern("MMM yyyy", com.forge.app.i18n.Lang.locale)), Plan.TIMELINE.lowercase())
                 } else t("Plan estimate: %s. Needs two weeks of weigh-ins for your own estimate.", Plan.TIMELINE.lowercase())
                 Details(t("When will I get there?")) {
                     Text(eta, style = T.Small, color = C.Mid)

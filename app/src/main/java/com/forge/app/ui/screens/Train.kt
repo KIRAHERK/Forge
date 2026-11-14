@@ -210,13 +210,16 @@ fun WeekStrip(weekStart: LocalDate, today: LocalDate, info: (LocalDate) -> Pair<
             ) {
                 Text(Fmt.dowLetter(d), style = T.Tiny, color = if (st == DayStatus.DONE) C.OnVolt else C.Mid)
                 Gap(4.dp)
-                if (st == DayStatus.SICK) {
-                    Icon(Icons.Rounded.Sick, t("Sick day"), tint = fg, modifier = Modifier.padding(vertical = 2.dp).size(20.dp))
-                } else {
-                    Text(
-                        if (slot == Program.REST) "–" else (Program.day(slot)?.number?.toString() ?: "•"),
-                        style = T.Num.copy(fontSize = T.Num.fontSize * 0.9f), color = fg, textAlign = TextAlign.Center,
-                    )
+                // Same slot height for a number or the sick icon, so every tile lines up.
+                Box(Modifier.height(30.dp), contentAlignment = Alignment.Center) {
+                    if (st == DayStatus.SICK) {
+                        Icon(Icons.Rounded.Sick, t("Sick day"), tint = fg, modifier = Modifier.size(22.dp))
+                    } else {
+                        Text(
+                            if (slot == Program.REST) "–" else (Program.day(slot)?.number?.toString() ?: "•"),
+                            style = T.Num.copy(fontSize = T.Num.fontSize * 0.9f), color = fg, textAlign = TextAlign.Center, maxLines = 1,
+                        )
+                    }
                 }
             }
         }
