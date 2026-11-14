@@ -19,7 +19,7 @@ Pick your color when you set up: green, red, purple, pink or blue. It runs throu
   <img src="docs/screenshots/weight.png" width="16%" alt="Weight">
 </p>
 
-New here? A short guide walks you through every tab the first time you open the app, so nothing gets missed. Replay it any time from **Settings → Help**.
+New here? A short guide walks you through every tab the first time you open the app, so nothing gets missed. Replay it any time with the **?** button on Today, or from **Settings → Help**.
 
 <img src="docs/screenshots/guide.png" width="80%" alt="The first-run guide: Today, Fuel and the final step">
 
@@ -53,17 +53,17 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 
 | | |
 |---|---|
-| **Today** | Today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
+| **Today** | Your session streak up top, today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
 | **Programs** | Six ready-made programs (the original 4-day home program, full body, upper/lower, push/pull/legs, dumbbell-only, bodyweight-only) or build your own: pick training days, add exercises from 85 gym and home exercises, set sets and reps (or seconds), reorder, and add your own exercises. Keep several programs and switch any time; your history stays. Share a program as a QR code: others scan it with the camera or from a screenshot. |
 | **Train** | The active program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |
-| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. |
+| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a barcode, or photograph a nutrition table and name the food. 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. A day counts as hit at 90–115% of your calories; go above that and Fuel tells you you're over. |
 | **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, the last 4 weeks of each habit at a glance, an urge timer for quit habits, penalty record. Starts empty. |
 | **Progress** | 7-day average weight with a 1M / 3M / 1Y / All chart, kg per week vs target, ETA, 2-week check-in, workouts and training volume for the last 8 weeks, levels, lifts, progress photos (stored privately) and body measurements. |
 | **Weight** | Morning weigh-ins with a type-in reminder notification, streak, 30-day change, lowest and highest, weekly averages, editable history. |
 | **Share** | A share button on Progress, Fuel and every workout turns it into a 1440 × 1800 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
 | **Color** | Pick the main color when you set up: green, red, purple, pink or blue. It changes the whole app, the widget and the share images. Change it any time in Settings. |
-| **Guide** | A tour of every tab on first open: what each one is for and the one thing not to miss. Skip it, or replay it from Settings. |
+| **Guide** | A tour of every tab on first open: what each one is for and the one thing not to miss. Go back a step any time, skip it, or replay it with the **?** button on Today. |
 
 ### Consequences
 

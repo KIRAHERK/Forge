@@ -39,8 +39,8 @@
   .btn.primary { background: var(--volt); color: var(--on-volt); }
   .btn.ghost { border: 1px solid #34343B; color: var(--ink); }
   .meta { margin-top: 12px; font-size: 14px; color: var(--low); }
-  .qr { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 18px; text-align: center; }
-  .qr img { width: 200px; height: 200px; border-radius: 12px; display: block; }
+  .qr { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 18px; text-align: center; width: 240px; }
+  .qr img { width: 200px; height: 200px; border-radius: 12px; display: block; margin: 0 auto; }
   .qr div { margin-top: 10px; font-size: 14px; color: var(--mid); }
   section { margin-top: 56px; }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -53,6 +53,11 @@
   .feature { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 20px; }
   .feature h3 { font-family: "Barlow Condensed", sans-serif; font-size: 22px; text-transform: uppercase; margin-bottom: 4px; }
   .feature p { color: var(--mid); font-size: 15px; }
+  .colors img { width: 100%; height: auto; display: block; border-radius: 22px; border: 1px solid var(--line); }
+  .colors p { color: var(--mid); margin-top: 14px; max-width: 640px; }
+  .swatches { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .swatches span { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; color: var(--ink); }
+  .swatches i { width: 16px; height: 16px; border-radius: 50%; display: block; }
   .coach { border-color: rgba(204, 255, 77, 0.35); background: linear-gradient(225deg, #20251A, var(--panel)); }
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--low); font-size: 14px; }
   a { color: var(--volt); }
@@ -105,14 +110,29 @@
     </div>
   </section>
 
+  <section class="colors">
+    <h2>Your color</h2>
+    <img src="screenshots/colors.png" alt="Forge in green, red, purple, pink and blue">
+    <div class="swatches">
+      <span><i style="background:#CCFF4D"></i>Green</span>
+      <span><i style="background:#FF4545"></i>Red</span>
+      <span><i style="background:#B57BFF"></i>Purple</span>
+      <span><i style="background:#FF6FC8"></i>Pink</span>
+      <span><i style="background:#4DA8FF"></i>Blue</span>
+    </div>
+    <p>Pick one when you set up. It runs through the whole app, the home-screen widget and the pictures you share. Change it any time in Settings.</p>
+  </section>
+
   <section>
     <div class="features">
       <div class="feature"><h3>Programs</h3><p>Six ready-made programs or build your own from 85 gym and home exercises. Share a program with a QR code.</p></div>
       <div class="feature"><h3>Every set</h3><p>Tick sets, see last time's numbers, get told when to add weight. Personal records are spotted for you.</p></div>
-      <div class="feature"><h3>Food</h3><p>Calories and protein, food search, barcode and label scanning, and 35 Syrian dishes with sourced values.</p></div>
+      <div class="feature"><h3>Food</h3><p>Calories and protein, food search, barcode and label scanning, and 35 Syrian dishes with sourced values. Go over your calories and it tells you.</p></div>
       <div class="feature"><h3>Consequences</h3><p>Miss a workout and a penalty lands. Sick? Mark it and nothing is lost. Your data stays on your phone.</p></div>
       <div class="feature coach"><h3>Gyms and coaches</h3><p>Want Forge with your brand and your own programs for your clients? <a href="https://www.linkedin.com/in/husseinalherk">Get in touch</a>.</p></div>
-      <div class="feature"><h3>Share</h3><p>Turn your progress, a day of eating or a workout into a clean image for Instagram or WhatsApp.</p></div>
+      <div class="feature"><h3>Share</h3><p>Turn your progress, a day of eating or a workout into a clean image for Instagram or WhatsApp, in your color.</p></div>
+      <div class="feature"><h3>A guide on first open</h3><p>A short tour of every tab, with the one thing not to miss on each. Replay it any time with the ? button.</p></div>
+      <div class="feature"><h3>Streaks</h3><p>Your session streak sits at the top of Today. Habits, protein and weigh-ins have their own streaks and a weekly score.</p></div>
     </div>
   </section>
 
