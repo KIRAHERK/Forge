@@ -89,6 +89,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import com.forge.app.ui.theme.C
 import com.forge.app.ui.theme.T
 import kotlinx.coroutines.delay
@@ -816,7 +817,8 @@ fun BarChart(
     val reveal by animateFloatAsState(1f, tween(800, easing = FastOutSlowInEasing), label = "bars")
     val maxV = (values.maxOrNull() ?: 0f).coerceAtLeast((target ?: 0f) * 1.1f).coerceAtLeast(1f)
     Column(modifier.fillMaxWidth()) {
-        Box(Modifier.fillMaxWidth().height(height)) {
+        // An unspecified height fills whatever room the caller's modifier gives the chart.
+        Box(Modifier.fillMaxWidth().then(if (height.isSpecified) Modifier.height(height) else Modifier.weight(1f))) {
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
                 values.forEachIndexed { i, v ->
                     val frac = (v / maxV * reveal).coerceIn(0f, 1f)
