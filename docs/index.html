@@ -57,10 +57,23 @@
   .colors p { color: var(--mid); margin-top: 14px; max-width: 640px; }
   .swatches { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   .swatches span { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; color: var(--ink); }
+  .swatches em { font-style: normal; }
   .swatches i { width: 16px; height: 16px; border-radius: 50%; display: block; }
   .coach { border-color: rgba(204, 255, 77, 0.35); background: linear-gradient(225deg, #20251A, var(--panel)); }
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--low); font-size: 14px; }
   a { color: var(--volt); }
+  @font-face { font-family: "Cairo"; font-weight: 400; src: url("fonts/cairo_regular.ttf"); }
+  @font-face { font-family: "Cairo"; font-weight: 600; src: url("fonts/cairo_semi_bold.ttf"); }
+  @font-face { font-family: "Changa"; font-weight: 700; src: url("fonts/changa_bold.ttf"); }
+  .topbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+  .lang { background: transparent; color: var(--ink); border: 1px solid #34343B; border-radius: 999px; padding: 8px 16px; font: 600 15px "Cairo", "Barlow", sans-serif; cursor: pointer; }
+  .lang:hover { border-color: var(--volt); color: var(--volt); }
+  .lang:focus-visible { outline: 2px solid var(--volt); outline-offset: 2px; }
+  html[lang="ar"] body { font-family: "Cairo", "Barlow", system-ui, sans-serif; }
+  html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] .btn, html[lang="ar"] .step b { font-family: "Changa", "Barlow Condensed", sans-serif; text-transform: none; letter-spacing: 0; }
+  html[lang="ar"] h1 { line-height: 1.15; }
+  html[lang="ar"] .eyebrow { letter-spacing: 0; }
+  html[lang="ar"] .en-only { display: none; }
   @media (max-width: 720px) {
     main { padding-top: 32px; }
     .hero { grid-template-columns: 1fr; }
@@ -72,34 +85,35 @@
 </head>
 <body>
 <main>
+  <div class="topbar"><button class="lang" id="lang" type="button" aria-label="Read this page in Arabic">العربية</button></div>
   <div class="hero">
     <div>
-      <div class="eyebrow">Forge · by Hussein Al Herk</div>
-      <h1>Your plan.<br><span>Enforced.</span></h1>
-      <p class="lead">A training and nutrition app for Android, in English and Arabic, that holds you to your plan. Pick a program or build your own, log every set, track food and weight, and share your progress.</p>
+      <div class="eyebrow" data-ar="Forge · من Hussein Al Herk">Forge · by Hussein Al Herk</div>
+      <h1 data-ar="خطتك.&lt;br&gt;&lt;span&gt;بالتزام.&lt;/span&gt;">Your plan.<br><span>Enforced.</span></h1>
+      <p class="lead" data-ar="تطبيق تمرين وتغذية لأندرويد، بالعربية والإنجليزية، يُلزمك بخطتك. اختر برنامجًا أو أنشئ برنامجك، وسجّل كل جولة، وتابع طعامك ووزنك، وشارك تقدّمك.">A training and nutrition app for Android, in English and Arabic, that holds you to your plan. Pick a program or build your own, log every set, track food and weight, and share your progress.</p>
       <div class="cta">
-        <a class="btn primary" href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk">Download for Android</a>
-        <a class="btn ghost" href="https://github.com/KIRAHERK/Forge">Source code</a>
+        <a class="btn primary" href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk" data-ar="نزّل لأندرويد">Download for Android</a>
+        <a class="btn ghost" href="https://github.com/KIRAHERK/Forge" data-ar="الشيفرة المصدرية">Source code</a>
       </div>
-      <div class="meta">Free for personal use · Android 8.0 or newer · About 18 MB · Updates itself</div>
+      <div class="meta" data-ar="مجاني للاستخدام الشخصي · أندرويد 8.0 فأحدث · نحو 18 ميغابايت · يحدّث نفسه">Free for personal use · Android 8.0 or newer · About 18 MB · Updates itself</div>
     </div>
     <div class="qr">
       <img src="download-qr.png" alt="QR code that downloads Forge">
-      <div>On a computer? Scan with your phone.</div>
+      <div data-ar="على الحاسوب؟ امسح الرمز بهاتفك.">On a computer? Scan with your phone.</div>
     </div>
   </div>
 
   <section>
-    <h2>Install in three steps</h2>
+    <h2 data-ar="التثبيت في ثلاث خطوات">Install in three steps</h2>
     <div class="steps">
-      <div class="step"><b>1</b><p>Tap <strong>Download for Android</strong> on your phone. Forge isn't on the Play Store, so it downloads as a file.</p></div>
-      <div class="step"><b>2</b><p>Open the file. If Android asks, allow your browser to install apps. It only asks once.</p></div>
-      <div class="step"><b>3</b><p>Done. Forge checks for updates itself and installs them over the old version, so your data stays.</p></div>
+      <div class="step"><b>1</b><p data-ar="اضغط &lt;strong&gt;نزّل لأندرويد&lt;/strong&gt; على هاتفك. Forge ليس على متجر Play، لذلك يُنزَّل كملف.">Tap <strong>Download for Android</strong> on your phone. Forge isn't on the Play Store, so it downloads as a file.</p></div>
+      <div class="step"><b>2</b><p data-ar="افتح الملف. إن سألك أندرويد، اسمح لمتصفحك بتثبيت التطبيقات. يسأل مرة واحدة فقط.">Open the file. If Android asks, allow your browser to install apps. It only asks once.</p></div>
+      <div class="step"><b>3</b><p data-ar="تم. يبحث Forge عن التحديثات بنفسه ويثبّتها فوق الإصدار القديم، فتبقى بياناتك.">Done. Forge checks for updates itself and installs them over the old version, so your data stays.</p></div>
     </div>
   </section>
 
   <section>
-    <h2>Inside</h2>
+    <h2 data-ar="داخل التطبيق">Inside</h2>
     <div class="shots">
       <img src="screenshots/today.png" alt="Today screen">
       <img src="screenshots/workout.png" alt="Workout screen">
@@ -111,43 +125,70 @@
   </section>
 
   <section class="colors">
-    <h2>Your color</h2>
+    <h2 data-ar="لونك">Your color</h2>
     <img src="screenshots/colors.png" alt="Forge in green, red, purple, pink and blue">
     <div class="swatches">
-      <span><i style="background:#CCFF4D"></i>Green</span>
-      <span><i style="background:#FF4545"></i>Red</span>
-      <span><i style="background:#B57BFF"></i>Purple</span>
-      <span><i style="background:#FF6FC8"></i>Pink</span>
-      <span><i style="background:#4DA8FF"></i>Blue</span>
+      <span><i style="background:#CCFF4D"></i><em data-ar="أخضر">Green</em></span>
+      <span><i style="background:#FF4545"></i><em data-ar="أحمر">Red</em></span>
+      <span><i style="background:#B57BFF"></i><em data-ar="بنفسجي">Purple</em></span>
+      <span><i style="background:#FF6FC8"></i><em data-ar="وردي">Pink</em></span>
+      <span><i style="background:#4DA8FF"></i><em data-ar="أزرق">Blue</em></span>
     </div>
-    <p>Pick one when you set up. It runs through the whole app, the home-screen widget and the pictures you share. Change it any time in Settings.</p>
+    <p data-ar="اختر لونك عند الإعداد. يظهر في التطبيق كله، وفي الأداة على الشاشة الرئيسية، وفي الصور التي تشاركها. ويمكنك تغييره في أي وقت من الإعدادات.">Pick one when you set up. It runs through the whole app, the home-screen widget and the pictures you share. Change it any time in Settings.</p>
   </section>
 
-  <section class="colors" lang="en">
-    <h2>In Arabic too</h2>
+  <section class="colors">
+    <h2 data-ar="بالعربية أيضًا">In Arabic too</h2>
     <img src="screenshots/arabic.png" alt="Forge in Arabic: Today, Train and Fuel">
-    <p>The whole app in clear Arabic, laid out right to left. Exercise names come with the English name underneath, and the motivation lines are written in Arabic. It follows your phone's language, or switch in Settings.</p>
-    <p lang="ar" dir="rtl" style="font-size:18px;color:var(--ink)">التطبيق كاملًا باللغة العربية، من اليمين إلى اليسار.</p>
+    <p data-ar="التطبيق كاملًا بعربية واضحة، من اليمين إلى اليسار. أسماء التمارين بالعربية مع الاسم الإنجليزي تحتها، وعبارات التحفيز مكتوبة بالعربية. يتبع لغة هاتفك، أو غيّرها من الإعدادات.">The whole app in clear Arabic, laid out right to left. Exercise names come with the English name underneath, and the motivation lines are written in Arabic. It follows your phone's language, or switch in Settings.</p>
+    <p lang="ar" dir="rtl" class="en-only" style="font-size:18px;color:var(--ink)">التطبيق كاملًا باللغة العربية، من اليمين إلى اليسار.</p>
   </section>
 
   <section>
     <div class="features">
-      <div class="feature"><h3>Programs</h3><p>Six ready-made programs or build your own from 85 gym and home exercises. Share a program with a QR code.</p></div>
-      <div class="feature"><h3>Every set</h3><p>Tick sets, see last time's numbers, get told when to add weight. Personal records are spotted for you.</p></div>
-      <div class="feature"><h3>Food</h3><p>Calories and protein, food search, barcode and label scanning, and 35 Syrian dishes with sourced values. Go over your calories and it tells you.</p></div>
-      <div class="feature"><h3>Consequences</h3><p>Miss a workout and a penalty lands. Sick? Mark it and nothing is lost. Your data stays on your phone.</p></div>
-      <div class="feature coach"><h3>Gyms and coaches</h3><p>Want Forge with your brand and your own programs for your clients? <a href="https://www.linkedin.com/in/husseinalherk">Get in touch</a>.</p></div>
-      <div class="feature"><h3>Share</h3><p>Turn your progress, a day of eating or a workout into a clean image for Instagram or WhatsApp, in your color.</p></div>
-      <div class="feature"><h3>A guide on first open</h3><p>A short tour of every tab, with the one thing not to miss on each. Replay it any time with the ? button.</p></div>
-      <div class="feature"><h3>Streaks</h3><p>Your session streak sits at the top of Today. Habits, protein and weigh-ins have their own streaks and a weekly score.</p></div>
+      <div class="feature"><h3 data-ar="البرامج">Programs</h3><p data-ar="ستة برامج جاهزة، أو أنشئ برنامجك من 85 تمرينًا للنادي والمنزل. وشارك أي برنامج برمز QR.">Six ready-made programs or build your own from 85 gym and home exercises. Share a program with a QR code.</p></div>
+      <div class="feature"><h3 data-ar="كل جولة">Every set</h3><p data-ar="علّم الجولات، وشاهد أرقام المرة السابقة، وسيخبرك التطبيق متى تزيد الوزن. ويكتشف أرقامك القياسية بنفسه.">Tick sets, see last time's numbers, get told when to add weight. Personal records are spotted for you.</p></div>
+      <div class="feature"><h3 data-ar="الطعام">Food</h3><p data-ar="السعرات والبروتين، والبحث عن الأطعمة، ومسح الباركود وجدول القيم الغذائية، و35 أكلة سورية بقيم موثّقة. وإن تجاوزت سعراتك يخبرك.">Calories and protein, food search, barcode and label scanning, and 35 Syrian dishes with sourced values. Go over your calories and it tells you.</p></div>
+      <div class="feature"><h3 data-ar="العواقب">Consequences</h3><p data-ar="إن فاتك تمرين تقع عقوبة. مريض؟ سجّل ذلك ولن تخسر شيئًا. وبياناتك تبقى على هاتفك.">Miss a workout and a penalty lands. Sick? Mark it and nothing is lost. Your data stays on your phone.</p></div>
+      <div class="feature coach"><h3 data-ar="النوادي والمدربون">Gyms and coaches</h3><p data-ar="تريد Forge بعلامتك التجارية وبرامجك الخاصة لعملائك؟ &lt;a href=&quot;https://www.linkedin.com/in/husseinalherk&quot;&gt;تواصل معي&lt;/a&gt;.">Want Forge with your brand and your own programs for your clients? <a href="https://www.linkedin.com/in/husseinalherk">Get in touch</a>.</p></div>
+      <div class="feature"><h3 data-ar="المشاركة">Share</h3><p data-ar="حوّل تقدّمك، أو طعام يومك، أو تمرينك إلى صورة مرتبة لإنستغرام أو واتساب، بلونك.">Turn your progress, a day of eating or a workout into a clean image for Instagram or WhatsApp, in your color.</p></div>
+      <div class="feature"><h3 data-ar="دليل عند أول فتح">A guide on first open</h3><p data-ar="جولة قصيرة في كل قسم، مع أهم ما لا يجب أن يفوتك في كل منها. أعد عرضها في أي وقت من زر ؟.">A short tour of every tab, with the one thing not to miss on each. Replay it any time with the ? button.</p></div>
+      <div class="feature"><h3 data-ar="السلاسل">Streaks</h3><p data-ar="سلسلة جلساتك في أعلى صفحة اليوم. وللعادات والبروتين وتسجيل الوزن سلاسلها الخاصة ونتيجة أسبوعية.">Your session streak sits at the top of Today. Habits, protein and weigh-ins have their own streaks and a weekly score.</p></div>
     </div>
   </section>
 
-  <footer>
+  <footer data-ar="صمّمه وطوّره <a href=&quot;https://kiraherk.github.io&quot;>Hussein Al Herk</a> · <a href=&quot;https://github.com/KIRAHERK/Forge&quot;>GitHub</a> · مجاني للاستخدام الشخصي بموجب ترخيص PolyForm Noncommercial. الاستخدام التجاري يحتاج ترخيصًا.">
     Designed and developed by <a href="https://kiraherk.github.io">Hussein Al Herk</a> ·
     <a href="https://github.com/KIRAHERK/Forge">GitHub</a> ·
     Free for personal use under the PolyForm Noncommercial License. Commercial use needs a license.
   </footer>
 </main>
+<script>
+  // English is in the page; Arabic sits in each element's data-ar. The choice is remembered,
+  // and an Arabic phone (or a link ending in #ar) opens in Arabic.
+  (function () {
+    var els = document.querySelectorAll("[data-ar]");
+    els.forEach(function (el) { el.setAttribute("data-en", el.innerHTML); });
+    var btn = document.getElementById("lang");
+    function apply(lang) {
+      var ar = lang === "ar";
+      document.documentElement.lang = ar ? "ar" : "en";
+      document.documentElement.dir = ar ? "rtl" : "ltr";
+      els.forEach(function (el) { el.innerHTML = el.getAttribute(ar ? "data-ar" : "data-en"); });
+      btn.textContent = ar ? "English" : "العربية";
+      btn.setAttribute("aria-label", ar ? "Read this page in English" : "Read this page in Arabic");
+      document.title = ar ? "Forge · تنزيل" : "Forge · Download";
+    }
+    var saved = null;
+    try { saved = localStorage.getItem("forge-lang"); } catch (e) {}
+    var start = location.hash === "#ar" ? "ar" : location.hash === "#en" ? "en" : saved || ((navigator.language || "").toLowerCase().indexOf("ar") === 0 ? "ar" : "en");
+    apply(start);
+    btn.addEventListener("click", function () {
+      var next = document.documentElement.lang === "ar" ? "en" : "ar";
+      apply(next);
+      try { localStorage.setItem("forge-lang", next); } catch (e) {}
+    });
+  })();
+</script>
 </body>
 </html>
