@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -179,22 +181,22 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
     fun retry() { stage = Stage.Camera; session++ }
 
     fun lookup(code: String) {
-        stage = Stage.Busy("Looking up $code")
+        stage = Stage.Busy(t("Looking up %s", code))
         scope.launch {
             stage = when (val r = OpenFoodFacts.lookup(code)) {
                 is OpenFoodFacts.Lookup.Found -> { onPick(r.product.pick()); return@launch }
                 is OpenFoodFacts.Lookup.NoNutrition -> {
                     nameHint = r.name
-                    Stage.Message("No nutrition data", "${r.name.ifBlank { "This product" }} is in Open Food Facts, but without its nutrition table. Scan the label instead.", toLabel = true)
+                    Stage.Message(t("No nutrition data"), t("%s is in Open Food Facts, but without its nutrition table. Scan the label instead.", r.name.ifBlank { t("This product") }), toLabel = true)
                 }
-                OpenFoodFacts.Lookup.NotFound -> Stage.Message("Not in Open Food Facts yet", "Barcode $code isn't in the database. Scan the nutrition label and name the food yourself.", toLabel = true)
-                OpenFoodFacts.Lookup.Offline -> Stage.Message("No connection", "Couldn't reach Open Food Facts. Check your connection, or scan the label instead: that works offline.", toLabel = true)
+                OpenFoodFacts.Lookup.NotFound -> Stage.Message(t("Not in Open Food Facts yet"), t("Barcode %s isn't in the database. Scan the nutrition label and name the food yourself.", code), toLabel = true)
+                OpenFoodFacts.Lookup.Offline -> Stage.Message(t("No connection"), t("Couldn't reach Open Food Facts. Check your connection, or scan the label instead: that works offline."), toLabel = true)
             }
         }
     }
 
     fun read(image: InputImage) {
-        stage = Stage.Busy("Reading the label")
+        stage = Stage.Busy(t("Reading the label"))
         scope.launch {
             val text = runCatching { recognizer.process(image).await() }.getOrNull()
             val lines = text?.toLines()
@@ -202,8 +204,8 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
             val result = lines?.let { LabelParser.parse(it) }
             stage = if (result == null || result.empty) {
                 Stage.Message(
-                    "Couldn't read a nutrition table",
-                    "Fill the frame with the table, keep the phone steady and make sure it's well lit. Arabic-only labels can't be read yet; use the English side if there is one.",
+                    t("Couldn't read a nutrition table"),
+                    t("Fill the frame with the table, keep the phone steady and make sure it's well lit. Arabic-only labels can't be read yet; use the English side if there is one."),
                 )
             } else Stage.Review(result)
         }
@@ -213,11 +215,11 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
         if (uri == null) return@rememberLauncherForActivityResult
         val image = runCatching { InputImage.fromFilePath(ctx, uri) }.getOrNull() ?: return@rememberLauncherForActivityResult
         if (mode == ScanMode.LABEL) read(image) else {
-            stage = Stage.Busy("Looking for a barcode")
+            stage = Stage.Busy(t("Looking for a barcode"))
             scope.launch {
                 val code = runCatching { barcodes.process(image).await() }.getOrNull()
                     ?.firstNotNullOfOrNull { b -> b.rawValue?.takeIf { OpenFoodFacts.validBarcode(it) } }
-                if (code != null) lookup(code) else stage = Stage.Message("No barcode found", "Try a sharper photo, or scan the nutrition label instead.", toLabel = true)
+                if (code != null) lookup(code) else stage = Stage.Message(t("No barcode found"), t("Try a sharper photo, or scan the nutrition label instead."), toLabel = true)
             }
         }
     }
@@ -245,14 +247,14 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
             ScanFrame(mode)
         } else {
             Column(Modifier.align(Alignment.Center).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("CAMERA IS OFF", style = T.H2, color = C.Hi)
+                Text(t("CAMERA IS OFF"), style = T.H2, color = C.Hi)
                 Gap(8.dp)
                 Text(
-                    "Forge needs the camera to read barcodes and labels. Photos stay on your phone. You can also pick a photo you already took.",
+                    t("Forge needs the camera to read barcodes and labels. Photos stay on your phone. You can also pick a photo you already took."),
                     style = T.Body, color = C.Mid, textAlign = TextAlign.Center,
                 )
                 Gap(16.dp)
-                PrimaryButton(if (asked) "Open settings" else "Allow camera", {
+                PrimaryButton(if (asked) t("Open settings") else t("Allow camera"), {
                     if (asked) ctx.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", ctx.packageName, null)))
                     else permission.launch(Manifest.permission.CAMERA)
                 }, height = 50.dp)
@@ -262,16 +264,16 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
         // Top bar
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconBtn(Icons.Rounded.Close, "Close", onDismiss, tint = C.Hi, bg = Color.Black.copy(alpha = 0.45f))
+                IconBtn(Icons.Rounded.Close, t("Close"), onDismiss, tint = C.Hi, bg = Color.Black.copy(alpha = 0.45f))
                 Spacer(Modifier.weight(1f))
                 Segmented(
-                    listOf("Barcode", "Label"), if (mode == ScanMode.BARCODE) 0 else 1,
+                    listOf(t("Barcode"), t("Label")), if (mode == ScanMode.BARCODE) 0 else 1,
                     { mode = if (it == 0) ScanMode.BARCODE else ScanMode.LABEL; retry() },
                     colors = listOf(C.Volt, C.Volt),
                 )
                 Spacer(Modifier.weight(1f))
                 if (granted && hasFlash) {
-                    IconBtn(if (torch) Icons.Rounded.FlashlightOn else Icons.Rounded.FlashlightOff, "Torch", { torch = !torch }, tint = if (torch) C.Volt else C.Hi, bg = Color.Black.copy(alpha = 0.45f))
+                    IconBtn(if (torch) Icons.Rounded.FlashlightOn else Icons.Rounded.FlashlightOff, t("Torch"), { torch = !torch }, tint = if (torch) C.Volt else C.Hi, bg = Color.Black.copy(alpha = 0.45f))
                 } else Spacer(Modifier.size(44.dp))
             }
         }
@@ -293,7 +295,7 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                 }
                 else -> {
                     Text(
-                        if (mode == ScanMode.BARCODE) "Point at the barcode. It reads by itself." else "Fit the nutrition table inside the frame, then take the photo.",
+                        if (mode == ScanMode.BARCODE) t("Point at the barcode. It reads by itself.") else t("Fit the nutrition table inside the frame, then take the photo."),
                         style = T.BodyS, color = C.Hi, textAlign = TextAlign.Center,
                         modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.5f)).padding(horizontal = 12.dp, vertical = 8.dp),
                     )
@@ -303,9 +305,9 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                             Modifier.size(76.dp).clip(CircleShape).border(3.dp, C.Hi, CircleShape).padding(6.dp).clip(CircleShape).background(C.Volt)
                                 .clickable {
                                     val cap = capture.value ?: return@clickable
-                                    stage = Stage.Busy("Reading the label")
+                                    stage = Stage.Busy(t("Reading the label"))
                                     takePhoto(ctx, cap) { bmp, rotation ->
-                                        if (bmp == null) stage = Stage.Message("Photo failed", "The camera didn't return a photo. Try again.")
+                                        if (bmp == null) stage = Stage.Message(t("Photo failed"), t("The camera didn't return a photo. Try again."))
                                         else read(InputImage.fromBitmap(bmp, rotation))
                                     }
                                 },
@@ -313,8 +315,8 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                         Gap(16.dp)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        SecondaryButton("From photo", { photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, height = 44.dp, border = C.Hi.copy(alpha = 0.4f))
-                        if (mode == ScanMode.BARCODE) SecondaryButton("Type code", { typeCode = true }, height = 44.dp, border = C.Hi.copy(alpha = 0.4f))
+                        SecondaryButton(t("From photo"), { photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, height = 44.dp, border = C.Hi.copy(alpha = 0.4f))
+                        if (mode == ScanMode.BARCODE) SecondaryButton(t("Type code"), { typeCode = true }, height = 44.dp, border = C.Hi.copy(alpha = 0.4f))
                     }
                 }
             }
@@ -324,17 +326,17 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
     if (typeCode) {
         var code by remember { mutableStateOf("") }
         ForgeDialog(
-            title = "Barcode",
+            title = t("Barcode"),
             onDismiss = { typeCode = false },
-            confirm = "Look up",
+            confirm = t("Look up"),
             onConfirm = {
                 val c = code.filter { it.isDigit() }
                 if (OpenFoodFacts.validBarcode(c)) { typeCode = false; lookup(c) }
             },
         ) {
-            Text("The digits under the bars, 8 to 13 of them.", style = T.Small, color = C.Mid)
+            Text(t("The digits under the bars, 8 to 13 of them."), style = T.Small, color = C.Mid)
             Gap(12.dp)
-            ForgeField(code, { code = it }, "Barcode", number = true)
+            ForgeField(code, { code = it }, t("Barcode"), number = true)
         }
     }
 }
@@ -347,8 +349,8 @@ private fun MessageCard(s: Stage.Message, onRetry: () -> Unit, onLabel: () -> Un
         Text(s.body, style = T.Small, color = C.Mid)
         Gap(14.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (s.toLabel) PrimaryButton("Scan the label", onLabel, Modifier.weight(1f), height = 46.dp)
-            SecondaryButton("Try again", onRetry, if (s.toLabel) Modifier else Modifier.weight(1f), height = 46.dp)
+            if (s.toLabel) PrimaryButton(t("Scan the label"), onLabel, Modifier.weight(1f), height = 46.dp)
+            SecondaryButton(t("Try again"), onRetry, if (s.toLabel) Modifier else Modifier.weight(1f), height = 46.dp)
         }
     }
 }
@@ -491,9 +493,9 @@ private fun show(v: Double?) = when {
 }
 
 private fun LabelColumn.title(i: Int, servingG: Double?) = when (basis) {
-    Basis.PER_100 -> "Per 100 g"
-    Basis.SERVING -> "Per serving" + (servingG?.let { " · ${show(it)} g" } ?: "")
-    Basis.UNKNOWN -> "Column ${i + 1}"
+    Basis.PER_100 -> t("Per 100 g")
+    Basis.SERVING -> t("Per serving") + (servingG?.let { " · ${show(it)} g" } ?: "")
+    Basis.UNKNOWN -> t("Column %s", i + 1)
 }
 
 @Composable
@@ -519,78 +521,78 @@ private fun LabelReview(result: LabelResult, nameHint: String, onBack: () -> Uni
 
     Column(Modifier.fillMaxSize().background(C.Bg).systemBarsPadding().imePadding()) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconBtn(Icons.AutoMirrored.Rounded.ArrowBack, "Retake", onBack)
+            IconBtn(Icons.AutoMirrored.Rounded.ArrowBack, t("Retake"), onBack)
             Column(Modifier.padding(horizontal = 6.dp)) {
-                Text("CHECK THE LABEL", style = T.H3, color = C.Hi)
-                Text("Compare each number with the package", style = T.Small, color = C.Mid)
+                Text(t("CHECK THE LABEL"), style = T.H3, color = C.Hi)
+                Text(t("Compare each number with the package"), style = T.Small, color = C.Mid)
             }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             Gap(8.dp)
-            ForgeField(name, { name = it }, "What is this food?")
+            ForgeField(name, { name = it }, t("What is this food?"))
             Gap(16.dp)
             if (result.columns.size > 1) {
-                Eyebrow("The label has ${result.columns.size} columns")
+                Eyebrow(t("The label has %s columns", result.columns.size))
                 Gap(8.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     result.columns.forEachIndexed { i, cl -> Chip(cl.title(i, result.servingG), column == i, { column = i }) }
                 }
                 Gap(16.dp)
             }
-            Eyebrow("These values are")
+            Eyebrow(t("These values are"))
             Gap(8.dp)
-            Segmented(listOf("Per 100 g", "Per serving"), if (per100) 0 else 1, { per100 = it == 0 }, colors = listOf(C.Volt, C.Volt))
+            Segmented(listOf(t("Per 100 g"), t("Per serving")), if (per100) 0 else 1, { per100 = it == 0 }, colors = listOf(C.Volt, C.Volt))
             if (!per100) {
                 Gap(10.dp)
-                ForgeField(serving, { serving = it }, "Serving size (optional)", number = true, suffix = "g")
+                ForgeField(serving, { serving = it }, t("Serving size (optional)"), number = true, suffix = t("g"))
             }
             Gap(16.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ForgeField(kcal, { kcal = it; calculated = false }, "Calories", Modifier.weight(1f), number = true, suffix = "kcal")
-                ForgeField(p, { p = it }, "Protein", Modifier.weight(1f), number = true, suffix = "g")
+                ForgeField(kcal, { kcal = it; calculated = false }, t("Calories"), Modifier.weight(1f), number = true, suffix = t("kcal"))
+                ForgeField(p, { p = it }, t("Protein"), Modifier.weight(1f), number = true, suffix = t("g"))
             }
             Gap(8.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ForgeField(f, { f = it }, "Fat", Modifier.weight(1f), number = true, suffix = "g")
-                ForgeField(c, { c = it }, "Carbs", Modifier.weight(1f), number = true, suffix = "g")
+                ForgeField(f, { f = it }, t("Fat"), Modifier.weight(1f), number = true, suffix = t("g"))
+                ForgeField(c, { c = it }, t("Carbs"), Modifier.weight(1f), number = true, suffix = t("g"))
             }
             if (missing.isNotEmpty()) {
                 Gap(10.dp)
-                Text("Not found on the label: ${missing.joinToString(", ")}. Type ${if (missing.size == 1) "it" else "them"} in.", style = T.Small, color = C.Amber)
+                Text(if (missing.size == 1) t("Not found on the label: %s. Type it in.", missing.joinToString(", ")) else t("Not found on the label: %s. Type them in.", missing.joinToString(", ")), style = T.Small, color = C.Amber)
             }
             if (col.kcalFromKj && col.kcal != null) {
                 Gap(6.dp)
-                Text("The label gave energy in kJ only; converted to kcal.", style = T.Small, color = C.Mid)
+                Text(t("The label gave energy in kJ only; converted to kcal."), style = T.Small, color = C.Mid)
             }
             if (num(kcal) == null && num(p) != null && num(f) != null && num(c) != null) {
                 Gap(10.dp)
-                SecondaryButton("Work out calories from protein, fat, carbs", {
+                SecondaryButton(t("Work out calories from protein, fat, carbs"), {
                     kcal = (4 * num(p)!! + 9 * num(f)!! + 4 * num(c)!!).roundToInt().toString()
                     calculated = true
                 }, height = 44.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f))
             }
             Gap(16.dp)
-            Text("Read on your phone; nothing is uploaded. OCR can misread a digit, so check before adding.", style = T.Tiny, color = C.Lo)
+            Text(t("Read on your phone; nothing is uploaded. OCR can misread a digit, so check before adding."), style = T.Tiny, color = C.Lo)
             Gap(24.dp)
         }
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
-            PrimaryButton("Use these values", {
+            PrimaryButton(t("Use these values"), {
                 val (k, pp, ff, cc) = values.map { it!! }
                 val m = Macros(k.roundToInt(), pp, ff, cc)
                 val note = buildList {
-                    add("Scanned from the label")
-                    if (col.kcalFromKj && !calculated) add("calories converted from kJ")
-                    if (calculated) add("calories worked out from macros")
+                    add(t("Scanned from the label"))
+                    if (col.kcalFromKj && !calculated) add(t("calories converted from kJ"))
+                    if (calculated) add(t("calories worked out from macros"))
                 }.joinToString(" · ")
                 val pick = when {
                     per100 -> FoodPick(
                         name = name.trim(), per100 = m,
-                        portions = listOfNotNull(servingG?.let { Portion("1 serving", it) }, Portion("100 g", 100.0)),
+                        portions = listOfNotNull(servingG?.let { Portion(t("1 serving"), it) }, Portion("100 g", 100.0)),
                         source = "label", sourceNote = note, fromOutside = true,
                     )
                     servingG != null -> FoodPick(
                         name = name.trim(), per100 = m * (100.0 / servingG),
-                        portions = listOf(Portion("1 serving", servingG), Portion("100 g", 100.0)),
+                        portions = listOf(Portion(t("1 serving"), servingG), Portion("100 g", 100.0)),
                         source = "label", sourceNote = note, fromOutside = true,
                     )
                     else -> FoodPick(name = name.trim(), base = m, source = "label", sourceNote = note, fromOutside = true)

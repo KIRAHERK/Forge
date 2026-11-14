@@ -1,5 +1,7 @@
 package com.forge.app.widget
 
+import com.forge.app.i18n.t
+
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -80,18 +82,18 @@ class ForgeWidget : GlanceAppWidget() {
         val day = s.dayFor(today)
         val st = Stats.dayStatus(s, today, now, done)
         val (status, color) = when {
-            !s.onboarded -> "Open the app to set up" to 0
-            st == DayStatus.DONE -> "Done. Recover and eat." to 1
-            st == DayStatus.SICK -> "Sick day. Rest up." to 0
+            !s.onboarded -> t("Open the app to set up") to 0
+            st == DayStatus.DONE -> t("Done. Recover and eat.") to 1
+            st == DayStatus.SICK -> t("Sick day. Rest up.") to 0
             day == null -> Program.REST_NOTE to 0
-            st == DayStatus.PENDING -> "Due ${Fmt.time(s.deadline)} · ${Fmt.left(now, s.deadlineAt(today))} left" to 1
-            else -> "Missed. Penalty active." to 2
+            st == DayStatus.PENDING -> t("Due %1${'$'}s · %2${'$'}s left", Fmt.time(s.deadline), Fmt.left(now, s.deadlineAt(today))) to 1
+            else -> t("Missed. Penalty active.") to 2
         }
         val pen = Graph.db.penalties().activeNow().size
         return WidgetData(
             onboarded = s.onboarded,
             date = Fmt.day(today).uppercase(),
-            title = if (st == DayStatus.DONE && day == null) "Extra session done" else day?.title?.uppercase() ?: "REST DAY",
+            title = if (st == DayStatus.DONE && day == null) t("Extra session done") else day?.title?.uppercase() ?: t("REST DAY"),
             status = status,
             statusColor = color,
             protein = m.protein.toInt(),
@@ -111,12 +113,12 @@ class ForgeWidget : GlanceAppWidget() {
                 .clickable(actionStartActivity(open)),
         ) {
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("FORGE · ${d.date}", style = TextStyle(color = MID, fontSize = 11.sp, fontWeight = FontWeight.Medium))
+                Text(t("FORGE · %s", d.date), style = TextStyle(color = MID, fontSize = 11.sp, fontWeight = FontWeight.Medium))
                 Spacer(GlanceModifier.defaultWeight())
                 if (d.penalties > 0) {
-                    Text("${d.penalties} PENALTY  ", style = TextStyle(color = RED, fontSize = 11.sp, fontWeight = FontWeight.Bold))
+                    Text(t("%s PENALTY  ", d.penalties), style = TextStyle(color = RED, fontSize = 11.sp, fontWeight = FontWeight.Bold))
                 }
-                Text("LVL ${d.level}", style = TextStyle(color = VOLT, fontSize = 11.sp, fontWeight = FontWeight.Bold))
+                Text(t("LVL %s", d.level), style = TextStyle(color = VOLT, fontSize = 11.sp, fontWeight = FontWeight.Bold))
             }
             Spacer(GlanceModifier.height(6.dp))
             Text(d.title, style = TextStyle(color = HI, fontSize = 20.sp, fontWeight = FontWeight.Bold), maxLines = 1)
@@ -126,9 +128,9 @@ class ForgeWidget : GlanceAppWidget() {
                 maxLines = 1,
             )
             Spacer(GlanceModifier.height(10.dp))
-            Bar("Protein", "${d.protein} / ${d.proteinTarget} g", d.protein.toFloat() / d.proteinTarget.coerceAtLeast(1))
+            Bar(t("Protein"), "${d.protein} / ${d.proteinTarget} g", d.protein.toFloat() / d.proteinTarget.coerceAtLeast(1))
             Spacer(GlanceModifier.height(6.dp))
-            Bar("Calories", "${Fmt.num(d.kcal)} / ${Fmt.num(d.kcalTarget)}", d.kcal.toFloat() / d.kcalTarget.coerceAtLeast(1))
+            Bar(t("Calories"), "${Fmt.num(d.kcal)} / ${Fmt.num(d.kcalTarget)}", d.kcal.toFloat() / d.kcalTarget.coerceAtLeast(1))
         }
     }
 

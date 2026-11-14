@@ -1,5 +1,7 @@
 package com.forge.app.ui.share
 
+import com.forge.app.i18n.t
+
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -98,7 +100,7 @@ const val CARD_DENSITY = 4f // the card is laid out at 360 × 450 dp
 
 /** Small share icon for the corner of a panel. */
 @Composable
-fun ShareIcon(onClick: () -> Unit) = IconBtn(Icons.Rounded.Share, "Share", onClick, tint = C.Mid, size = 36.dp)
+fun ShareIcon(onClick: () -> Unit) = IconBtn(Icons.Rounded.Share, t("Share"), onClick, tint = C.Mid, size = 36.dp)
 
 // ------------------------------------------------------------------ dialog
 
@@ -118,8 +120,8 @@ internal fun ShareDialog(name: String, onDismiss: () -> Unit, card: @Composable 
             Box(Modifier.clip(RoundedCornerShape(18.dp)).clickable(remember { MutableInteractionSource() }, null) {}) { CardCanvas(layer, card) }
             Gap(18.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SecondaryButton("Cancel", onDismiss, Modifier.weight(1f), height = 50.dp)
-                PrimaryButton(if (busy) "Preparing" else "Share", {
+                SecondaryButton(t("Cancel"), onDismiss, Modifier.weight(1f), height = 50.dp)
+                PrimaryButton(if (busy) t("Preparing") else t("Share"), {
                     if (busy) return@PrimaryButton
                     busy = true
                     scope.launch {
@@ -175,12 +177,12 @@ private suspend fun shareBitmap(ctx: Context, image: Bitmap, name: String) {
         putExtra(Intent.EXTRA_STREAM, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    ctx.startActivity(Intent.createChooser(send, "Share").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    ctx.startActivity(Intent.createChooser(send, t("Share")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
 // ------------------------------------------------------------------ frame
 
-private val cardDate = DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.ENGLISH)
+private val cardDate get() = DateTimeFormatter.ofPattern("EEE d MMM yyyy", com.forge.app.i18n.Lang.locale)
 
 /** Shared layout of every card: brand, title, optional badge, content, a line, the credit. */
 @Composable
@@ -205,7 +207,7 @@ internal fun CardFrame(
         }
         Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("FORGE", style = T.H3.copy(letterSpacing = 3.sp), color = C.Volt, modifier = Modifier.weight(1f))
+                Text(t("FORGE"), style = T.H3.copy(letterSpacing = 3.sp), color = C.Volt, modifier = Modifier.weight(1f))
                 Text(date.format(cardDate), style = T.Tiny, color = C.Mid)
             }
             Gap(12.dp)
@@ -225,7 +227,7 @@ internal fun CardFrame(
             Hairline()
             Gap(8.dp)
             Row {
-                Text("Tracked with Forge", style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
+                Text(t("Tracked with Forge"), style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
                 Text("by ${Credits.AUTHOR}", style = T.Tiny, color = C.Lo)
             }
         }
@@ -261,37 +263,37 @@ fun WorkoutCard(sessionId: Long) {
     }
     CardFrame(
         date = LocalDate.ofEpochDay(session.date),
-        eyebrow = day?.let { "Day ${it.number} · workout" } ?: "Workout",
-        title = day?.name ?: "Session",
+        eyebrow = day?.let { t("Day %s · workout", it.number) } ?: t("Workout"),
+        title = day?.name ?: t("Session"),
         badge = when {
-            prs.isNotEmpty() -> if (prs.size == 1) "New personal record" else "${prs.size} new personal records"
-            session.complete -> "Session complete"
+            prs.isNotEmpty() -> if (prs.size == 1) t("New personal record") else t("%s new personal records", prs.size)
+            session.complete -> t("Session complete")
             else -> null
         },
         line = when {
-            prs.isNotEmpty() -> "Stronger than last time."
-            streak >= 3 -> "$streak sessions in a row."
+            prs.isNotEmpty() -> t("Stronger than last time.")
+            streak >= 3 -> t("%s sessions in a row.", streak)
             session.complete -> Lines.done(session.id)
-            else -> "Logged. The next one counts too."
+            else -> t("Logged. The next one counts too.")
         },
     ) {
         Row(Modifier.fillMaxWidth()) {
-            Stat("Time", "$minutes", Modifier.weight(1f), unit = "min")
-            Stat("Volume", Fmt.num(session.volumeKg.roundToInt()), Modifier.weight(1.2f), unit = "kg")
-            Stat("Sets", "${done.size}", Modifier.weight(0.8f))
-            Stat("Streak", "$streak", Modifier.weight(0.9f), color = if (streak > 0) C.Volt else C.Hi)
+            Stat(t("Time"), "$minutes", Modifier.weight(1f), unit = t("min"))
+            Stat(t("Volume"), Fmt.num(session.volumeKg.roundToInt()), Modifier.weight(1.2f), unit = t("kg"))
+            Stat(t("Sets"), "${done.size}", Modifier.weight(0.8f))
+            Stat(t("Streak"), "$streak", Modifier.weight(0.9f), color = if (streak > 0) C.Volt else C.Hi)
         }
         Gap(12.dp)
-        Eyebrow("Top sets")
+        Eyebrow(t("Top sets"))
         Gap(6.dp)
         tops.take(5).forEach { st ->
             val ex = runCatching { com.forge.app.domain.Exercises.byId(st.exerciseId) }.getOrNull()
             val isPr = ex != null && prs.any { it.startsWith(ex.name) }
             Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(ex?.name ?: st.exerciseId, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f), maxLines = 1)
-                if (isPr) { Tag("PR", color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
+                if (isPr) { Tag(t("PR"), color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
                 Text(
-                    if (st.weightKg > 0) "${st.reps} × ${Progression.fmtKg(st.weightKg)} kg" else "${st.reps} reps",
+                    if (st.weightKg > 0) t("%1${'$'}s × %2${'$'}s kg", st.reps, Progression.fmtKg(st.weightKg)) else t("%s reps", st.reps),
                     style = T.Small, color = if (isPr) C.Volt else C.Mid,
                 )
             }
@@ -326,19 +328,19 @@ fun FuelCard(date: LocalDate) {
 
     CardFrame(
         date = date,
-        eyebrow = "Nutrition",
-        title = if (date == LocalDate.now()) "Today's fuel" else "Fuel",
+        eyebrow = t("Nutrition"),
+        title = if (date == LocalDate.now()) t("Today's fuel") else t("Fuel"),
         badge = when {
-            proteinHit && kcalHit -> "Targets hit"
-            proteinHit -> "Protein target hit"
-            kcalHit -> "Calorie target hit"
+            proteinHit && kcalHit -> t("Targets hit")
+            proteinHit -> t("Protein target hit")
+            kcalHit -> t("Calorie target hit")
             else -> null
         },
         line = when {
-            proteinHit && kcalHit -> "Every gram accounted for."
-            weekHits >= 4 -> "Protein target hit $weekHits days this week."
-            proteinHit -> "Protein done. Muscle gets built on days like this."
-            else -> "${(s.protein - m.protein).roundToInt().coerceAtLeast(0)} g of protein to go today."
+            proteinHit && kcalHit -> t("Every gram accounted for.")
+            weekHits >= 4 -> t("Protein target hit %s days this week.", weekHits)
+            proteinHit -> t("Protein done. Muscle gets built on days like this.")
+            else -> t("%s g of protein to go today.", (s.protein - m.protein).roundToInt().coerceAtLeast(0))
         },
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -350,26 +352,26 @@ fun FuelCard(date: LocalDate) {
                     }
                 }
                 Gap(4.dp)
-                Eyebrow("Calories")
+                Eyebrow(t("Calories"))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Ring((m.protein / s.protein).toFloat(), size = 80.dp, stroke = 7.dp, color = C.Volt) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("${Fmt.g(m.protein)} g", style = T.Num, color = C.Volt)
-                        Text("of ${s.protein} g", style = T.Tiny, color = C.Mid)
+                        Text(com.forge.app.i18n.t("%s g", Fmt.g(m.protein)), style = T.Num, color = C.Volt)
+                        Text(t("of %s g", s.protein), style = T.Tiny, color = C.Mid)
                     }
                 }
                 Gap(4.dp)
-                Eyebrow("Protein")
+                Eyebrow(t("Protein"))
             }
         }
         Gap(8.dp)
         Text(
-            "Fat ${Fmt.g(m.fat)} / ${s.fat} g  ·  Carbs ${Fmt.g(m.carbs)} / ${s.carbs} g",
+            t("Fat %1${'$'}s / %2${'$'}s g  ·  Carbs %3${'$'}s / %4${'$'}s g", Fmt.g(m.fat), s.fat, Fmt.g(m.carbs), s.carbs),
             style = T.Small, color = C.Mid, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
         Gap(8.dp)
-        Eyebrow("Protein this week")
+        Eyebrow(t("Protein this week"))
         Gap(4.dp)
         // The chart takes the rest of the card, so there's never a blank band above the credit.
         BarChart(
@@ -411,36 +413,36 @@ fun ProgressCard() {
 
     CardFrame(
         date = today,
-        eyebrow = "Body weight · 7-day average",
-        title = cur?.let { "${Fmt.kg(it)} kg" } ?: "Progress",
+        eyebrow = t("Body weight · 7-day average"),
+        title = cur?.let { t("%s kg", Fmt.kg(it)) } ?: t("Progress"),
         badge = when {
-            goalReached -> "Goal reached"
-            toward(rate) -> "On track"
+            goalReached -> t("Goal reached")
+            toward(rate) -> t("On track")
             else -> null
         },
         line = when {
-            goalReached -> "${Fmt.kg(s.goalWeight)} kg. Done. Next target."
-            toward(month) -> "${signed(month!!)} kg in 30 days. Moving the right way."
-            toward(sinceStart) -> "${signed(sinceStart!!)} kg since day one."
-            else -> "Weighed every morning. The trend is what counts."
+            goalReached -> t("%s kg. Done. Next target.", Fmt.kg(s.goalWeight))
+            toward(month) -> t("%s kg in 30 days. Moving the right way.", signed(month!!))
+            toward(sinceStart) -> t("%s kg since day one.", signed(sinceStart!!))
+            else -> t("Weighed every morning. The trend is what counts.")
         },
     ) {
         Row(Modifier.fillMaxWidth()) {
-            Stat("Since start", sinceStart?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = "kg", color = if (toward(sinceStart)) C.Volt else C.Hi)
-            Stat("30 days", month?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = "kg", color = if (toward(month)) C.Volt else C.Hi)
-            Stat("Per week", rate?.let { String.format(Locale.US, "%+.2f", it) } ?: "—", Modifier.weight(1f), unit = "kg")
+            Stat(t("Since start"), sinceStart?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = t("kg"), color = if (toward(sinceStart)) C.Volt else C.Hi)
+            Stat(t("30 days"), month?.let { signed(it) } ?: "—", Modifier.weight(1f), unit = t("kg"), color = if (toward(month)) C.Volt else C.Hi)
+            Stat(t("Per week"), rate?.let { String.format(Locale.US, "%+.2f", it) } ?: "—", Modifier.weight(1f), unit = t("kg"))
         }
         Gap(14.dp)
         LineChart(
             weights.filter { it.date >= from }.map { it.date to it.kg },
             avg.filter { it.first >= from },
             goal = s.goalWeight, height = 84.dp,
-            empty = "Log a few mornings to see the trend.",
+            empty = t("Log a few mornings to see the trend."),
         )
         Gap(10.dp)
         Row {
-            Text("Start ${Fmt.kg(s.startWeight)} kg", style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
-            Text("Goal ${Fmt.kg(s.goalWeight)} kg", style = T.Tiny, color = C.Volt)
+            Text(t("Start %s kg", Fmt.kg(s.startWeight)), style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
+            Text(t("Goal %s kg", Fmt.kg(s.goalWeight)), style = T.Tiny, color = C.Volt)
         }
         Gap(5.dp)
         Bar(progress, height = 7.dp)

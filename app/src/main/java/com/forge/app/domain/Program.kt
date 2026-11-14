@@ -1,12 +1,16 @@
 package com.forge.app.domain
 
+import com.forge.app.i18n.t
+
 /*
  * The training program, copied exactly from
  * "4_Day_Home_Muscle_Program_Redesigned_v2.pdf". Do not edit sets, reps or order.
  */
 
-enum class RepUnit(val label: String) {
+enum class RepUnit(private val en: String) {
     NONE(""), SIDE("/ side"), LEG("/ leg"), SEC("s"), SEC_SIDE("s / side");
+
+    val label: String get() = if (en.isEmpty()) "" else t(en)
 
     /** Counted in seconds rather than reps. */
     val timed: Boolean get() = this == SEC || this == SEC_SIDE
@@ -14,16 +18,20 @@ enum class RepUnit(val label: String) {
     val perSide: Boolean get() = this != NONE && this != SEC
 }
 
-enum class Equip(val label: String) {
+enum class Equip(private val en: String) {
     BODYWEIGHT("Bodyweight"), DUMBBELL("Dumbbell"), BARBELL("Barbell"), KETTLEBELL("Kettlebell"),
     CABLE("Cable"), MACHINE("Machine"), BAND("Band");
+
+    val label: String get() = t(en)
 
     /** Gear you'd normally only find in a gym. */
     val gymOnly: Boolean get() = this == CABLE || this == MACHINE
 }
 
-enum class MuscleGroup(val label: String) {
-    CHEST("Chest"), BACK("Back"), SHOULDERS("Shoulders"), ARMS("Arms"), LEGS("Legs"), CORE("Core"), FULL_BODY("Full body")
+enum class MuscleGroup(private val en: String) {
+    CHEST("Chest"), BACK("muscle|Back"), SHOULDERS("Shoulders"), ARMS("Arms"), LEGS("Legs"), CORE("Core"), FULL_BODY("Full body");
+
+    val label: String get() = t(en)
 }
 
 data class ProgramExercise(
@@ -37,7 +45,7 @@ data class ProgramExercise(
     val exercise: Exercise get() = Exercises.byId(exerciseId)
     val repsText: String get() = (if (repMin == repMax) "$repMin" else "$repMin–$repMax") + if (unit != RepUnit.NONE) " ${unit.label}" else ""
     val prescription: String get() = "$sets × $repsText"
-    val displayName: String get() = exercise.name + (tag?.let { " — $it" } ?: "")
+    val displayName: String get() = exercise.name + (tag?.let { " — " + t(it) } ?: "")
 }
 
 data class WorkoutDay(
@@ -46,7 +54,7 @@ data class WorkoutDay(
     val name: String,
     val exercises: List<ProgramExercise>,
 ) {
-    val title: String get() = "Day $number — $name"
+    val title: String get() = t("Day %1${'$'}s — %2${'$'}s", number, t(name))
     val totalSets: Int get() = exercises.sumOf { it.sets }
 
     /** Rough session length: work time per set (x2 for single-side work) plus rest. */
@@ -154,7 +162,7 @@ data class Exercise(
 object Exercises {
     val all: List<Exercise> = listOf(
         Exercise(
-            id = "pushup", name = "Push-ups", equip = Equip.BODYWEIGHT, restSec = 75,
+            id = "pushup", name = t("Push-ups"), equip = Equip.BODYWEIGHT, restSec = 75,
             muscles = "Chest, front delts, triceps, core",
             setup = listOf(
                 "Hands slightly wider than shoulders, fingers pointing forward.",
@@ -170,7 +178,7 @@ object Exercises {
             homeTip = "On Day 1 these are your warm-up. Smooth reps, stop 2–3 reps before failure.",
         ),
         Exercise(
-            id = "db_floor_press_1arm", name = "1-arm Dumbbell Floor Press", equip = Equip.DUMBBELL, restSec = 90, compound = true,
+            id = "db_floor_press_1arm", name = t("1-arm Dumbbell Floor Press"), equip = Equip.DUMBBELL, restSec = 90, compound = true,
             muscles = "Chest, triceps, front delts. Core resists twisting.",
             setup = listOf(
                 "Lie on your back, knees bent, feet flat.",
@@ -186,7 +194,7 @@ object Exercises {
             mistakes = listOf("Bouncing the elbow off the floor", "Flaring the elbow wide", "Arching the lower back", "Twisting the torso"),
         ),
         Exercise(
-            id = "pushup_feet_elevated", name = "Feet-Elevated Push-ups", equip = Equip.BODYWEIGHT, restSec = 90,
+            id = "pushup_feet_elevated", name = t("Feet-Elevated Push-ups"), equip = Equip.BODYWEIGHT, restSec = 90,
             muscles = "Upper chest, front delts, triceps",
             setup = listOf(
                 "Feet on a chair, bed or step. Hands on the floor slightly wider than shoulders.",
@@ -202,7 +210,7 @@ object Exercises {
             homeTip = "Top of the rep range on every set? Raise your feet higher or wear a loaded backpack.",
         ),
         Exercise(
-            id = "db_squeeze_press", name = "Dumbbell Squeeze Press", equip = Equip.DUMBBELL, restSec = 75,
+            id = "db_squeeze_press", name = t("Dumbbell Squeeze Press"), equip = Equip.DUMBBELL, restSec = 75,
             muscles = "Chest (inner and mid), triceps",
             setup = listOf(
                 "Lie on the floor or a bench with a dumbbell in each hand, palms facing each other.",
@@ -217,7 +225,7 @@ object Exercises {
             mistakes = listOf("Letting the dumbbells drift apart", "Going too heavy", "Arching the lower back", "Locking the elbows"),
         ),
         Exercise(
-            id = "pushup_close_grip", name = "Close-Grip Push-ups", equip = Equip.BODYWEIGHT, restSec = 75,
+            id = "pushup_close_grip", name = t("Close-Grip Push-ups"), equip = Equip.BODYWEIGHT, restSec = 75,
             muscles = "Triceps, inner chest, front delts",
             setup = listOf(
                 "Hands just inside shoulder width, under your shoulders or slightly narrower.",
@@ -233,7 +241,7 @@ object Exercises {
             homeTip = "If you fall under 8 reps, finish the set from your knees.",
         ),
         Exercise(
-            id = "barbell_squat", name = "Barbell Squat", equip = Equip.BARBELL, restSec = 150, compound = true,
+            id = "barbell_squat", name = t("Barbell Squat"), equip = Equip.BARBELL, restSec = 150, compound = true,
             muscles = "Quads, glutes, adductors, lower back",
             setup = listOf(
                 "Bar on your upper traps, not your neck. Hands just outside the shoulders.",
@@ -250,7 +258,7 @@ object Exercises {
             homeTip = "No rack? Only use a weight you can safely get onto your back and off again.",
         ),
         Exercise(
-            id = "bulgarian_split_squat", name = "Bulgarian Split Squat", equip = Equip.DUMBBELL, restSec = 90, compound = true,
+            id = "bulgarian_split_squat", name = t("Bulgarian Split Squat"), equip = Equip.DUMBBELL, restSec = 90, compound = true,
             muscles = "Quads, glutes, adductors",
             setup = listOf(
                 "Rear foot laces-down on a chair or bench about knee height.",
@@ -267,7 +275,7 @@ object Exercises {
             homeTip = "Losing balance? Move the front foot further from the bench.",
         ),
         Exercise(
-            id = "barbell_rdl", name = "Barbell Romanian Deadlift", equip = Equip.BARBELL, restSec = 120, compound = true,
+            id = "barbell_rdl", name = t("Barbell Romanian Deadlift"), equip = Equip.BARBELL, restSec = 120, compound = true,
             muscles = "Hamstrings, glutes, spinal erectors",
             setup = listOf(
                 "Stand tall holding the bar at hip height, hands just outside your thighs.",
@@ -283,7 +291,7 @@ object Exercises {
             mistakes = listOf("Turning it into a squat", "Rounding the back at the bottom", "Bar drifting away from the legs", "Leaning back at lockout"),
         ),
         Exercise(
-            id = "sl_rdl", name = "Single-Leg Romanian Deadlift", equip = Equip.DUMBBELL, restSec = 75,
+            id = "sl_rdl", name = t("Single-Leg Romanian Deadlift"), equip = Equip.DUMBBELL, restSec = 75,
             muscles = "Hamstrings, glutes, hip stabilisers",
             setup = listOf(
                 "Dumbbell in the hand opposite the working leg.",
@@ -299,7 +307,7 @@ object Exercises {
             mistakes = listOf("Free hip opening up / torso rotating", "Rounding the back", "Locking the standing knee", "Rushing the descent"),
         ),
         Exercise(
-            id = "sl_calf_raise", name = "Single-Leg Calf Raise", equip = Equip.BODYWEIGHT, restSec = 60,
+            id = "sl_calf_raise", name = t("Single-Leg Calf Raise"), equip = Equip.BODYWEIGHT, restSec = 60,
             muscles = "Calves",
             setup = listOf(
                 "Ball of one foot on the edge of a step, heel hanging.",
@@ -314,7 +322,7 @@ object Exercises {
             mistakes = listOf("Bouncing out of the stretch", "Half reps", "Rolling onto the outside of the foot"),
         ),
         Exercise(
-            id = "db_row_supported", name = "1-arm Supported Dumbbell Row", equip = Equip.DUMBBELL, restSec = 90, compound = true,
+            id = "db_row_supported", name = t("1-arm Supported Dumbbell Row"), equip = Equip.DUMBBELL, restSec = 90, compound = true,
             muscles = "Lats, mid-back, rear delts, biceps",
             setup = listOf(
                 "One hand and the same-side knee on a bench, or hand on a chair with a staggered stance.",
@@ -329,7 +337,7 @@ object Exercises {
             mistakes = listOf("Jerking the torso to heave the weight", "Shrugging toward the ear", "Skipping the stretch at the bottom", "Rounded back"),
         ),
         Exercise(
-            id = "db_reverse_fly", name = "Dumbbell Reverse Fly", equip = Equip.DUMBBELL, restSec = 60,
+            id = "db_reverse_fly", name = t("Dumbbell Reverse Fly"), equip = Equip.DUMBBELL, restSec = 60,
             muscles = "Rear delts, upper back",
             setup = listOf(
                 "Hinge forward to 45° or lower with a flat back, or lie chest-down on an incline bench.",
@@ -344,7 +352,7 @@ object Exercises {
             mistakes = listOf("Swinging the torso", "Shrugging — traps take over", "Going too heavy", "Back rounding late in the set"),
         ),
         Exercise(
-            id = "db_curl", name = "Dumbbell Curl", equip = Equip.DUMBBELL, restSec = 60,
+            id = "db_curl", name = t("Dumbbell Curl"), equip = Equip.DUMBBELL, restSec = 60,
             muscles = "Biceps",
             setup = listOf("Stand tall, dumbbells at your sides, palms forward."),
             steps = listOf(
@@ -356,7 +364,7 @@ object Exercises {
             mistakes = listOf("Leaning back to swing the weight", "Elbows drifting forward", "Half reps", "Dropping the weight on the way down"),
         ),
         Exercise(
-            id = "hammer_curl", name = "Hammer Curl", equip = Equip.DUMBBELL, restSec = 60,
+            id = "hammer_curl", name = t("Hammer Curl"), equip = Equip.DUMBBELL, restSec = 60,
             muscles = "Brachialis, forearms, biceps",
             setup = listOf("Dumbbells at your sides, palms facing each other."),
             steps = listOf(
@@ -368,7 +376,7 @@ object Exercises {
             mistakes = listOf("Swinging", "Rotating the wrist", "Elbows moving forward"),
         ),
         Exercise(
-            id = "oh_triceps_ext_1arm", name = "1-arm Overhead Triceps Extension", equip = Equip.DUMBBELL, restSec = 60,
+            id = "oh_triceps_ext_1arm", name = t("1-arm Overhead Triceps Extension"), equip = Equip.DUMBBELL, restSec = 60,
             muscles = "Triceps, especially the long head",
             setup = listOf(
                 "Seated or standing, dumbbell overhead, elbow pointing up and slightly forward.",
@@ -384,7 +392,7 @@ object Exercises {
             homeTip = "Shoulder pain overhead? Stop and swap for a lighter weight or a smaller range.",
         ),
         Exercise(
-            id = "reverse_lunge", name = "Reverse Lunges", equip = Equip.DUMBBELL, restSec = 90, compound = true,
+            id = "reverse_lunge", name = t("Reverse Lunges"), equip = Equip.DUMBBELL, restSec = 90, compound = true,
             muscles = "Quads, glutes",
             setup = listOf("Stand tall, feet hip-width, dumbbells at your sides (or bodyweight)."),
             steps = listOf(
@@ -396,7 +404,7 @@ object Exercises {
             mistakes = listOf("Stepping too short", "Front knee caving in", "Pushing off the back foot", "Torso collapsing forward"),
         ),
         Exercise(
-            id = "barbell_hip_thrust", name = "Barbell Hip Thrust", equip = Equip.BARBELL, restSec = 120, compound = true,
+            id = "barbell_hip_thrust", name = t("Barbell Hip Thrust"), equip = Equip.BARBELL, restSec = 120, compound = true,
             muscles = "Glutes, hamstrings",
             setup = listOf(
                 "Upper back (bottom of the shoulder blades) against a couch or bench edge.",
@@ -412,7 +420,7 @@ object Exercises {
             mistakes = listOf("Arching the lower back instead of extending the hips", "Head thrown back", "Feet too far or too close", "Pushing through the toes"),
         ),
         Exercise(
-            id = "db_lateral_raise", name = "Dumbbell Lateral Raise", equip = Equip.DUMBBELL, restSec = 60,
+            id = "db_lateral_raise", name = t("Dumbbell Lateral Raise"), equip = Equip.DUMBBELL, restSec = 60,
             muscles = "Side delts",
             setup = listOf("Stand tall, dumbbells at your sides, slight forward lean, soft bend in the elbows."),
             steps = listOf(
@@ -434,7 +442,7 @@ object Exercises {
 
     /** Built-in first, then custom. An id nothing knows (an exercise deleted long ago) still resolves. */
     fun byId(id: String): Exercise = builtInMap[id] ?: custom[id] ?: Exercise(
-        id = id, name = "Removed exercise", equip = Equip.BODYWEIGHT, restSec = 90, muscles = "",
+        id = id, name = t("Removed exercise"), equip = Equip.BODYWEIGHT, restSec = 90, muscles = "",
         setup = emptyList(), steps = emptyList(), cues = emptyList(), mistakes = emptyList(), custom = true,
     )
 

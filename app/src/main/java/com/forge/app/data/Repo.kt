@@ -1,5 +1,7 @@
 package com.forge.app.data
 
+import com.forge.app.i18n.t
+
 import android.content.Context
 import com.forge.app.domain.Macros
 import com.forge.app.domain.PenaltyKind
@@ -130,7 +132,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
     suspend fun startSession(dayId: String, date: LocalDate, makeUp: Boolean): Long {
         ProgramStore.ensure(db, settings)
         db.sessions().activeNow()?.let { return it.id }
-        val day = Program.day(dayId) ?: error("Unknown day $dayId")
+        val day = Program.day(dayId) ?: error(t("Unknown day %s", dayId))
         val id = db.sessions().insert(
             SessionEntity(date = date.toEpochDay(), dayId = dayId, startedAt = nowMs(), makeUp = makeUp)
         )
@@ -180,9 +182,9 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
     }
 
     suspend fun finishSession(id: Long): FinishSummary {
-        val session = db.sessions().get(id) ?: error("No session")
+        val session = db.sessions().get(id) ?: error(t("No session"))
         ProgramStore.ensure(db, settings)
-        val dayTitle = Program.day(session.dayId)?.title ?: "Workout"
+        val dayTitle = Program.day(session.dayId)?.title ?: t("Workout")
         val sets = db.sets().forSessionNow(id)
         val done = sets.filter { it.done }
         val volume = done.sumOf { it.reps * it.weightKg }
@@ -209,7 +211,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         db.sessions().update(
             session.copy(finishedAt = finishedAt, xp = xp, volumeKg = volume, prs = prs.size, prNames = prs.joinToString("|"), complete = complete)
         )
-        award("session:$id", xp, (if (!complete) "Partial: " else if (session.makeUp) "Make-up: " else "") + dayTitle)
+        award("session:$id", xp, (if (!complete) t("Partial: ") else if (session.makeUp) t("Make-up: ") else "") + dayTitle)
         onChanged()
         return FinishSummary(
             sessionId = id,
@@ -250,7 +252,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
 
     suspend fun logWeight(date: LocalDate, kg: Double) {
         db.weights().upsert(WeightEntity(date.toEpochDay(), kg, nowMs()))
-        award("weigh:${date.toEpochDay()}", Xp.WEIGH_IN, "Weigh-in · ${Fmt.day(date)}")
+        award("weigh:${date.toEpochDay()}", Xp.WEIGH_IN, t("Weigh-in · %s", Fmt.day(date)))
         onChanged()
     }
 
@@ -264,7 +266,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
 
     suspend fun logMeasurements(m: MeasurementEntity) {
         db.measurements().upsert(m)
-        award("measure:${m.date}", 15, "Body measurements")
+        award("measure:${m.date}", 15, t("Body measurements"))
     }
 
     // ------------------------------------------------------------- habits
@@ -309,7 +311,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             true -> { award(xpKey, Xp.CLEAN_DAY, "${def.name} · ${Fmt.day(date)}"); dropPenaltyIfActive(penaltyKey) }
             false -> {
                 db.xp().deleteKey(xpKey)
-                if (def.isQuit) createPenalty(penaltyKey, PenaltyKind.SLIP, "Slip: ${def.name} on ${Fmt.day(date)}", d * 7 + def.id)
+                if (def.isQuit) createPenalty(penaltyKey, PenaltyKind.SLIP, t("Slip: %1${'$'}s on %2${'$'}s", def.name, Fmt.day(date)), d * 7 + def.id)
             }
         }
         onChanged()
@@ -328,7 +330,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         val cur = db.habits().log(habitId, d) ?: HabitLog(habitId, d)
         val n = cur.urges + 1
         db.habits().upsertLog(cur.copy(urges = n))
-        if (n <= 5) award("urge:$d:$habitId:$n", Xp.URGE, "Urge resisted")
+        if (n <= 5) award("urge:$d:$habitId:$n", Xp.URGE, t("Urge resisted"))
         onChanged()
     }
 
@@ -379,11 +381,11 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
     suspend fun createFromTemplate(templateId: String?, name: String? = null): String {
         val t = templateId?.let { com.forge.app.domain.Templates.byId(it) }
         val pid = newId("p")
-        val days = t?.days ?: listOf(com.forge.app.domain.TemplateDay("Day 1", emptyList()))
+        val days = t?.days ?: listOf(com.forge.app.domain.TemplateDay(t("Day 1"), emptyList()))
         val dayIds = days.indices.map { "$pid-d${it + 1}" }
         val schedule = (t?.week ?: listOf(0, null, null, null, null, null, null)).map { i -> i?.let { dayIds[it] } ?: Program.REST }
         db.programs().upsertProgram(
-            ProgramEntity(pid, name ?: t?.name ?: "My program", t?.note ?: "", t?.id ?: "", schedule.joinToString(","), createdAt = nowMs()),
+            ProgramEntity(pid, name ?: t?.name ?: t("My program"), t?.note ?: "", t?.id ?: "", schedule.joinToString(","), createdAt = nowMs()),
         )
         db.programs().upsertDays(days.mapIndexed { i, d -> ProgramDayEntity(dayIds[i], pid, i, i + 1, d.name) })
         days.forEachIndexed { i, d -> with(ProgramStore) { db.programs().insertExercises(d.exercises.toEntities(dayIds[i])) } }
@@ -397,7 +399,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         val pid = newId("p")
         val map = p.days.mapIndexed { i, d -> d.id to "$pid-d${i + 1}" }.toMap()
         db.programs().upsertProgram(
-            ProgramEntity(pid, "${p.name} (copy)", p.note, p.templateId, p.schedule.joinToString(",") { map[it] ?: Program.REST }, createdAt = nowMs()),
+            ProgramEntity(pid, t("%s (copy)", p.name), p.note, p.templateId, p.schedule.joinToString(",") { map[it] ?: Program.REST }, createdAt = nowMs()),
         )
         db.programs().upsertDays(p.days.mapIndexed { i, d -> ProgramDayEntity(map.getValue(d.id), pid, i, i + 1, d.name) })
         p.days.forEach { d -> with(ProgramStore) { db.programs().insertExercises(d.exercises.toEntities(map.getValue(d.id))) } }
@@ -424,7 +426,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             ProgramDayEntity(
                 id = dayId, programId = id, position = i,
                 number = if (keepNumbers && prev != null) prev.number else i + 1,
-                name = d.name.trim().ifBlank { "Day ${i + 1}" },
+                name = d.name.trim().ifBlank { t("Day %s", i + 1) },
             )
         }
         val keptIds = saved.map { it.id }.toSet()
@@ -467,7 +469,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         val pid = newId("p")
         val dayIds = shared.d.indices.map { "$pid-d${it + 1}" }
         val schedule = shared.w.map { i -> if (i >= 0) dayIds[i] else Program.REST }
-        db.programs().upsertProgram(ProgramEntity(pid, shared.n, "Shared with you", "", schedule.joinToString(","), createdAt = nowMs()))
+        db.programs().upsertProgram(ProgramEntity(pid, shared.n, t("Shared with you"), "", schedule.joinToString(","), createdAt = nowMs()))
         db.programs().upsertDays(shared.d.mapIndexed { i, d -> ProgramDayEntity(dayIds[i], pid, i, i + 1, d.n) })
         shared.d.forEachIndexed { i, d ->
             with(ProgramStore) { db.programs().insertExercises(ProgramCode.toExercises(d, idMap).toEntities(dayIds[i])) }
@@ -529,7 +531,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         val p = db.penalties().get(id) ?: return
         if (p.status != "ACTIVE") return
         db.penalties().update(p.copy(status = "DONE", completedAt = nowMs()))
-        award("penalty_done:$id", Xp.PENALTY_DONE, "Penalty paid: ${p.taskText}")
+        award("penalty_done:$id", Xp.PENALTY_DONE, t("Penalty paid: %s", p.taskText))
         onChanged()
     }
 
@@ -569,12 +571,12 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             if (now.isBefore(s.deadlineAt(date))) continue
             val day = s.dayFor(date) ?: continue
             val key = "miss:$d"
-            award(key, Xp.MISSED_WORKOUT, "Missed ${day.title}")
+            award(key, Xp.MISSED_WORKOUT, t("Missed %s", day.title))
             if (s.penaltiesOn) {
                 val task = Penalties.roll(PenaltyKind.MISSED_WORKOUT, d * 31 + 7)
                 val p = PenaltyEntity(
                     key = key, kind = PenaltyKind.MISSED_WORKOUT.name,
-                    reason = "Missed ${day.title} on ${Fmt.day(date)}",
+                    reason = t("Missed %1${'$'}s on %2${'$'}s", day.title, Fmt.day(date)),
                     amount = task.amount, unit = task.unit, what = task.what,
                     createdAt = nowMs, dueAt = nowMs + Penalties.DUE_HOURS * 3_600_000,
                     jarAmount = s.jarAmount,
@@ -590,12 +592,12 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             if (!p.escalated) {
                 val up = p.copy(amount = p.amount * 2, escalated = true, dueAt = nowMs + Penalties.DUE_HOURS * 3_600_000, seen = false)
                 db.penalties().update(up)
-                award("overdue:${p.id}", Xp.PENALTY_OVERDUE, "Penalty overdue — doubled")
+                award("overdue:${p.id}", Xp.PENALTY_OVERDUE, t("Penalty overdue — doubled"))
                 escalated += up
             } else {
                 val f = p.copy(status = "FAILED")
                 db.penalties().update(f)
-                award("failed:${p.id}", Xp.PENALTY_FAILED, "Penalty failed")
+                award("failed:${p.id}", Xp.PENALTY_FAILED, t("Penalty failed"))
                 failed += f
             }
         }
@@ -605,8 +607,8 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             val foods = db.food().betweenNow(from, today.toEpochDay() - 1).groupBy { it.date }
             foods.forEach { (d, list) ->
                 val m = Stats.sum(list)
-                if (Stats.proteinHit(m.protein, s.protein)) award("protein:$d", Xp.PROTEIN_DAY, "Protein target hit · ${Fmt.day(LocalDate.ofEpochDay(d))}")
-                if (Stats.kcalHit(m.kcal, s.kcal)) award("kcal:$d", Xp.CALORIE_DAY, "Calorie target hit · ${Fmt.day(LocalDate.ofEpochDay(d))}")
+                if (Stats.proteinHit(m.protein, s.protein)) award("protein:$d", Xp.PROTEIN_DAY, t("Protein target hit · %s", Fmt.day(LocalDate.ofEpochDay(d))))
+                if (Stats.kcalHit(m.kcal, s.kcal)) award("kcal:$d", Xp.CALORIE_DAY, t("Calorie target hit · %s", Fmt.day(LocalDate.ofEpochDay(d))))
             }
         }
 
@@ -689,13 +691,13 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         if (p.kind == PenaltyKind.MISSED_WORKOUT.name) return p
         val n = legacyHabitNo(p.key, 0)
         val day = p.reason.substringAfter(" on ", "")
-        return p.copy(kind = PenaltyKind.SLIP.name, key = "slip:$n:${p.key.substringAfter(':')}", reason = "Slip: Habit $n on $day")
+        return p.copy(kind = PenaltyKind.SLIP.name, key = "slip:$n:${p.key.substringAfter(':')}", reason = t("Slip: Habit %1${'$'}s on %2${'$'}s", n, day))
     }
 
     private fun legacyXp(x: XpEntity): XpEntity {
         if (!x.key.startsWith("clean_")) return x
         val n = legacyHabitNo(x.key, 6)
         val tail = x.reason.substringAfter(" · ", "").let { if (it.isBlank()) "" else " · $it" }
-        return x.copy(key = "habit:$n:${x.key.substringAfter(':')}", reason = "Habit $n kept$tail")
+        return x.copy(key = "habit:$n:${x.key.substringAfter(':')}", reason = t("Habit %1${'$'}s kept%2${'$'}s", n, tail))
     }
 }

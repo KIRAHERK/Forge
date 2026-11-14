@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -108,8 +110,8 @@ fun TimeDialog(title: String, minutes: Int, onDismiss: () -> Unit, onConfirm: (I
                 ),
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextAction("CANCEL", onDismiss, color = C.Mid, style = T.Button)
-                TextAction("SET", { onConfirm(state.hour * 60 + state.minute) }, style = T.Button)
+                TextAction(t("CANCEL"), onDismiss, color = C.Mid, style = T.Button)
+                TextAction(t("SET"), { onConfirm(state.hour * 60 + state.minute) }, style = T.Button)
             }
         }
     }
@@ -163,7 +165,7 @@ fun SettingsScreen(nav: Nav) {
                 val json = Graph.repo.exportJson()
                 withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) } }
             }.isSuccess
-            message = if (ok) "Backup saved." else "Couldn't save the backup."
+            message = if (ok) t("Backup saved.") else t("Couldn't save the backup.")
         }
     }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -171,35 +173,41 @@ fun SettingsScreen(nav: Nav) {
             importText = withContext(Dispatchers.IO) {
                 runCatching { ctx.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } }.getOrNull()
             }
-            if (importText == null) message = "Couldn't read that file."
+            if (importText == null) message = t("Couldn't read that file.")
         }
     }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Settings", onBack = { nav.back() })
+        TopBar(t("Settings"), onBack = { nav.back() })
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
 
             // ------------------------------------------------ look
-            Group("Color") {
+            Group(t("Color")) {
                 AccentPicker(C.accent, { pickAccent(scope, it) })
                 Gap(6.dp)
-                Text("Changes the whole app, the widget and the pictures you share.", style = T.Small, color = C.Lo)
+                Text(t("Changes the whole app, the widget and the pictures you share."), style = T.Small, color = C.Lo)
             }
 
-            Group("Help") {
-                ValueRow("Guide", "Show", "A quick tour of every tab") {
+            Group(t("Language")) {
+                com.forge.app.ui.components.LanguagePicker()
+                Gap(6.dp)
+                Text(t("The app restarts to switch."), style = T.Small, color = C.Lo)
+            }
+
+            Group(t("Help")) {
+                ValueRow(t("Guide"), t("Show"), t("A quick tour of every tab")) {
                     com.forge.app.ui.UiEvents.guideRequest.value = true
                     nav.tab("today")
                 }
             }
 
             // ------------------------------------------------ schedule
-            Group("Schedule") {
-                Eyebrow("Week starts on")
+            Group(t("Schedule")) {
+                Eyebrow(t("Week starts on"))
                 Gap(8.dp)
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     weekdays.forEach { d ->
-                        Chip(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), s.weekStart == d.value, {
+                        Chip(d.getDisplayName(TextStyle.SHORT, com.forge.app.i18n.Lang.locale), s.weekStart == d.value, {
                             upd {
                                 val n = it.copy(weekStart = d.value)
                                 n.copy(programStart = n.weekStartOf(LocalDate.ofEpochDay(it.programStart)).toEpochDay())
@@ -211,161 +219,161 @@ fun SettingsScreen(nav: Nav) {
                 Hairline()
                 val active = com.forge.app.ui.LocalPrograms.current?.active
                 ValueRow(
-                    "Program",
-                    active?.let { "${it.daysPerWeek} / week" } ?: "",
-                    active?.name ?: "None",
+                    t("Program"),
+                    active?.let { t("%s / week", it.daysPerWeek) } ?: "",
+                    active?.name ?: t("None"),
                 ) { nav.go("programs") }
             }
 
             // ------------------------------------------------ reminders
-            Group("Reminders") {
-                ValueRow("Workout reminder", Fmt.time(s.workoutTime), "Training days only") {
-                    timeEdit = Triple("Workout reminder", s.workoutTime) { v -> upd { it.copy(workoutTime = v) } }
+            Group(t("Reminders")) {
+                ValueRow(t("Workout reminder"), Fmt.time(s.workoutTime), t("Training days only")) {
+                    timeEdit = Triple(t("Workout reminder"), s.workoutTime) { v -> upd { it.copy(workoutTime = v) } }
                 }
                 Hairline()
-                ValueRow("Deadline", Fmt.time(s.deadline), "Warnings at ${Fmt.time(Scheduler.nudgeMinutes(s))} and ${Fmt.time(Scheduler.finalMinutes(s))}", valueColor = C.Red) {
-                    timeEdit = Triple("Deadline", s.deadline) { v -> upd { it.copy(deadline = v.coerceAtLeast(it.workoutTime + 30)) } }
+                ValueRow(t("Deadline"), Fmt.time(s.deadline), t("Warnings at %1${'$'}s and %2${'$'}s", Fmt.time(Scheduler.nudgeMinutes(s)), Fmt.time(Scheduler.finalMinutes(s))), valueColor = C.Red) {
+                    timeEdit = Triple(t("Deadline"), s.deadline) { v -> upd { it.copy(deadline = v.coerceAtLeast(it.workoutTime + 30)) } }
                 }
                 Hairline()
-                ValueRow("Morning weigh-in", Fmt.time(s.weighInTime)) {
-                    timeEdit = Triple("Morning weigh-in", s.weighInTime) { v -> upd { it.copy(weighInTime = v) } }
+                ValueRow(t("Morning weigh-in"), Fmt.time(s.weighInTime)) {
+                    timeEdit = Triple(t("Morning weigh-in"), s.weighInTime) { v -> upd { it.copy(weighInTime = v) } }
                 }
                 Hairline()
-                ValueRow("Food check 1", Fmt.time(s.proteinCheck1), "Only if you're behind") {
-                    timeEdit = Triple("Food check 1", s.proteinCheck1) { v -> upd { it.copy(proteinCheck1 = v) } }
+                ValueRow(t("Food check 1"), Fmt.time(s.proteinCheck1), t("Only if you're behind")) {
+                    timeEdit = Triple(t("Food check 1"), s.proteinCheck1) { v -> upd { it.copy(proteinCheck1 = v) } }
                 }
                 Hairline()
-                ValueRow("Food check 2", Fmt.time(s.proteinCheck2), "Only if you're behind") {
-                    timeEdit = Triple("Food check 2", s.proteinCheck2) { v -> upd { it.copy(proteinCheck2 = v) } }
+                ValueRow(t("Food check 2"), Fmt.time(s.proteinCheck2), t("Only if you're behind")) {
+                    timeEdit = Triple(t("Food check 2"), s.proteinCheck2) { v -> upd { it.copy(proteinCheck2 = v) } }
                 }
                 Hairline()
-                ValueRow("Night check-in", Fmt.time(s.nightTime), "Log habits and food") {
-                    timeEdit = Triple("Night check-in", s.nightTime) { v -> upd { it.copy(nightTime = v) } }
+                ValueRow(t("Night check-in"), Fmt.time(s.nightTime), t("Log habits and food")) {
+                    timeEdit = Triple(t("Night check-in"), s.nightTime) { v -> upd { it.copy(nightTime = v) } }
                 }
                 Gap(8.dp)
-                ToggleRow("Workout reminders", null, s.remindWorkout) { v -> upd { it.copy(remindWorkout = v) } }
-                ToggleRow("Weigh-in reminder", null, s.remindWeighIn) { v -> upd { it.copy(remindWeighIn = v) } }
-                ToggleRow("Food checks", null, s.remindNutrition) { v -> upd { it.copy(remindNutrition = v) } }
-                ToggleRow("Night check-in", null, s.remindNight) { v -> upd { it.copy(remindNight = v) } }
-                ToggleRow("Weekly review", "Score at the end of each week", s.remindWeekly) { v -> upd { it.copy(remindWeekly = v) } }
+                ToggleRow(t("Workout reminders"), null, s.remindWorkout) { v -> upd { it.copy(remindWorkout = v) } }
+                ToggleRow(t("Weigh-in reminder"), null, s.remindWeighIn) { v -> upd { it.copy(remindWeighIn = v) } }
+                ToggleRow(t("Food checks"), null, s.remindNutrition) { v -> upd { it.copy(remindNutrition = v) } }
+                ToggleRow(t("Night check-in"), null, s.remindNight) { v -> upd { it.copy(remindNight = v) } }
+                ToggleRow(t("Weekly review"), t("Score at the end of each week"), s.remindWeekly) { v -> upd { it.copy(remindWeekly = v) } }
             }
 
             // ------------------------------------------------ accountability
-            Group("Accountability") {
-                ToggleRow("Penalties", "Missed workouts and habit slips issue a penalty. Ignore it and it doubles.", s.penaltiesOn) { v -> upd { it.copy(penaltiesOn = v) } }
+            Group(t("Accountability")) {
+                ToggleRow(t("Penalties"), t("Missed workouts and habit slips issue a penalty. Ignore it and it doubles."), s.penaltiesOn) { v -> upd { it.copy(penaltiesOn = v) } }
                 Hairline()
                 ValueRow(
-                    "Penalty jar",
-                    if (s.jarAmount == 0) "Off" else "${s.jarAmount} ${s.jarCurrency}".trim(),
-                    "Money you set aside for every miss or slip",
+                    t("Penalty jar"),
+                    if (s.jarAmount == 0) t("Off") else "${s.jarAmount} ${s.jarCurrency}".trim(),
+                    t("Money you set aside for every miss or slip"),
                     valueColor = if (s.jarAmount == 0) C.Mid else C.Amber,
                 ) {
-                    numEdit = Triple("Amount per miss", s.jarAmount.toString()) { v -> upd { it.copy(jarAmount = v.toInt().coerceIn(0, 100000)) } }
+                    numEdit = Triple(t("Amount per miss"), s.jarAmount.toString()) { v -> upd { it.copy(jarAmount = v.toInt().coerceIn(0, 100000)) } }
                 }
                 if (s.jarAmount > 0) {
                     var cur by remember(s.jarCurrency) { mutableStateOf(s.jarCurrency) }
-                    ForgeField(cur, { cur = it.take(6); upd { st -> st.copy(jarCurrency = cur) } }, "Currency (e.g. EGP, USD)")
+                    ForgeField(cur, { cur = it.take(6); upd { st -> st.copy(jarCurrency = cur) } }, t("Currency (e.g. EGP, USD)"))
                     Gap(8.dp)
                 }
             }
 
             // ------------------------------------------------ habits
-            Group("Habits") {
-                ValueRow("Your habits", "Manage", "Add, rename or delete them in the Habits tab") { nav.tab("habits") }
+            Group(t("Habits")) {
+                ValueRow(t("Your habits"), t("Manage"), t("Add, rename or delete them in the Habits tab")) { nav.tab("habits") }
             }
 
             // ------------------------------------------------ targets
-            Group("Targets") {
-                ValueRow("Calories", "${Fmt.num(s.kcal)} kcal") { numEdit = Triple("Calories", s.kcal.toString()) { v -> upd { it.copy(kcal = v.toInt().coerceIn(1200, 6000)) } } }
+            Group(t("Targets")) {
+                ValueRow(t("Calories"), t("%s kcal", Fmt.num(s.kcal))) { numEdit = Triple(t("Calories"), s.kcal.toString()) { v -> upd { it.copy(kcal = v.toInt().coerceIn(1200, 6000)) } } }
                 Hairline()
-                ValueRow("Protein", "${s.protein} g") { numEdit = Triple("Protein (g)", s.protein.toString()) { v -> upd { it.copy(protein = v.toInt().coerceIn(30, 400)) } } }
+                ValueRow(t("Protein"), com.forge.app.i18n.t("%s g", s.protein)) { numEdit = Triple(t("Protein (g)"), s.protein.toString()) { v -> upd { it.copy(protein = v.toInt().coerceIn(30, 400)) } } }
                 Hairline()
-                ValueRow("Fat", "${s.fat} g") { numEdit = Triple("Fat (g)", s.fat.toString()) { v -> upd { it.copy(fat = v.toInt().coerceIn(10, 300)) } } }
+                ValueRow(t("Fat"), com.forge.app.i18n.t("%s g", s.fat)) { numEdit = Triple(t("Fat (g)"), s.fat.toString()) { v -> upd { it.copy(fat = v.toInt().coerceIn(10, 300)) } } }
                 Hairline()
-                ValueRow("Carbs", "${s.carbs} g") { numEdit = Triple("Carbs (g)", s.carbs.toString()) { v -> upd { it.copy(carbs = v.toInt().coerceIn(20, 900)) } } }
+                ValueRow(t("Carbs"), com.forge.app.i18n.t("%s g", s.carbs)) { numEdit = Triple(t("Carbs (g)"), s.carbs.toString()) { v -> upd { it.copy(carbs = v.toInt().coerceIn(20, 900)) } } }
                 Hairline()
-                ValueRow("Milestone weight", "${Fmt.kg(s.goalWeight)} kg") { numEdit = Triple("Milestone (kg)", Fmt.kg(s.goalWeight)) { v -> upd { it.copy(goalWeight = v.coerceIn(40.0, 200.0)) } } }
+                ValueRow(t("Milestone weight"), t("%s kg", Fmt.kg(s.goalWeight))) { numEdit = Triple(t("Milestone (kg)"), Fmt.kg(s.goalWeight)) { v -> upd { it.copy(goalWeight = v.coerceIn(40.0, 200.0)) } } }
                 Gap(6.dp)
-                TextAction("Reset to plan: ${Fmt.num(Plan.KCAL)} kcal · ${Plan.PROTEIN} g · ${Plan.FAT} g · ${Plan.CARBS} g", {
+                TextAction(t("Reset to plan: %1${'$'}s kcal · %2${'$'}s g · %3${'$'}s g · %4${'$'}s g", Fmt.num(Plan.KCAL), Plan.PROTEIN, Plan.FAT, Plan.CARBS), {
                     upd { it.copy(kcal = Plan.KCAL, protein = Plan.PROTEIN, fat = Plan.FAT, carbs = Plan.CARBS, goalWeight = Plan.MILESTONE) }
                 }, style = T.Small)
                 Gap(10.dp)
                 var note by remember(s.planNote) { mutableStateOf(s.planNote) }
-                ForgeField(note, { note = it }, "Plan notes (e.g. a doctor's protein limit)", singleLine = false)
+                ForgeField(note, { note = it }, t("Plan notes (e.g. a doctor's protein limit)"), singleLine = false)
                 if (note != s.planNote) {
                     Gap(6.dp)
-                    TextAction("Save notes", { scope.launch { Graph.settings.update { it.copy(planNote = note.trim()) } } }, style = T.Small)
+                    TextAction(t("Save notes"), { scope.launch { Graph.settings.update { it.copy(planNote = note.trim()) } } }, style = T.Small)
                 }
-                Text("Stays on this phone. Shown in Fuel → Your nutrition plan.", style = T.Tiny, color = C.Lo)
+                Text(t("Stays on this phone. Shown in Fuel → Your nutrition plan."), style = T.Tiny, color = C.Lo)
             }
 
             // ------------------------------------------------ updates
-            Group("Updates") {
-                ValueRow("Version", "v${com.forge.app.update.Updater.currentVersion}", "Check GitHub for a newer release") { nav.go("update") }
+            Group(t("Updates")) {
+                ValueRow(t("Version"), "v${com.forge.app.update.Updater.currentVersion}", t("Check GitHub for a newer release")) { nav.go("update") }
                 Hairline()
-                ToggleRow("Check daily", "Get a notification when a new version is out", s.autoUpdateCheck) { v -> upd { it.copy(autoUpdateCheck = v) } }
+                ToggleRow(t("Check daily"), t("Get a notification when a new version is out"), s.autoUpdateCheck) { v -> upd { it.copy(autoUpdateCheck = v) } }
             }
 
             // ------------------------------------------------ reliability
-            Group("Make sure reminders arrive") {
+            Group(t("Make sure reminders arrive")) {
                 val notifOk = remember(refresh) { Notifier.canPost(ctx) }
                 val exactOk = remember(refresh) { Scheduler.canExact(ctx) }
                 val batteryOk = remember(refresh) { isIgnoringBattery(ctx) }
-                StatusRow("Notifications", notifOk, "Allow") {
+                StatusRow(t("Notifications"), notifOk, t("Allow")) {
                     if (Build.VERSION.SDK_INT >= 33) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) else openNotificationSettings(ctx)
                 }
                 Hairline()
-                StatusRow("Exact timing", exactOk, "Allow") {
+                StatusRow(t("Exact timing"), exactOk, t("Allow")) {
                     if (Build.VERSION.SDK_INT >= 31) runCatching {
                         ctx.startActivity(Intent(AndroidSettings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${ctx.packageName}")))
                     }
                 }
                 Hairline()
-                StatusRow("Not battery-restricted", batteryOk, "Allow") { requestBatteryExemption(ctx) }
+                StatusRow(t("Not battery-restricted"), batteryOk, t("Allow")) { requestBatteryExemption(ctx) }
                 Gap(8.dp)
                 Text(
-                    "Xiaomi, Samsung, Huawei, Oppo and similar phones kill background apps. If reminders don't arrive, enable Autostart for Forge and set its battery use to Unrestricted.",
+                    t("Xiaomi, Samsung, Huawei, Oppo and similar phones kill background apps. If reminders don't arrive, enable Autostart for Forge and set its battery use to Unrestricted."),
                     style = T.Small, color = C.Mid,
                 )
                 Gap(10.dp)
-                SecondaryButton("Send a test notification", {
-                    Notifier.post(ctx, Notifier.ID_TEST, Notifier.CH_WORKOUT, "Test", "If you can read this, reminders work.")
+                SecondaryButton(t("Send a test notification"), {
+                    Notifier.post(ctx, Notifier.ID_TEST, Notifier.CH_WORKOUT, t("Test"), t("If you can read this, reminders work."))
                 }, Modifier.fillMaxWidth(), height = 46.dp)
             }
 
             // ------------------------------------------------ data
-            Group("Data") {
-                Text("Everything is stored on this phone only. Updates keep it in place; backups cover the rest.", style = T.Small, color = C.Mid)
+            Group(t("Data")) {
+                Text(t("Everything is stored on this phone only. Updates keep it in place; backups cover the rest."), style = T.Small, color = C.Mid)
                 Gap(6.dp)
-                ToggleRow("Daily automatic backup", "Saved in the app and in Downloads/Forge (Android 10+)", s.autoBackup) { v -> upd { it.copy(autoBackup = v) } }
+                ToggleRow(t("Daily automatic backup"), t("Saved in the app and in Downloads/Forge (Android 10+)"), s.autoBackup) { v -> upd { it.copy(autoBackup = v) } }
                 if (s.lastBackupAt > 0) {
                     Text(
-                        "Last backup: ${java.text.SimpleDateFormat("EEE d MMM, HH:mm", Locale.ENGLISH).format(java.util.Date(s.lastBackupAt))}" +
+                        "Last backup: ${java.text.SimpleDateFormat("EEE d MMM, HH:mm", com.forge.app.i18n.Lang.locale).format(java.util.Date(s.lastBackupAt))}" +
                             (if (s.lastBackupReason.isNotBlank()) " · ${s.lastBackupReason}" else ""),
                         style = T.Small, color = C.Lo,
                     )
                 }
                 Gap(10.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SecondaryButton("Back up now", {
-                        scope.launch { message = if (runCatching { com.forge.app.data.AutoBackup.run(ctx, "manual") }.getOrDefault(false)) "Backup saved." else "Backup failed." }
+                    SecondaryButton(t("Back up now"), {
+                        scope.launch { message = if (runCatching { com.forge.app.data.AutoBackup.run(ctx, "manual") }.getOrDefault(false)) t("Backup saved.") else t("Backup failed.") }
                     }, Modifier.weight(1f), height = 46.dp)
-                    SecondaryButton("Restore last", {
+                    SecondaryButton(t("Restore last"), {
                         scope.launch {
                             val f = com.forge.app.data.AutoBackup.latestFile(ctx)
-                            if (f.exists()) importText = f.readText() else message = "No automatic backup on this phone yet."
+                            if (f.exists()) importText = f.readText() else message = t("No automatic backup on this phone yet.")
                         }
                     }, Modifier.weight(1f), height = 46.dp)
                 }
                 Gap(10.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SecondaryButton("Export file", { exportLauncher.launch("forge-backup-${LocalDate.now()}.json") }, Modifier.weight(1f), height = 46.dp)
-                    SecondaryButton("Import file", { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }, Modifier.weight(1f), height = 46.dp)
+                    SecondaryButton(t("Export file"), { exportLauncher.launch("forge-backup-${LocalDate.now()}.json") }, Modifier.weight(1f), height = 46.dp)
+                    SecondaryButton(t("Import file"), { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }, Modifier.weight(1f), height = 46.dp)
                 }
             }
 
-            Group("About") {
-                Text("Forge v${com.forge.app.update.Updater.currentVersion}", style = T.BodyS, color = C.Hi)
+            Group(t("About")) {
+                Text(t("Forge v%s", com.forge.app.update.Updater.currentVersion), style = T.BodyS, color = C.Hi)
                 Gap(2.dp)
                 Text(com.forge.app.Credits.LINE, style = T.Small, color = C.Volt)
                 Gap(12.dp)
@@ -380,27 +388,27 @@ fun SettingsScreen(nav: Nav) {
                     Gap(10.dp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SecondaryButton("Share Forge", {
+                    SecondaryButton(t("Share Forge"), {
                         val send = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "Forge: a training and nutrition app for Android that holds you to your plan. Free for personal use.\n" +
-                                    "Download: ${com.forge.app.Credits.DOWNLOAD_PAGE}",
+                                t("Forge: a training and nutrition app for Android that holds you to your plan. Free for personal use.\n") +
+                                    t("Download: %s", com.forge.app.Credits.DOWNLOAD_PAGE),
                             )
                         }
-                        runCatching { ctx.startActivity(Intent.createChooser(send, "Share Forge")) }
+                        runCatching { ctx.startActivity(Intent.createChooser(send, t("Share Forge"))) }
                     }, Modifier.weight(1f), height = 46.dp, hPad = 6.dp)
-                    SecondaryButton("Source code", {
+                    SecondaryButton(t("Source code"), {
                         runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/${com.forge.app.update.Updater.repo}"))) }
                     }, Modifier.weight(1f), height = 46.dp, hPad = 6.dp)
                 }
-                com.forge.app.ui.components.Details("Sources and license") {
+                com.forge.app.ui.components.Details(t("Sources and license")) {
                     Text(
-                        "Ships with a 4-day home muscle program and a lean-bulk nutrition plan; their sets, reps and targets are used as written. " +
-                            "Exercise cues were compiled from coaching references (ACE, NASM, Motra and others). Food values come from USDA FoodData Central, " +
-                            "published dish studies and Open Food Facts.\n\nSource-available under the PolyForm Noncommercial License 1.0.0. Free for personal use; " +
-                            "selling, rebranding or business use needs a commercial license. Copyright ${com.forge.app.Credits.AUTHOR}.",
+                        t("Ships with a 4-day home muscle program and a lean-bulk nutrition plan; their sets, reps and targets are used as written. ") +
+                            t("Exercise cues were compiled from coaching references (ACE, NASM, Motra and others). Food values come from USDA FoodData Central, ") +
+                            t("published dish studies and Open Food Facts.\n\nSource-available under the PolyForm Noncommercial License 1.0.0. Free for personal use; ") +
+                            t("selling, rebranding or business use needs a commercial license. Copyright %s.", com.forge.app.Credits.AUTHOR),
                         style = T.Small, color = C.Mid,
                     )
                 }
@@ -417,23 +425,23 @@ fun SettingsScreen(nav: Nav) {
     }
     importText?.let { txt ->
         ForgeDialog(
-            title = "Replace all data?",
+            title = t("Replace all data?"),
             onDismiss = { importText = null },
-            confirm = "Replace",
+            confirm = t("Replace"),
             destructive = true,
             onConfirm = {
                 importText = null
                 scope.launch {
-                    message = if (runCatching { Graph.repo.importJson(txt) }.isSuccess) "Backup restored." else "That file isn't a valid Forge backup."
+                    message = if (runCatching { Graph.repo.importJson(txt) }.isSuccess) t("Backup restored.") else t("That file isn't a valid Forge backup.")
                 }
             },
         ) {
-            Text("Everything currently in the app is replaced by the backup. This can't be undone.", style = T.Body, color = C.Mid)
+            Text(t("Everything currently in the app is replaced by the backup. This can't be undone."), style = T.Body, color = C.Mid)
         }
     }
     message?.let { m ->
         LaunchedEffect(m) { kotlinx.coroutines.delay(2500); message = null }
-        ForgeDialog(title = "Done", onDismiss = { message = null }, confirm = "OK", onConfirm = { message = null }, dismiss = "") {
+        ForgeDialog(title = t("Done"), onDismiss = { message = null }, confirm = t("OK"), onConfirm = { message = null }, dismiss = "") {
             Text(m, style = T.Body, color = C.Mid)
         }
     }
@@ -452,7 +460,7 @@ private fun StatusRow(title: String, ok: Boolean, action: String, onFix: () -> U
     Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(title, style = T.BodyM, color = C.Hi)
-            Text(if (ok) "On" else "Off — reminders may not arrive", style = T.Small, color = if (ok) C.Volt else C.Red)
+            Text(if (ok) t("On") else t("Off — reminders may not arrive"), style = T.Small, color = if (ok) C.Volt else C.Red)
         }
         if (!ok) SecondaryButton(action, onFix, height = 38.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f))
     }

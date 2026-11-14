@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -61,8 +63,8 @@ data class LogItem(
     val saveAs: Pair<String, String>? = null,
 )
 
-internal fun macroText(m: Macros) = "${Fmt.num(m.kcal)} kcal · ${Fmt.g(m.protein)} g protein"
-internal fun fullMacro(m: Macros) = "${Fmt.num(m.kcal)} kcal · P ${Fmt.g(m.protein)} · F ${Fmt.g(m.fat)} · C ${Fmt.g(m.carbs)}"
+internal fun macroText(m: Macros) = t("%1${'$'}s kcal · %2${'$'}s g protein", Fmt.num(m.kcal), Fmt.g(m.protein))
+internal fun fullMacro(m: Macros) = t("%1${'$'}s kcal · P %2${'$'}s · F %3${'$'}s · C %4${'$'}s", Fmt.num(m.kcal), Fmt.g(m.protein), Fmt.g(m.fat), Fmt.g(m.carbs))
 
 private fun num(s: String) = s.replace(',', '.').trim().toDoubleOrNull()
 private fun field(v: Double) = if (v % 1.0 == 0.0) v.toInt().toString() else String.format(java.util.Locale.US, "%.1f", v)
@@ -108,19 +110,19 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
                 Text(pick.name, style = T.BodyS, color = C.Hi)
                 if (pick.detail.isNotBlank()) Text(pick.detail, style = T.Small, color = C.Mid, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            IconBtn(Icons.Rounded.Close, "Cancel", onCancel, tint = C.Mid, size = 36.dp)
+            IconBtn(Icons.Rounded.Close, t("Cancel"), onCancel, tint = C.Mid, size = 36.dp)
         }
         if (gramBased) {
             Gap(10.dp)
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 pick.portions.forEachIndexed { i, pt -> Chip(pt.chip(), portion == i, { portion = i }) }
-                Chip("Grams", gramsMode, { portion = pick.portions.size })
+                Chip(t("Grams"), gramsMode, { portion = pick.portions.size })
             }
         }
         Gap(10.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (gramsMode) {
-                ForgeField(gramsText, { gramsText = it }, "Amount", Modifier.width(140.dp), number = true, suffix = "g")
+                ForgeField(gramsText, { gramsText = it }, t("Amount"), Modifier.width(140.dp), number = true, suffix = t("g"))
             } else {
                 Stepper(
                     "${Fmt.kg(count).removeSuffix(".0")}×",
@@ -130,7 +132,7 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
                 )
             }
             HGap(12.dp)
-            Text(line?.let { fullMacro(it.second * it.third) } ?: "Check the values", style = T.Small, color = if (line == null) C.Amber else C.Hi, modifier = Modifier.weight(1f))
+            Text(line?.let { fullMacro(it.second * it.third) } ?: t("Check the values"), style = T.Small, color = if (line == null) C.Amber else C.Hi, modifier = Modifier.weight(1f))
         }
         if (pick.sourceNote.isNotBlank()) {
             Gap(10.dp)
@@ -139,29 +141,29 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
         if (pick.fromOutside) {
             Gap(8.dp)
             Text(
-                if (editing) "Values ${if (gramBased) "per 100 g" else "per serving"}" else "Edit values",
+                if (editing) (if (gramBased) t("Values per 100 g") else t("Values per serving")) else t("Edit values"),
                 style = T.Small, color = C.Volt,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { editing = true }.padding(vertical = 6.dp),
             )
             if (editing) {
                 Gap(4.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ForgeField(kcal, { kcal = it }, "Calories", Modifier.weight(1f), number = true, suffix = "kcal")
-                    ForgeField(p, { p = it }, "Protein", Modifier.weight(1f), number = true, suffix = "g")
+                    ForgeField(kcal, { kcal = it }, t("Calories"), Modifier.weight(1f), number = true, suffix = t("kcal"))
+                    ForgeField(p, { p = it }, t("Protein"), Modifier.weight(1f), number = true, suffix = t("g"))
                 }
                 Gap(8.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ForgeField(f, { f = it }, "Fat", Modifier.weight(1f), number = true, suffix = "g")
-                    ForgeField(c, { c = it }, "Carbs", Modifier.weight(1f), number = true, suffix = "g")
+                    ForgeField(f, { f = it }, t("Fat"), Modifier.weight(1f), number = true, suffix = t("g"))
+                    ForgeField(c, { c = it }, t("Carbs"), Modifier.weight(1f), number = true, suffix = t("g"))
                 }
             }
-            ToggleRow("Save to My foods", null, save) { save = it }
+            ToggleRow(t("Save to My foods"), null, save) { save = it }
         }
         Gap(8.dp)
-        PrimaryButton("Add", {
+        PrimaryButton(t("Add"), {
             line?.let { (name, m, n) ->
                 val serving = when {
-                    !gramBased -> "1 serving"
+                    !gramBased -> t("1 serving")
                     gramsMode -> gramsLabel(grams ?: 100.0)
                     else -> pick.portions[portion].chip()
                 }

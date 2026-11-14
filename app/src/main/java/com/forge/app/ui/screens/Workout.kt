@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
@@ -135,7 +137,7 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
     val programs = com.forge.app.ui.LocalPrograms.current
     val savedDay = remember(ses.dayId, programs) { Program.day(ses.dayId) }
     val plan = remember(sets, savedDay) { com.forge.app.data.ProgramStore.sessionPlan(savedDay, sets) }
-    val day = (savedDay ?: com.forge.app.domain.WorkoutDay(ses.dayId, 0, "Workout", plan)).copy(exercises = plan)
+    val day = (savedDay ?: com.forge.app.domain.WorkoutDay(ses.dayId, 0, t("Workout"), plan)).copy(exercises = plan)
     if (ses.finishedAt != null) {
         LaunchedEffect(Unit) { nav.summary(ses.id) }
         return
@@ -168,7 +170,7 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
                     val pe = day.exercises.getOrNull(set.exerciseIndex)
                     val nextPe = day.exercises.getOrNull(next.exerciseIndex)
                     if (pe != null && nextPe != null) {
-                        RestTimer.start(ctx, pe.exercise.restSec, "Next: ${nextPe.exercise.name} · set ${next.setIndex + 1} of ${nextPe.sets}")
+                        RestTimer.start(ctx, pe.exercise.restSec, t("Next: %1${'$'}s · set %2${'$'}s of %3${'$'}s", nextPe.exercise.name, next.setIndex + 1, nextPe.sets))
                     }
                 } else {
                     RestTimer.stop(ctx)
@@ -180,14 +182,14 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
     Column(Modifier.fillMaxSize()) {
         TopBar(
             title = day.title,
-            subtitle = (if (ses.makeUp) "Make-up · " else "") + Fmt.clock(elapsedSec) + " elapsed",
+            subtitle = (if (ses.makeUp) t("Make-up · ") else "") + Fmt.clock(elapsedSec) + " elapsed",
             onBack = { nav.back() },
         ) {
-            IconBtn(Icons.Rounded.DeleteOutline, "Discard", { confirmDiscard = true }, tint = C.Mid)
+            IconBtn(Icons.Rounded.DeleteOutline, t("Discard"), { confirmDiscard = true }, tint = C.Mid)
         }
         Column(Modifier.padding(horizontal = 20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("$doneCount / $total sets", style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
+                Text(t("%1${'$'}s / %2${'$'}s sets", doneCount, total), style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
                 Text("${if (total == 0) 0 else doneCount * 100 / total}%", style = T.Small, color = C.Volt)
             }
             Gap(6.dp)
@@ -227,7 +229,7 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
         } else {
             Column(Modifier.fillMaxWidth().background(C.Bg).navigationBarsPadding().padding(16.dp)) {
                 PrimaryButton(
-                    if (doneCount == total && total > 0) "Finish workout" else "Finish workout · $doneCount/$total",
+                    if (doneCount == total && total > 0) t("Finish workout") else t("Finish workout · %1${'$'}s/%2${'$'}s", doneCount, total),
                     onClick = { if (doneCount < total) confirmFinish = true else scope.launch { RestTimer.stop(ctx); repo.finishSession(ses.id); nav.summary(ses.id) } },
                     icon = Icons.Rounded.Check,
                 )
@@ -253,9 +255,9 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
     edit?.let { e ->
         val isReps = e.field == "reps"
         NumberDialog(
-            title = if (isReps) "Reps" else "Weight",
+            title = if (isReps) t("Reps") else t("Weight"),
             initial = if (isReps) e.set.reps.toString() else Progression.fmtKg(e.set.weightKg),
-            suffix = if (isReps) null else "kg",
+            suffix = if (isReps) null else t("kg"),
             onDismiss = { edit = null },
             onConfirm = { v ->
                 scope.launch {
@@ -271,36 +273,36 @@ fun WorkoutScreen(nav: Nav, sessionId: Long) {
         val required = Stats.requiredSets(total)
         val counts = doneCount >= required
         ForgeDialog(
-            title = if (counts) "Finish early?" else "This won't count",
+            title = if (counts) t("Finish early?") else t("This won't count"),
             onDismiss = { confirmFinish = false },
-            confirm = if (counts) "Finish" else "Finish anyway",
+            confirm = if (counts) t("Finish") else t("Finish anyway"),
             destructive = !counts,
             onConfirm = {
                 confirmFinish = false
                 scope.launch { RestTimer.stop(ctx); repo.finishSession(ses.id); nav.summary(ses.id) }
             },
-            dismiss = "Keep going",
+            dismiss = t("Keep going"),
         ) {
             Text(
-                if (counts) "You've done $doneCount of $total sets. Unticked sets won't be logged."
-                else "You've done $doneCount of $total sets. A session needs at least $required to count as done. " +
-                    "Finish now and it's logged as partial: no streak, and the deadline and penalty still apply.",
+                if (counts) t("You've done %1${'$'}s of %2${'$'}s sets. Unticked sets won't be logged.", doneCount, total)
+                else t("You've done %1${'$'}s of %2${'$'}s sets. A session needs at least %3${'$'}s to count as done. ", doneCount, total, required) +
+                    t("Finish now and it's logged as partial: no streak, and the deadline and penalty still apply."),
                 style = T.Body, color = C.Mid,
             )
         }
     }
     if (confirmDiscard) {
         ForgeDialog(
-            title = "Discard session?",
+            title = t("Discard session?"),
             onDismiss = { confirmDiscard = false },
-            confirm = "Discard",
+            confirm = t("Discard"),
             destructive = true,
             onConfirm = {
                 confirmDiscard = false
                 scope.launch { RestTimer.stop(ctx); repo.discardSession(ses.id); nav.back() }
             },
         ) {
-            Text("Everything logged in this session is deleted. It will not count as done.", style = T.Body, color = C.Mid)
+            Text(t("Everything logged in this session is deleted. It will not count as done."), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -324,9 +326,9 @@ private fun ExerciseCard(
             HGap(12.dp)
             Column(Modifier.weight(1f)) {
                 Text(pe.displayName, style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("${pe.prescription} · rest ${ex.restSec}s", style = T.Small, color = C.Mid)
+                Text(t("%1${'$'}s · rest %2${'$'}ss", pe.prescription, ex.restSec), style = T.Small, color = C.Mid)
             }
-            IconBtn(Icons.Outlined.Info, "How to", onInfo, tint = C.Mid, size = 40.dp)
+            IconBtn(Icons.Outlined.Info, t("How to"), onInfo, tint = C.Mid, size = 40.dp)
         }
         Gap(8.dp)
         Row(verticalAlignment = Alignment.Top) {
@@ -336,15 +338,15 @@ private fun ExerciseCard(
         }
         Gap(12.dp)
         Row(Modifier.fillMaxWidth().padding(horizontal = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("SET", style = T.Tiny, color = C.Lo, modifier = Modifier.width(24.dp))
-            Text("PREV", style = T.Tiny, color = C.Lo, modifier = Modifier.width(46.dp))
-            Text("KG", style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1.15f).padding(start = 6.dp))
+            Text(t("SET"), style = T.Tiny, color = C.Lo, modifier = Modifier.width(24.dp))
+            Text(t("PREV"), style = T.Tiny, color = C.Lo, modifier = Modifier.width(46.dp))
+            Text(t("KG"), style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1.15f).padding(start = 6.dp))
             Text(
                 when {
-                    pe.unit == com.forge.app.domain.RepUnit.SEC_SIDE -> "SECONDS / SIDE"
-                    pe.unit.timed -> "SECONDS"
-                    pe.unit != com.forge.app.domain.RepUnit.NONE -> "REPS " + pe.unit.label.uppercase()
-                    else -> "REPS"
+                    pe.unit == com.forge.app.domain.RepUnit.SEC_SIDE -> t("SECONDS / SIDE")
+                    pe.unit.timed -> t("SECONDS")
+                    pe.unit != com.forge.app.domain.RepUnit.NONE -> t("REPS ") + pe.unit.label.uppercase()
+                    else -> t("REPS")
                 }, style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f).padding(start = 6.dp))
             Spacer(Modifier.width(44.dp))
         }
@@ -362,7 +364,7 @@ private fun ExerciseCard(
                     style = T.Tiny, color = C.Lo, modifier = Modifier.width(46.dp), maxLines = 1,
                 )
                 Stepper(
-                    value = if (!ex.loaded && set.weightKg == 0.0) "BW" else Progression.fmtKg(set.weightKg),
+                    value = if (!ex.loaded && set.weightKg == 0.0) t("BW") else Progression.fmtKg(set.weightKg),
                     onMinus = { onAdjust(set, "w", -ex.weightStep.let { if (!ex.loaded) 2.5 else it }) },
                     onPlus = { onAdjust(set, "w", ex.weightStep.let { if (!ex.loaded) 2.5 else it }) },
                     onValueClick = { onEdit(set, "w") },
@@ -373,9 +375,9 @@ private fun ExerciseCard(
                 HGap(6.dp)
                 Stepper(
                     value = "${set.reps}",
-                    onMinus = { onAdjust(set, "reps", -1.0) },
-                    onPlus = { onAdjust(set, "reps", 1.0) },
-                    onValueClick = { onEdit(set, "reps") },
+                    onMinus = { onAdjust(set, t("reps"), -1.0) },
+                    onPlus = { onAdjust(set, t("reps"), 1.0) },
+                    onValueClick = { onEdit(set, t("reps")) },
                     modifier = Modifier.weight(1f),
                     dim = set.done,
                     btn = 28.dp,
@@ -403,7 +405,7 @@ private fun RestBar(r: RestTimer.State, onAdd: (Int) -> Unit, onSkip: () -> Unit
         Bar(1f - (remaining.toFloat() / (r.totalSec * 1000f)).coerceIn(0f, 1f), height = 3.dp, track = C.S2)
         Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Eyebrow("Rest", color = C.Volt)
+                Eyebrow(t("Rest"), color = C.Volt)
                 AnimatedContent(sec, transitionSpec = { (slideInVertically { -it / 2 } + fadeIn(tween(120))) togetherWith (slideOutVertically { it / 2 } + fadeOut(tween(120))) }, label = "rest") {
                     Text(Fmt.clock(it), style = T.Display, color = C.Hi)
                 }
@@ -413,7 +415,7 @@ private fun RestBar(r: RestTimer.State, onAdd: (Int) -> Unit, onSkip: () -> Unit
             HGap(6.dp)
             SecondaryButton("+15", { onAdd(15) }, height = 44.dp)
             HGap(6.dp)
-            PrimaryButton("Skip", onSkip, Modifier.width(76.dp), height = 44.dp)
+            PrimaryButton(t("Skip"), onSkip, Modifier.width(76.dp), height = 44.dp)
         }
     }
 }
@@ -441,36 +443,36 @@ fun SummaryScreen(nav: Nav, sessionId: Long) {
     ) {
         Gap(36.dp)
         if (ses.complete) {
-            Eyebrow(if (ses.makeUp) "Make-up complete" else "Session complete", color = C.Volt)
-            Text("DONE.", style = T.Hero.copy(fontSize = 104.sp, lineHeight = 100.sp), color = C.Hi)
+            Eyebrow(if (ses.makeUp) t("Make-up complete") else t("Session complete"), color = C.Volt)
+            Text(t("DONE."), style = T.hero(104, 100), color = C.Hi)
         } else {
-            Eyebrow("Logged as partial · doesn't count", color = C.Red)
-            Text("PARTIAL.", style = T.Hero.copy(fontSize = 96.sp, lineHeight = 92.sp), color = C.Hi)
+            Eyebrow(t("Logged as partial · doesn't count"), color = C.Red)
+            Text(t("PARTIAL."), style = T.hero(96, 92), color = C.Hi)
         }
         Text(day?.title?.uppercase() ?: "", style = T.H2, color = C.Mid)
         Gap(28.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("XP earned", "+$xpShown", Modifier.weight(1f), color = C.Volt)
-            Stat("Sets", "${sets.count { it.done }}/${sets.size}", Modifier.weight(1f))
+            Stat(t("XP earned"), "+$xpShown", Modifier.weight(1f), color = C.Volt)
+            Stat(t("Sets"), "${sets.count { it.done }}/${sets.size}", Modifier.weight(1f))
         }
         Gap(20.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("Volume", Fmt.num(ses.volumeKg.roundToInt()), Modifier.weight(1f), unit = "kg")
-            Stat("Time", "${((ses.finishedAt ?: ses.startedAt) - ses.startedAt) / 60000}", Modifier.weight(1f), unit = "min")
+            Stat(t("Volume"), Fmt.num(ses.volumeKg.roundToInt()), Modifier.weight(1f), unit = t("kg"))
+            Stat(t("Time"), "${((ses.finishedAt ?: ses.startedAt) - ses.startedAt) / 60000}", Modifier.weight(1f), unit = t("min"))
         }
         Gap(20.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("Streak", "$streak", Modifier.weight(1f), unit = if (streak == 1) "session" else "sessions", color = if (streak > 0) C.Volt else C.Hi)
-            Stat("Records", "${prs.size}", Modifier.weight(1f), color = if (prs.isNotEmpty()) C.Volt else C.Hi)
+            Stat(t("Streak"), "$streak", Modifier.weight(1f), unit = if (streak == 1) "session" else "sessions", color = if (streak > 0) C.Volt else C.Hi)
+            Stat(t("Records"), "${prs.size}", Modifier.weight(1f), color = if (prs.isNotEmpty()) C.Volt else C.Hi)
         }
         if (prs.isNotEmpty()) {
             Gap(24.dp)
             Panel(border = C.Volt.copy(alpha = 0.4f)) {
-                Eyebrow("Personal records", color = C.Volt)
+                Eyebrow(t("Personal records"), color = C.Volt)
                 Gap(10.dp)
                 prs.forEach {
                     Row(Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Tag("PR", color = C.OnVolt, bg = C.Volt)
+                        Tag(t("PR"), color = C.OnVolt, bg = C.Volt)
                         HGap(10.dp)
                         Text(it, style = T.BodyM, color = C.Hi)
                     }
@@ -480,16 +482,16 @@ fun SummaryScreen(nav: Nav, sessionId: Long) {
         Gap(28.dp)
         Text(
             if (ses.complete) Lines.done(ses.id)
-            else "Half a session is still a missed session. Start again and finish it before the deadline.",
+            else t("Half a session is still a missed session. Start again and finish it before the deadline."),
             style = T.H2, color = C.Hi,
         )
         Gap(36.dp)
         var sharing by remember { mutableStateOf(false) }
         if (ses.finishedAt != null) {
-            SecondaryButton("Share this workout", { sharing = true }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Share)
+            SecondaryButton(t("Share this workout"), { sharing = true }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Share)
             Gap(10.dp)
         }
-        PrimaryButton("Back to today", { nav.tab("today") })
+        PrimaryButton(t("Back to today"), { nav.tab("today") })
         if (sharing) com.forge.app.ui.share.ShareWorkoutDialog(ses.id) { sharing = false }
         Gap(24.dp)
     }
@@ -507,32 +509,32 @@ fun GuideContent(ex: Exercise, pe: ProgramExercise? = null) {
         Gap(8.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Tag(pe.prescription, color = C.OnVolt, bg = C.Volt)
-            Tag("Rest ${ex.restSec}s")
+            Tag(t("Rest %ss", ex.restSec))
         }
     }
     Gap(14.dp)
     if (!ex.hasGuide) {
-        Text("Your own exercise. There's no form guide for it.", style = T.Body, color = C.Mid)
+        Text(t("Your own exercise. There's no form guide for it."), style = T.Body, color = C.Mid)
         ex.homeTip?.let { Gap(8.dp); Text(it, style = T.Body, color = C.Hi) }
         Gap(12.dp)
     }
-    if (ex.hasGuide) GuideSection("How to do it", ex.steps, numbered = true, initiallyOpen = true)
-    if (ex.setup.isNotEmpty()) GuideSection("Setup", ex.setup, numbered = true)
-    if (ex.cues.isNotEmpty()) GuideBullets("Cues", ex.cues, C.Volt, C.Hi)
-    if (ex.mistakes.isNotEmpty()) GuideBullets("Common mistakes", ex.mistakes, C.Red, C.Mid)
+    if (ex.hasGuide) GuideSection(t("How to do it"), ex.steps, numbered = true, initiallyOpen = true)
+    if (ex.setup.isNotEmpty()) GuideSection(t("Setup"), ex.setup, numbered = true)
+    if (ex.cues.isNotEmpty()) GuideBullets(t("Cues"), ex.cues, C.Volt, C.Hi)
+    if (ex.mistakes.isNotEmpty()) GuideBullets(t("Common mistakes"), ex.mistakes, C.Red, C.Mid)
     ex.homeTip?.takeIf { ex.hasGuide }?.let { tip ->
         Hairline()
-        Details("Note") { Text(tip, style = T.Body, color = C.Hi) }
+        Details(t("Note")) { Text(tip, style = T.Body, color = C.Hi) }
     }
     Hairline()
-    Details("Effort and progression") {
+    Details(t("Effort and progression")) {
         Text(Exercises.EFFORT_RULE, style = T.Small, color = C.Hi)
         Gap(6.dp)
         Text(Exercises.PROGRESSION_RULE, style = T.Small, color = C.Mid)
     }
     Gap(18.dp)
     SecondaryButton(
-        "Watch a demo", {
+        t("Watch a demo"), {
             runCatching {
                 ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(Exercises.demoUrl(ex))))
             }

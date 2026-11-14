@@ -29,6 +29,7 @@ object Graph {
 
     fun init(context: Context) {
         if (!::appContext.isInitialized) appContext = context.applicationContext
+        com.forge.app.i18n.Lang.init(appContext)
     }
 
     /** Programs loaded (and the original one created on first run). Call before reading any day. */

@@ -64,6 +64,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Share** | A share button on Progress, Fuel and every workout turns it into a 1440 × 1800 image with your numbers and a chart, ready for Instagram or WhatsApp. Cards earn a badge when you hit your targets, stay on track or set a personal record. |
 | **Color** | Pick the main color when you set up: green, red, purple, pink or blue. It changes the whole app, the widget and the share images. Change it any time in Settings. |
 | **Guide** | A tour of every tab on first open: what each one is for and the one thing not to miss. Go back a step any time, skip it, or replay it with the **?** button on Today. |
+| **Arabic** | The whole app in Arabic, right to left, with casual Syrian wording for the motivation lines. It follows your phone's language, or pick English or العربية in Settings. Exercise how-to guides, recipes and the basic food list are still in English. |
 
 ### Consequences
 
@@ -117,7 +118,7 @@ Forge is designed, built and maintained by **Hussein Al Herk**.
 
 ## Credits
 
-Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Strength, Eric Cressey and StrengthLog. Food values from USDA FoodData Central, Hoteit et al. (2021) and the FAO Near East tables. Product data from Open Food Facts (ODbL). Scanning uses Google ML Kit, on device. Typeface: Barlow (SIL Open Font License).
+Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Strength, Eric Cressey and StrengthLog. Food values from USDA FoodData Central, Hoteit et al. (2021) and the FAO Near East tables. Product data from Open Food Facts (ODbL). Scanning uses Google ML Kit, on device. Typefaces: Barlow, and Changa and Cairo for Arabic (all SIL Open Font License).
 
 ## License
 

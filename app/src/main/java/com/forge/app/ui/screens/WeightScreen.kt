@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -94,24 +96,24 @@ fun WeighDialog(initialKg: Double, onDismiss: () -> Unit, onSave: (LocalDate, Do
     val value = text.replace(',', '.').toDoubleOrNull()
     val valid = value != null && value in 30.0..250.0
     ForgeDialog(
-        title = "Weigh-in",
+        title = t("Weigh-in"),
         onDismiss = onDismiss,
-        confirm = "Save",
+        confirm = t("Save"),
         onConfirm = { if (valid) onSave(date, value!!) },
     ) {
         if (fixedDate == null) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 (0..3).forEach { i ->
                     val d = today.minusDays(i.toLong())
-                    Chip(when (i) { 0 -> "Today"; 1 -> "Yesterday"; else -> Fmt.day(d) }, date == d, { date = d })
+                    Chip(when (i) { 0 -> t("Today"); 1 -> t("Yesterday"); else -> Fmt.day(d) }, date == d, { date = d })
                 }
             }
             Gap(12.dp)
         }
-        ForgeField(text, { text = it }, "Weight", number = true, suffix = "kg")
+        ForgeField(text, { text = it }, t("Weight"), number = true, suffix = t("kg"))
         if (!valid && text.isNotBlank()) {
             Gap(4.dp)
-            Text("Enter a weight between 30 and 250 kg.", style = T.Tiny, color = C.Red)
+            Text(t("Enter a weight between 30 and 250 kg."), style = T.Tiny, color = C.Red)
         }
     }
 }
@@ -143,42 +145,42 @@ fun WeightScreen(nav: Nav) {
     fun upd(t: (Settings) -> Settings) { scope.launch { Graph.settings.update(t); Scheduler.rescheduleAll(ctx) } }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Weight", "Morning weigh-ins · ${s.startWeight.toInt()} → ${s.goalWeight.toInt()} kg", onBack = { nav.back() })
+        TopBar(t("Weight"), t("Morning weigh-ins · %1${'$'}s → %2${'$'}s kg", s.startWeight.toInt(), s.goalWeight.toInt()), onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
             item {
                 Panel(border = if (todayEntry == null) C.Volt.copy(alpha = 0.45f) else C.Line, accent = true) {
                     Row(verticalAlignment = Alignment.Bottom) {
                         Column(Modifier.weight(1f)) {
-                            Eyebrow(if (todayEntry == null) "Today · not logged" else "Today", color = if (todayEntry == null) C.Volt else C.Mid)
+                            Eyebrow(if (todayEntry == null) t("Today · not logged") else t("Today"), color = if (todayEntry == null) C.Volt else C.Mid)
                             Gap(4.dp)
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(todayEntry?.let { Fmt.kg(it.kg) } ?: "—", style = T.Hero, color = C.Hi)
-                                if (todayEntry != null) Text(" kg", style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 8.dp))
+                                if (todayEntry != null) Text(t(" kg"), style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 8.dp))
                             }
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Eyebrow("Streak")
+                            Eyebrow(t("Streak"))
                             Text("$streak", style = T.NumL, color = if (streak > 0) C.Volt else C.Hi)
                             Text(if (streak == 1) "morning" else "mornings", style = T.Tiny, color = C.Lo)
                         }
                     }
                     Gap(16.dp)
-                    PrimaryButton(if (todayEntry == null) "Log today's weight" else "Update or add a day", { logDialog = true }, icon = Icons.Rounded.MonitorWeight)
+                    PrimaryButton(if (todayEntry == null) t("Log today's weight") else t("Update or add a day"), { logDialog = true }, icon = Icons.Rounded.MonitorWeight)
                 }
                 Gap(12.dp)
             }
 
             item {
                 Panel {
-                    Eyebrow("Reminder")
-                    ToggleRow("Morning weigh-in reminder", null, s.remindWeighIn) { v -> upd { it.copy(remindWeighIn = v) } }
+                    Eyebrow(t("Reminder"))
+                    ToggleRow(t("Morning weigh-in reminder"), null, s.remindWeighIn) { v -> upd { it.copy(remindWeighIn = v) } }
                     Hairline()
-                    ValueRow("Reminder time", Fmt.time(s.weighInTime)) { timeEdit = true }
-                    Details("How it works") {
+                    ValueRow(t("Reminder time"), Fmt.time(s.weighInTime)) { timeEdit = true }
+                    Details(t("How it works")) {
                         Text(
-                            "Skipped once you've logged. A second nudge comes at ${Fmt.time(Scheduler.weighLateMinutes(s))} if you still haven't. " +
-                                "You can type your weight straight into the notification.\n\n" +
-                                "Weigh in the morning, after the bathroom, before food or water. Same scale every time.",
+                            t("Skipped once you've logged. A second nudge comes at %s if you still haven't. ", Fmt.time(Scheduler.weighLateMinutes(s))) +
+                                t("You can type your weight straight into the notification.\n\n") +
+                                t("Weigh in the morning, after the bathroom, before food or water. Same scale every time."),
                             style = T.Small, color = C.Mid,
                         )
                     }
@@ -190,13 +192,13 @@ fun WeightScreen(nav: Nav) {
                 Panel {
                     Row(verticalAlignment = Alignment.Bottom) {
                         Column(Modifier.weight(1f)) {
-                            Eyebrow("7-day average")
-                            Text(avgSeries.lastOrNull()?.second?.let { "${Fmt.kg(it)} kg" } ?: "—", style = T.Display, color = C.Hi)
+                            Eyebrow(t("7-day average"))
+                            Text(avgSeries.lastOrNull()?.second?.let { t("%s kg", Fmt.kg(it)) } ?: "—", style = T.Display, color = C.Hi)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Eyebrow("Per week")
+                            Eyebrow(t("Per week"))
                             Text(rate?.let { String.format(Locale.US, "%+.2f", it) } ?: "—", style = T.NumL, color = rateColor(rate))
-                            Text("target ${Plan.RATE_MIN}–${Plan.RATE_MAX}", style = T.Tiny, color = C.Lo)
+                            Text(t("target %1${'$'}s–%2${'$'}s", Plan.RATE_MIN, Plan.RATE_MAX), style = T.Tiny, color = C.Lo)
                         }
                     }
                     Gap(16.dp)
@@ -209,9 +211,9 @@ fun WeightScreen(nav: Nav) {
                         val base = weights.filter { it.date <= monthAgo }.maxByOrNull { it.date } ?: weights.first()
                         val change = (avgSeries.lastOrNull()?.second ?: weights.last().kg) - base.kg
                         Row(Modifier.fillMaxWidth()) {
-                            Stat("30 days", String.format(Locale.US, "%+.1f", change), Modifier.weight(1f), unit = "kg", color = rateColor(change / 4.3))
-                            Stat("Lowest", Fmt.kg(weights.minOf { it.kg }), Modifier.weight(1f), unit = "kg")
-                            Stat("Highest", Fmt.kg(weights.maxOf { it.kg }), Modifier.weight(1f), unit = "kg")
+                            Stat(t("30 days"), String.format(Locale.US, "%+.1f", change), Modifier.weight(1f), unit = t("kg"), color = rateColor(change / 4.3))
+                            Stat(t("Lowest"), Fmt.kg(weights.minOf { it.kg }), Modifier.weight(1f), unit = t("kg"))
+                            Stat(t("Highest"), Fmt.kg(weights.maxOf { it.kg }), Modifier.weight(1f), unit = t("kg"))
                         }
                     }
                 }
@@ -220,16 +222,16 @@ fun WeightScreen(nav: Nav) {
 
             if (weeks.isNotEmpty()) {
                 item {
-                    SectionTitle("Weekly averages")
+                    SectionTitle(t("Weekly averages"))
                     Panel(padding = PaddingValues(vertical = 6.dp)) {
                         weeks.take(10).forEachIndexed { i, w ->
                             if (i > 0) Hairline(Modifier.padding(horizontal = 16.dp))
                             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
-                                    Text("Week of ${Fmt.day(w.start)}", style = T.BodyM, color = C.Hi)
+                                    Text(t("Week of %s", Fmt.day(w.start)), style = T.BodyM, color = C.Hi)
                                     Text("${w.count} ${if (w.count == 1) "reading" else "readings"}", style = T.Small, color = C.Lo)
                                 }
-                                Text("${Fmt.kg(w.avg)} kg", style = T.Num, color = C.Hi)
+                                Text(t("%s kg", Fmt.kg(w.avg)), style = T.Num, color = C.Hi)
                                 HGap(12.dp)
                                 Text(
                                     w.delta?.let { String.format(Locale.US, "%+.1f", it) } ?: "",
@@ -242,9 +244,9 @@ fun WeightScreen(nav: Nav) {
                 }
             }
 
-            item { SectionTitle("All weigh-ins · ${weights.size}") }
+            item { SectionTitle(t("All weigh-ins · %s", weights.size)) }
             if (weights.isEmpty()) {
-                item { Text("No weigh-ins yet. Tomorrow morning: bathroom, scale, then breakfast.", style = T.Small, color = C.Lo) }
+                item { Text(t("No weigh-ins yet. Tomorrow morning: bathroom, scale, then breakfast."), style = T.Small, color = C.Lo) }
             }
             val sorted = weights.sortedByDescending { it.date }
             items(sorted, key = { it.date }) { w ->
@@ -254,11 +256,11 @@ fun WeightScreen(nav: Nav) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(Fmt.day(LocalDate.ofEpochDay(w.date)), style = T.BodyM, color = C.Hi, modifier = Modifier.weight(1f))
-                    Text("${Fmt.kg(w.kg)} kg", style = T.Num.copy(fontSize = T.Num.fontSize * 0.85f), color = C.Hi)
+                    Text(t("%s kg", Fmt.kg(w.kg)), style = T.Num.copy(fontSize = T.Num.fontSize * 0.85f), color = C.Hi)
                     HGap(12.dp)
                     val d = prev?.let { w.kg - it.kg }
                     Text(d?.let { String.format(Locale.US, "%+.1f", it) } ?: "", style = T.Small, color = C.Mid, modifier = Modifier.width(40.dp))
-                    IconBtn(Icons.Rounded.Close, "Delete", { deleteEntry = w }, tint = C.Lo, size = 36.dp)
+                    IconBtn(Icons.Rounded.Close, t("Delete"), { deleteEntry = w }, tint = C.Lo, size = 36.dp)
                 }
                 Hairline()
             }
@@ -283,15 +285,15 @@ fun WeightScreen(nav: Nav) {
     }
     deleteEntry?.let { e ->
         ForgeDialog(
-            "Delete weigh-in?", { deleteEntry = null }, "Delete",
+            t("Delete weigh-in?"), { deleteEntry = null }, t("Delete"),
             { scope.launch { repo.deleteWeight(LocalDate.ofEpochDay(e.date)) }; deleteEntry = null },
             destructive = true,
         ) {
-            Text("${Fmt.day(LocalDate.ofEpochDay(e.date))}: ${Fmt.kg(e.kg)} kg will be removed.", style = T.Body, color = C.Mid)
+            Text(t("%1${'$'}s: %2${'$'}s kg will be removed.", Fmt.day(LocalDate.ofEpochDay(e.date)), Fmt.kg(e.kg)), style = T.Body, color = C.Mid)
         }
     }
     if (timeEdit) {
-        TimeDialog("Weigh-in reminder", s.weighInTime, { timeEdit = false }) { v -> upd { it.copy(weighInTime = v) }; timeEdit = false }
+        TimeDialog(t("Weigh-in reminder"), s.weighInTime, { timeEdit = false }) { v -> upd { it.copy(weighInTime = v) }; timeEdit = false }
     }
 }
 

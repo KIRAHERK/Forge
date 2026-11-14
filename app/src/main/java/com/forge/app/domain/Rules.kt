@@ -1,5 +1,7 @@
 package com.forge.app.domain
 
+import com.forge.app.i18n.t
+
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -37,19 +39,19 @@ object Xp {
     }
 
     fun title(level: Int) = when {
-        level < 5 -> "Beginner"
-        level < 10 -> "Novice"
-        level < 15 -> "Trained"
-        level < 20 -> "Committed"
-        level < 30 -> "Disciplined"
-        level < 40 -> "Hardened"
-        else -> "Elite"
+        level < 5 -> t("Beginner")
+        level < 10 -> t("Novice")
+        level < 15 -> t("Trained")
+        level < 20 -> t("Committed")
+        level < 30 -> t("Disciplined")
+        level < 40 -> t("Hardened")
+        else -> t("Elite")
     }
 }
 
 // ---------------------------------------------------------------- Penalties
 
-enum class PenaltyKind(val label: String) { MISSED_WORKOUT("Missed workout"), SLIP("Slip") }
+enum class PenaltyKind(val label: String) { MISSED_WORKOUT(t("Missed workout")), SLIP(t("Slip")) }
 
 data class PenaltyTask(val amount: Int, val unit: String, val what: String) {
     val text: String get() = if (unit.isBlank()) "$amount $what" else "$amount $unit $what"
@@ -62,20 +64,20 @@ object Penalties {
 
     /** Missed workout — heavier. */
     private val heavy = listOf(
-        PenaltyTask(100, "", "push-ups, any number of sets"),
+        PenaltyTask(100, "", t("push-ups, any number of sets")),
         PenaltyTask(60, "", "burpees"),
-        PenaltyTask(6, "min", "plank, accumulated"),
-        PenaltyTask(200, "", "bodyweight squats"),
-        PenaltyTask(100, "", "walking lunges"),
+        PenaltyTask(6, t("min"), t("plank, accumulated")),
+        PenaltyTask(200, "", t("bodyweight squats")),
+        PenaltyTask(100, "", t("walking lunges")),
     )
 
     /** Slipping on a habit you're quitting — lighter, but it adds up. */
     private val light = listOf(
         PenaltyTask(50, "", "push-ups"),
         PenaltyTask(40, "", "burpees"),
-        PenaltyTask(4, "min", "plank, accumulated"),
-        PenaltyTask(150, "", "bodyweight squats"),
-        PenaltyTask(2, "min", "cold shower"),
+        PenaltyTask(4, t("min"), t("plank, accumulated")),
+        PenaltyTask(150, "", t("bodyweight squats")),
+        PenaltyTask(2, t("min"), t("cold shower")),
     )
 
     fun roll(kind: PenaltyKind, seed: Long): PenaltyTask {
@@ -103,18 +105,18 @@ object Progression {
     fun advice(pe: ProgramExercise, last: List<SetRecord>): String {
         val ex = pe.exercise
         if (last.isEmpty()) {
-            return if (ex.loaded) "First time: pick a weight you can lift for ${pe.repMin}–${pe.repMax} clean reps, stopping 1–2 reps before failure."
-            else "First time: controlled reps, stop 1–2 before failure. Log what you get."
+            return if (ex.loaded) t("First time: pick a weight you can lift for %1${'$'}s–%2${'$'}s clean reps, stopping 1–2 reps before failure.", pe.repMin, pe.repMax)
+            else t("First time: controlled reps, stop 1–2 before failure. Log what you get.")
         }
         val topWeight = last.maxOf { it.weight }
         val atTop = last.filter { abs(it.weight - topWeight) < 0.01 }
         val hitTop = last.size >= pe.sets && atTop.size >= pe.sets && atTop.all { it.reps >= pe.repMax }
         return if (hitTop) {
-            if (ex.loaded) "You hit ${pe.repMax} on every set last time. Go heavier: ${fmtKg(topWeight + ex.weightStep)} kg."
-            else "You hit ${pe.repMax} on every set. Make it harder: slower lowering, higher feet or a loaded backpack."
+            if (ex.loaded) t("You hit %1${'$'}s on every set last time. Go heavier: %2${'$'}s kg.", pe.repMax, fmtKg(topWeight + ex.weightStep))
+            else t("You hit %s on every set. Make it harder: slower lowering, higher feet or a loaded backpack.", pe.repMax)
         } else {
             val total = last.sumOf { it.reps }
-            val w = if (ex.loaded && topWeight > 0) " at ${fmtKg(topWeight)} kg" else ""
+            val w = if (ex.loaded && topWeight > 0) t(" at %s kg", fmtKg(topWeight)) else ""
             "Last time: ${last.joinToString(" · ") { it.reps.toString() }}$w. Beat $total total reps."
         }
     }
@@ -126,55 +128,55 @@ object Progression {
 
 object Lines {
     private val general = listOf(
-        "Nobody is coming to do this for you.",
-        "You don't need motivation. You need to start.",
-        "The plan is already written. Your only job is to show up.",
-        "Every session you skip is one you never get back.",
-        "81 to 90 doesn't happen by thinking about it.",
-        "Results are slow. That's not a reason to stop. It's the reason most people do.",
-        "Small, boring, every day. That's the whole secret.",
-        "Your excuses aren't as original as you think.",
-        "If it were easy, everyone would look like that.",
-        "The version of you at 90 kg didn't skip today.",
-        "Feelings are optional. Reps are not.",
-        "Do it tired. Do it bored. Just do it.",
-        "The weeks pass either way. Decide what you'll have to show for them.",
-        "Consistency first. Progress follows.",
+        t("Nobody is coming to do this for you."),
+        t("You don't need motivation. You need to start."),
+        t("The plan is already written. Your only job is to show up."),
+        t("Every session you skip is one you never get back."),
+        t("81 to 90 doesn't happen by thinking about it."),
+        t("Results are slow. That's not a reason to stop. It's the reason most people do."),
+        t("Small, boring, every day. That's the whole secret."),
+        t("Your excuses aren't as original as you think."),
+        t("If it were easy, everyone would look like that."),
+        t("The version of you at 90 kg didn't skip today."),
+        t("Feelings are optional. Reps are not."),
+        t("Do it tired. Do it bored. Just do it."),
+        t("The weeks pass either way. Decide what you'll have to show for them."),
+        t("Consistency first. Progress follows."),
     )
     private val preWorkout = listOf(
-        "%s is on the schedule. The schedule doesn't care how you feel.",
-        "Get the first set of %s done. The rest follows.",
-        "%s today. Warm up, then go to work.",
-        "%s. Forty-five minutes. You've lost more than that scrolling today.",
+        t("%s is on the schedule. The schedule doesn't care how you feel."),
+        t("Get the first set of %s done. The rest follows."),
+        t("%s today. Warm up, then go to work."),
+        t("%s. Forty-five minutes. You've lost more than that scrolling today."),
     )
     private val restDay = listOf(
-        "Rest day. Growth happens now — eat like it.",
-        "No training today. Hit your protein and sleep.",
-        "Recovery is part of the program, not a day off from it.",
+        t("Rest day. Growth happens now — eat like it."),
+        t("No training today. Hit your protein and sleep."),
+        t("Recovery is part of the program, not a day off from it."),
     )
     private val missed = listOf(
-        "You missed. That's done. The next one isn't.",
-        "One miss is an accident. Two is a pattern. Don't make it two.",
-        "Pay the penalty and get back on schedule.",
+        t("You missed. That's done. The next one isn't."),
+        t("One miss is an accident. Two is a pattern. Don't make it two."),
+        t("Pay the penalty and get back on schedule."),
     )
     private val streak = listOf(
-        "%d sessions in a row. Don't be the one who breaks it.",
-        "%d straight. This is who you are now.",
-        "%d sessions without a miss. Keep the chain.",
+        t("%d sessions in a row. Don't be the one who breaks it."),
+        t("%d straight. This is who you are now."),
+        t("%d sessions without a miss. Keep the chain."),
     )
     private val proteinLow = listOf(
-        "%d g of protein left. Muscle isn't built from intentions.",
-        "You trained. Now feed it. %d g protein to go.",
-        "%d g short on protein. Fix it before bed.",
+        t("%d g of protein left. Muscle isn't built from intentions."),
+        t("You trained. Now feed it. %d g protein to go."),
+        t("%d g short on protein. Fix it before bed."),
     )
     private val kcalLow = listOf(
-        "%d kcal short. You can't build without material.",
-        "%d kcal to go. The scale won't move on its own.",
+        t("%d kcal short. You can't build without material."),
+        t("%d kcal to go. The scale won't move on its own."),
     )
     private val done = listOf(
-        "Workout done. Now eat and recover.",
-        "Session logged. That's another brick.",
-        "Done. Tomorrow's version of you says thanks.",
+        t("Workout done. Now eat and recover."),
+        t("Session logged. That's another brick."),
+        t("Done. Tomorrow's version of you says thanks."),
     )
 
     private fun <T> List<T>.pick(seed: Long): T = this[Random(seed).nextInt(size)]
@@ -189,7 +191,7 @@ object Lines {
     fun done(seed: Long) = done.pick(seed)
 
     // Notification copy, escalating through the day.
-    fun reminder(meta: String, deadline: String) = "$meta Due by $deadline. Start now and it's done."
-    fun nudge(left: String) = "Still not started. $left left before it counts as a miss."
-    fun final(left: String) = "$left left. Start now or take the penalty."
+    fun reminder(meta: String, deadline: String) = t("%1${'$'}s Due by %2${'$'}s. Start now and it's done.", meta, deadline)
+    fun nudge(left: String) = t("Still not started. %s left before it counts as a miss.", left)
+    fun final(left: String) = t("%s left. Start now or take the penalty.", left)
 }
