@@ -114,7 +114,7 @@ object Guide {
                 "Settings is the gear at the top of Today: your color, reminder times, targets and backups.",
                 "Reminders do the pushing, so keep notifications on.",
             ),
-            "You can replay this guide any time from Settings.",
+            "Replay this guide any time with the ? button on Today.",
         ),
     )
 }
