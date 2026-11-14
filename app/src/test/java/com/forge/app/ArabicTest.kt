@@ -34,12 +34,12 @@ class ArabicTest {
 
     @Test fun lookupFormatsAndFallsBack() {
         Lang.useTable(true, table)
-        assertEquals("الأسبوع 9", t("Week %s", 9))
+        assertEquals("السلسلة 9", t("Streak %s", 9))
         assertEquals("Some new text", t("Some new text"))
-        assertEquals("الضهر", t("muscle|Back"))
+        assertEquals("الظهر", t("muscle|Back"))
         Lang.useTable(false, table)
         assertEquals("Back", t("muscle|Back"))
-        assertEquals("Week 9", t("Week %s", 9))
+        assertEquals("Streak 9", t("Streak %s", 9))
     }
 
     @Test fun pickingFollowsThePhoneUnlessSet() {
