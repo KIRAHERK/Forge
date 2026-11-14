@@ -51,6 +51,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -270,7 +272,7 @@ fun WorkoutCard(sessionId: Long) {
             prs.isNotEmpty() -> "Stronger than last time."
             streak >= 3 -> "$streak sessions in a row."
             session.complete -> Lines.done(session.id)
-            else -> null
+            else -> "Logged. The next one counts too."
         },
     ) {
         Row(Modifier.fillMaxWidth()) {
@@ -336,7 +338,7 @@ fun FuelCard(date: LocalDate) {
             proteinHit && kcalHit -> "Every gram accounted for."
             weekHits >= 4 -> "Protein target hit $weekHits days this week."
             proteinHit -> "Protein done. Muscle gets built on days like this."
-            else -> null
+            else -> "${(s.protein - m.protein).roundToInt().coerceAtLeast(0)} g of protein to go today."
         },
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -369,7 +371,11 @@ fun FuelCard(date: LocalDate) {
         Gap(8.dp)
         Eyebrow("Protein this week")
         Gap(4.dp)
-        BarChart(weekProtein, days.map { Fmt.dowLetter(it) }, target = s.protein.toFloat(), highlight = days.indexOf(date), height = 44.dp)
+        // The chart takes the rest of the card, so there's never a blank band above the credit.
+        BarChart(
+            weekProtein, days.map { Fmt.dowLetter(it) }, Modifier.weight(1f).heightIn(min = 44.dp),
+            target = s.protein.toFloat(), highlight = days.indexOf(date), height = Dp.Unspecified,
+        )
     }
 }
 
@@ -416,7 +422,7 @@ fun ProgressCard() {
             goalReached -> "${Fmt.kg(s.goalWeight)} kg. Done. Next target."
             toward(month) -> "${signed(month!!)} kg in 30 days. Moving the right way."
             toward(sinceStart) -> "${signed(sinceStart!!)} kg since day one."
-            else -> null
+            else -> "Weighed every morning. The trend is what counts."
         },
     ) {
         Row(Modifier.fillMaxWidth()) {

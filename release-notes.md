@@ -1,6 +1,6 @@
-## Forge 1.11.2
+## Forge 1.11.3
 
-- **Today shows your streak instead of "Week 6".** The week number counted from when you started your program, but it didn't say of what. The header now shows how many sessions you've done in a row, or "Today" when you're starting fresh.
+- **Share cards fill the whole picture.** On days without a target hit, the Fuel card left an empty band above the credit line. The protein chart now grows to fill the card, and every card always ends with a line (for example "121 g of protein to go today.").
 
 Your data is untouched.
 
