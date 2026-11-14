@@ -53,7 +53,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 
 | | |
 |---|---|
-| **Today** | Your session streak up top, today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
+| **Today** | Your session streak up top ("Streak 32"), today's session with a live deadline countdown, calorie and protein rings, morning weigh-in, daily habit check-in, streak, week score, and a blunt line for the day. |
 | **Programs** | Six ready-made programs (the original 4-day home program, full body, upper/lower, push/pull/legs, dumbbell-only, bodyweight-only) or build your own: pick training days, add exercises from 85 gym and home exercises, set sets and reps (or seconds), reorder, and add your own exercises. Keep several programs and switch any time; your history stays. Share a program as a QR code: others scan it with the camera or from a screenshot. |
 | **Train** | The active program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |

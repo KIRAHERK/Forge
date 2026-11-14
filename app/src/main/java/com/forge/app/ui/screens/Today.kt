@@ -153,11 +153,8 @@ fun TodayScreen(nav: Nav) {
             // The streak says more about today than a week count with nothing to count towards.
             ScreenHeader(
                 eyebrow = Fmt.longDay(today),
-                title = when (streak) {
-                    0 -> "Today"
-                    1 -> "1 session in a row"
-                    else -> "$streak sessions in a row"
-                },
+                // Short enough to stay on one line beside the level ring and icons.
+                title = if (streak > 0) "Streak $streak" else "Today",
             ) {
                 Box(Modifier.clip(CircleShape).clickable { nav.tab("progress") }) {
                     Ring(level.progress, size = 46.dp, stroke = 3.dp) {
