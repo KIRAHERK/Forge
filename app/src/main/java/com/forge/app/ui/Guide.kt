@@ -1,5 +1,7 @@
 package com.forge.app.ui
 
+import com.forge.app.i18n.t
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.RepeatMode
@@ -64,57 +66,57 @@ data class GuideStep(val tab: String, val title: String, val points: List<String
 object Guide {
     val steps = listOf(
         GuideStep(
-            "today", "Your day on one screen.",
+            "today", t("Your day on one screen."),
             listOf(
-                "Today's workout, with a countdown to your deadline.",
-                "Calories and protein left for today.",
-                "Your morning weigh-in and habit check-in.",
+                t("Today's workout, with a countdown to your deadline."),
+                t("Calories and protein left for today."),
+                t("Your morning weigh-in and habit check-in."),
             ),
-            "Can't train? Tap \"I'm sick today\" under Start workout. No penalty, and your streak waits for you.",
+            t("Can't train? Tap \"I'm sick today\" under Start workout. No penalty, and your streak waits for you."),
         ),
         GuideStep(
-            "train", "Your program.",
+            "train", t("Your program."),
             listOf(
-                "This week's training days and every past session.",
-                "Each exercise has a how-to: setup, cues and common mistakes.",
-                "Programs: pick one of 6 ready ones, edit it, or build your own.",
+                t("This week's training days and every past session."),
+                t("Each exercise has a how-to: setup, cues and common mistakes."),
+                t("Programs: pick one of 6 ready ones, edit it, or build your own."),
             ),
-            "Got a program from a coach or a friend? Programs → Scan a program, and point the camera at their QR code.",
+            t("Got a program from a coach or a friend? Programs → Scan a program, and point the camera at their QR code."),
         ),
         GuideStep(
-            "fuel", "Everything you eat.",
+            "fuel", t("Everything you eat."),
             listOf(
-                "Add food from a basic list, 35 Syrian dishes, or online search.",
-                "Recipes and full-day meal plans that hit your protein.",
-                "A weekly chart of protein or calories.",
+                t("Add food from a basic list, 35 Syrian dishes, or online search."),
+                t("Recipes and full-day meal plans that hit your protein."),
+                t("A weekly chart of protein or calories."),
             ),
-            "The scan button next to Recipes reads barcodes and nutrition labels, so you don't type anything.",
+            t("The scan button next to Recipes reads barcodes and nutrition labels, so you don't type anything."),
         ),
         GuideStep(
-            "habits", "Build it. Or quit it.",
+            "habits", t("Build it. Or quit it."),
             listOf(
-                "Add any habit you want to build, or one you want to quit.",
-                "Tick it off each day; the grid shows your whole week.",
-                "Streaks, best runs and a week score.",
+                t("Add any habit you want to build, or one you want to quit."),
+                t("Tick it off each day; the grid shows your whole week."),
+                t("Streaks, best runs and a week score."),
             ),
-            "Fighting an urge? Quit habits come with an urge timer to help you ride it out.",
+            t("Fighting an urge? Quit habits come with an urge timer to help you ride it out."),
         ),
         GuideStep(
-            "progress", "Proof it's working.",
+            "progress", t("Proof it's working."),
             listOf(
-                "Your 7-day average weight, so daily swings don't fool you.",
-                "Kilos per week against your target, and when you'll get there.",
-                "Workouts, training volume, lifts and your level.",
+                t("Your 7-day average weight, so daily swings don't fool you."),
+                t("Kilos per week against your target, and when you'll get there."),
+                t("Workouts, training volume, lifts and your level."),
             ),
-            "Tap the share icon on a chart to turn it into a clean picture for Instagram or WhatsApp.",
+            t("Tap the share icon on a chart to turn it into a clean picture for Instagram or WhatsApp."),
         ),
         GuideStep(
-            "today", "You're all set.",
+            "today", t("You're all set."),
             listOf(
-                "Settings is the gear at the top of Today: your color, reminder times, targets and backups.",
-                "Reminders do the pushing, so keep notifications on.",
+                t("Settings is the gear at the top of Today: your color, reminder times, targets and backups."),
+                t("Reminders do the pushing, so keep notifications on."),
             ),
-            "Replay this guide any time with the ? button on Today.",
+            t("Replay this guide any time with the ? button on Today."),
         ),
     )
 }
@@ -170,7 +172,7 @@ fun GuideOverlay(nav: Nav, onDone: () -> Unit) {
                 Box {
                 if (step > 0 && !last) {
                     Text(
-                        "SKIP", style = T.Button.copy(fontSize = T.Button.fontSize * 0.8f), color = C.Mid,
+                        t("SKIP"), style = T.Button.copy(fontSize = T.Button.fontSize * 0.8f), color = C.Mid,
                         modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-6).dp).clip(RoundedCornerShape(8.dp))
                             .clickable(onClick = onDone).padding(horizontal = 8.dp, vertical = 6.dp),
                     )
@@ -186,7 +188,7 @@ fun GuideOverlay(nav: Nav, onDone: () -> Unit) {
                     val g = steps[i]
                     Column {
                         Eyebrow(
-                            if (i == steps.lastIndex) "Guide" else "${i + 1} of ${steps.size - 1} · ${tabLabel(g.tab)}",
+                            if (i == steps.lastIndex) t("Guide") else t("%1${'$'}s of %2${'$'}s · %3${'$'}s", i + 1, steps.size - 1, tabLabel(g.tab)),
                             color = C.Volt,
                         )
                         Gap(6.dp)
@@ -213,12 +215,12 @@ fun GuideOverlay(nav: Nav, onDone: () -> Unit) {
                 Gap(16.dp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Back on every step after the first, so a mistaken Next is one tap away from undone.
-                    if (step > 0) TextAction("Back", { step-- }, color = C.Mid, style = T.Button)
-                    else TextAction("Skip", onDone, color = C.Mid, style = T.Button)
+                    if (step > 0) TextAction(t("Back"), { step-- }, color = C.Mid, style = T.Button)
+                    else TextAction(t("Skip"), onDone, color = C.Mid, style = T.Button)
                     HGap(12.dp)
                     Dots(step, steps.size, Modifier.weight(1f))
                     PrimaryButton(
-                        if (last) "Let's go" else "Next",
+                        if (last) t("Let's go") else t("Next"),
                         { if (last) onDone() else step++ },
                         Modifier.width(132.dp),
                         height = 48.dp,
@@ -243,4 +245,4 @@ private fun Dots(current: Int, count: Int, modifier: Modifier) {
 
 private val TAB_ORDER = listOf("today", "train", "fuel", "habits", "progress")
 
-private fun tabLabel(route: String) = route.replaceFirstChar { it.uppercase() }
+private fun tabLabel(route: String) = t(route.replaceFirstChar { it.uppercase() })

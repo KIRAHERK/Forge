@@ -1,5 +1,7 @@
 package com.forge.app.domain
 
+import com.forge.app.i18n.t
+
 /*
  * The rest of the built-in library: gym and home exercises, so any program can be built.
  * Guides are short on purpose: the setup, the movement, three cues and the usual mistakes.
@@ -12,7 +14,7 @@ object ExerciseLibrary {
         setup: List<String>, steps: List<String>, cues: List<String>, mistakes: List<String>,
         compound: Boolean = false,
     ) = Exercise(
-        id = id, name = name, equip = equip, restSec = rest, muscles = muscles,
+        id = id, name = t(name), en = name, equip = equip, restSec = rest, muscles = muscles,
         setup = setup, steps = steps, cues = cues, mistakes = mistakes, compound = compound, group = group,
     )
 

@@ -1,5 +1,7 @@
 package com.forge.app.notify
 
+import com.forge.app.i18n.t
+
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -43,28 +45,28 @@ object Notifier {
         val nm = ctx.getSystemService(NotificationManager::class.java)
         val channels = listOf(
             NotificationChannel(CH_WORKOUT, "Workout reminders", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Reminders and deadline warnings on training days"
+                description = t("Reminders and deadline warnings on training days")
             },
             NotificationChannel(CH_PENALTY, "Penalties and misses", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Missed sessions, penalty deadlines"
+                description = t("Missed sessions, penalty deadlines")
             },
             NotificationChannel(CH_NUTRITION, "Food and weigh-in", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Morning weigh-in, protein and calorie checks"
+                description = t("Morning weigh-in, protein and calorie checks")
             },
             NotificationChannel(CH_HABITS, "Daily check-in", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "End-of-day habit check-in"
+                description = t("End-of-day habit check-in")
                 lockscreenVisibility = android.app.Notification.VISIBILITY_PRIVATE
             },
             NotificationChannel(CH_TIMER, "Rest timer", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Tells you when rest is over"
+                description = t("Tells you when rest is over")
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 300, 150, 300)
             },
             NotificationChannel(CH_WEEKLY, "Weekly review", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Your score at the end of each week"
+                description = t("Your score at the end of each week")
             },
             NotificationChannel(CH_UPDATES, "App updates", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "A new version is available on GitHub"
+                description = t("A new version is available on GitHub")
             },
         )
         nm.createNotificationChannels(channels)
@@ -129,7 +131,7 @@ object Notifier {
                 NotificationCompat.Builder(ctx, channel)
                     .setSmallIcon(R.drawable.ic_stat_forge)
                     .setColor(ACCENT)
-                    .setContentTitle("Forge")
+                    .setContentTitle(t("Forge"))
                     .setContentText(publicText)
                     .build()
             )

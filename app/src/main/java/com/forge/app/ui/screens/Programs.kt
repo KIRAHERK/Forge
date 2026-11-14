@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -109,42 +111,42 @@ fun ProgramsScreen(nav: Nav) {
     var received by remember { mutableStateOf<com.forge.app.data.ProgramCode.Shared?>(null) }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Programs", "Pick one, edit it, or build your own", onBack = { nav.back() })
+        TopBar(t("Programs"), t("Pick one, edit it, or build your own"), onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
             item {
                 Gap(4.dp)
                 Panel(padding = PaddingValues(16.dp)) {
-                    Text("GOT A PROGRAM FROM SOMEONE?", style = T.H3, color = C.Hi)
-                    Text("Scan the QR code a coach or friend shared, or pick a screenshot of it.", style = T.Small, color = C.Mid)
+                    Text(t("GOT A PROGRAM FROM SOMEONE?"), style = T.H3, color = C.Hi)
+                    Text(t("Scan the QR code a coach or friend shared, or pick a screenshot of it."), style = T.Small, color = C.Mid)
                     Gap(12.dp)
-                    PrimaryButton("Scan a program", { scanning = true }, height = 46.dp, icon = Icons.Rounded.QrCodeScanner)
+                    PrimaryButton(t("Scan a program"), { scanning = true }, height = 46.dp, icon = Icons.Rounded.QrCodeScanner)
                 }
                 Gap(6.dp)
-                SectionTitle("Your programs")
+                SectionTitle(t("Your programs"))
             }
             items(programs, key = { it.id }) { p ->
                 val inUse = p.id == activeId
                 Panel(accent = inUse, border = if (inUse) C.Volt.copy(alpha = 0.45f) else C.Line, onClick = { nav.go("program/${p.id}") }, padding = PaddingValues(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            if (inUse) { Tag("In use", color = C.OnVolt, bg = C.Volt); Gap(6.dp) }
-                            Text(p.name.uppercase(), style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            if (inUse) { Tag(t("In use"), color = C.OnVolt, bg = C.Volt); Gap(6.dp) }
+                            Text(t(p.name).uppercase(), style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
                             Text(
-                                "${p.daysPerWeek} days a week · ${p.days.sumOf { it.exercises.size }} exercises",
+                                t("%1${'$'}s days a week · %2${'$'}s exercises", p.daysPerWeek, p.days.sumOf { it.exercises.size }),
                                 style = T.Small, color = C.Mid,
                             )
                         }
                     }
                     Gap(12.dp)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (!inUse) SecondaryButton("Use", { scope.launch { repo.activateProgram(p.id) } }, Modifier.weight(1f), height = 42.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f), hPad = 6.dp)
-                        SecondaryButton("Edit", { nav.go("program/${p.id}") }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp)
-                        SecondaryButton("Share", { sharing = p }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp, icon = Icons.Rounded.QrCode2)
+                        if (!inUse) SecondaryButton(t("Use"), { scope.launch { repo.activateProgram(p.id) } }, Modifier.weight(1f), height = 42.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f), hPad = 6.dp)
+                        SecondaryButton(t("Edit"), { nav.go("program/${p.id}") }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp)
+                        SecondaryButton(t("Share"), { sharing = p }, Modifier.weight(1f), height = 42.dp, hPad = 6.dp, icon = Icons.Rounded.QrCode2)
                     }
                     Gap(4.dp)
                     Row {
-                        TextAction("Make a copy", { scope.launch { repo.duplicateProgram(p.id) } }, color = C.Mid, style = T.Small)
-                        if (!inUse) TextAction("Delete", { deleting = p }, color = C.Red, style = T.Small)
+                        TextAction(t("Make a copy"), { scope.launch { repo.duplicateProgram(p.id) } }, color = C.Mid, style = T.Small)
+                        if (!inUse) TextAction(t("Delete"), { deleting = p }, color = C.Red, style = T.Small)
                     }
                 }
                 Gap(10.dp)
@@ -152,16 +154,16 @@ fun ProgramsScreen(nav: Nav) {
 
             item {
                 Gap(4.dp)
-                SectionTitle("Start a new one")
+                SectionTitle(t("Start a new one"))
                 Panel(onClick = {
-                    scope.launch { val id = repo.createFromTemplate(null, "My program"); nav.go("program/$id") }
+                    scope.launch { val id = repo.createFromTemplate(null, t("My program")); nav.go("program/$id") }
                 }, padding = PaddingValues(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.Add, null, tint = C.Volt)
                         HGap(10.dp)
                         Column {
-                            Text("BUILD FROM SCRATCH", style = T.H3, color = C.Hi)
-                            Text("Your own days and exercises", style = T.Small, color = C.Mid)
+                            Text(t("BUILD FROM SCRATCH"), style = T.H3, color = C.Hi)
+                            Text(t("Your own days and exercises"), style = T.Small, color = C.Mid)
                         }
                     }
                 }
@@ -170,7 +172,7 @@ fun ProgramsScreen(nav: Nav) {
             items(Templates.all, key = { "t" + it.id }) { t ->
                 Panel(onClick = { addTemplate = t }, padding = PaddingValues(16.dp)) {
                     Text(t.name.uppercase(), style = T.H3, color = C.Hi)
-                    Text("${t.daysPerWeek} days a week · ${t.equipment}" + (t.credit?.let { " · $it" } ?: ""), style = T.Small, color = C.Volt)
+                    Text(t("%1${'$'}s days a week · %2${'$'}s", t.daysPerWeek, t.equipment) + (t.credit?.let { " · $it" } ?: ""), style = T.Small, color = C.Volt)
                     Gap(4.dp)
                     Text(t.note, style = T.Small, color = C.Mid)
                 }
@@ -184,7 +186,7 @@ fun ProgramsScreen(nav: Nav) {
         ForgeDialog(
             title = t.name,
             onDismiss = { addTemplate = null },
-            confirm = "Add and use",
+            confirm = t("Add and use"),
             onConfirm = {
                 addTemplate = null
                 scope.launch { repo.activateProgram(repo.createFromTemplate(t.id)) }
@@ -193,12 +195,12 @@ fun ProgramsScreen(nav: Nav) {
             Text(t.note, style = T.Body, color = C.Mid)
             Gap(10.dp)
             t.days.forEach { d ->
-                Text(d.name, style = T.BodyS, color = C.Hi)
+                Text(t(d.name), style = T.BodyS, color = C.Hi)
                 Text(d.exercises.joinToString(", ") { it.exercise.name }, style = T.Small, color = C.Mid)
                 Gap(6.dp)
             }
             Gap(4.dp)
-            TextAction("Add without using it", {
+            TextAction(t("Add without using it"), {
                 addTemplate = null
                 scope.launch { repo.createFromTemplate(t.id) }
             }, color = C.Mid, style = T.Small)
@@ -219,13 +221,13 @@ fun ProgramsScreen(nav: Nav) {
     }
     deleting?.let { p ->
         ForgeDialog(
-            title = "Delete ${p.name}?",
+            title = t("Delete %s?", p.name),
             onDismiss = { deleting = null },
-            confirm = "Delete",
+            confirm = t("Delete"),
             destructive = true,
             onConfirm = { deleting = null; scope.launch { repo.deleteProgram(p.id) } },
         ) {
-            Text("Workouts you already logged with it stay in your history.", style = T.Body, color = C.Mid)
+            Text(t("Workouts you already logged with it stay in your history."), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -247,8 +249,8 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
     val program = remember(programId) { com.forge.app.data.ProgramStore.program(programId) }
     if (program == null) {
         Column(Modifier.fillMaxSize()) {
-            TopBar("Program", null, onBack = { nav.back() })
-            Text("This program no longer exists.", style = T.Body, color = C.Mid, modifier = Modifier.padding(20.dp))
+            TopBar(t("Program"), null, onBack = { nav.back() })
+            Text(t("This program no longer exists."), style = T.Body, color = C.Mid, modifier = Modifier.padding(20.dp))
         }
         return
     }
@@ -284,14 +286,14 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
     BackHandler { leave() }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar(if (isActive) "Edit program · in use" else "Edit program", null, onBack = { leave() }) {
-            TextAction("Save", { save() }, color = if (dirty) C.Volt else C.Mid)
+        TopBar(if (isActive) t("Edit program · in use") else t("Edit program"), null, onBack = { leave() }) {
+            TextAction(t("Save"), { save() }, color = if (dirty) C.Volt else C.Mid)
         }
         LazyColumn(Modifier.weight(1f).imePadding(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
             item {
-                ForgeField(name, { name = it.take(40); touch() }, "Program name")
+                ForgeField(name, { name = it.take(40); touch() }, t("Program name"))
                 Gap(16.dp)
-                SectionTitle("Your week")
+                SectionTitle(t("Your week"))
                 Panel(padding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)) {
                     weekdays.forEachIndexed { i, d ->
                         if (i > 0) Hairline()
@@ -304,7 +306,7 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
                                 Text(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), style = T.BodyM, color = C.Mid, modifier = Modifier.width(52.dp))
                                 val idx = schedule[i]
                                 Text(
-                                    idx?.let { days.getOrNull(it)?.name } ?: "Rest",
+                                    idx?.let { days.getOrNull(it)?.name } ?: t("Rest"),
                                     style = T.BodyM, color = if (idx == null) C.Lo else C.Hi,
                                     modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis,
                                 )
@@ -313,12 +315,12 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
                             DropdownMenu(open, { open = false }, containerColor = C.S2) {
                                 days.forEachIndexed { k, day ->
                                     DropdownMenuItem(
-                                        text = { Text(day.name, style = T.BodyM, color = if (schedule[i] == k) C.Volt else C.Hi) },
+                                        text = { Text(t(day.name), style = T.BodyM, color = if (schedule[i] == k) C.Volt else C.Hi) },
                                         onClick = { open = false; schedule[i] = k; touch() },
                                     )
                                 }
                                 DropdownMenuItem(
-                                    text = { Text("Rest", style = T.BodyM, color = if (schedule[i] == null) C.Volt else C.Hi) },
+                                    text = { Text(t("Rest"), style = T.BodyM, color = if (schedule[i] == null) C.Volt else C.Hi) },
                                     onClick = { open = false; schedule[i] = null; touch() },
                                 )
                             }
@@ -326,7 +328,7 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
                     }
                 }
                 Gap(6.dp)
-                Text("${schedule.count { it != null }} training days a week. A day can repeat in the week.", style = T.Small, color = C.Lo)
+                Text(t("%s training days a week. A day can repeat in the week.", schedule.count { it != null }), style = T.Small, color = C.Lo)
                 Gap(16.dp)
             }
 
@@ -335,11 +337,11 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
                     Panel(padding = PaddingValues(0.dp)) {
                         Row(Modifier.padding(start = 16.dp, end = 6.dp, top = 12.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f).clickable { renaming = day }) {
-                                Eyebrow("Day ${di + 1} · ${day.exercises.sumOf { it.sets }} sets")
-                                Text(day.name.uppercase(), style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Eyebrow(t("Day %1${'$'}s · %2${'$'}s sets", di + 1, day.exercises.sumOf { it.sets }))
+                                Text(t(day.name).uppercase(), style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
                             }
-                            TextAction("Rename", { renaming = day }, color = C.Mid, style = T.Small)
-                            IconBtn(Icons.Rounded.Close, "Remove day", { removingDay = di }, tint = C.Lo, size = 36.dp)
+                            TextAction(t("Rename"), { renaming = day }, color = C.Mid, style = T.Small)
+                            IconBtn(Icons.Rounded.Close, t("Remove day"), { removingDay = di }, tint = C.Lo, size = 36.dp)
                         }
                         day.exercises.forEachIndexed { ei, pe ->
                             Hairline(Modifier.padding(horizontal = 16.dp))
@@ -351,13 +353,13 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
                                     Text(pe.displayName, style = T.BodyM, color = C.Hi, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     Text(pe.prescription, style = T.Small, color = C.Mid)
                                 }
-                                IconBtn(Icons.Rounded.KeyboardArrowUp, "Move up", {
+                                IconBtn(Icons.Rounded.KeyboardArrowUp, t("Move up"), {
                                     if (ei > 0) { day.exercises.add(ei - 1, day.exercises.removeAt(ei)); touch() }
                                 }, tint = if (ei > 0) C.Mid else C.S3, size = 34.dp)
-                                IconBtn(Icons.Rounded.KeyboardArrowDown, "Move down", {
+                                IconBtn(Icons.Rounded.KeyboardArrowDown, t("Move down"), {
                                     if (ei < day.exercises.lastIndex) { day.exercises.add(ei + 1, day.exercises.removeAt(ei)); touch() }
                                 }, tint = if (ei < day.exercises.lastIndex) C.Mid else C.S3, size = 34.dp)
-                                IconBtn(Icons.Rounded.Close, "Remove", { day.exercises.removeAt(ei); touch() }, tint = C.Lo, size = 34.dp)
+                                IconBtn(Icons.Rounded.Close, t("Remove"), { day.exercises.removeAt(ei); touch() }, tint = C.Lo, size = 34.dp)
                             }
                         }
                         Hairline(Modifier.padding(horizontal = 16.dp))
@@ -367,7 +369,7 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
                         ) {
                             Icon(Icons.Rounded.Add, null, tint = C.Volt, modifier = Modifier.size(20.dp))
                             HGap(8.dp)
-                            Text("Add exercise", style = T.BodyS, color = C.Volt)
+                            Text(t("Add exercise"), style = T.BodyS, color = C.Volt)
                         }
                     }
                     Gap(12.dp)
@@ -375,11 +377,11 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
             }
 
             item {
-                SecondaryButton("Add a day", {
-                    days.add(DayEdit(null, "Day ${days.size + 1}", emptyList())); touch()
+                SecondaryButton(t("Add a day"), {
+                    days.add(DayEdit(null, t("Day %s", days.size + 1), emptyList())); touch()
                 }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Add, height = 48.dp)
                 Gap(16.dp)
-                PrimaryButton("Save program", { save() }, enabled = dirty || program.days.isEmpty())
+                PrimaryButton(t("Save program"), { save() }, enabled = dirty || program.days.isEmpty())
                 BottomSpace()
             }
         }
@@ -405,14 +407,14 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
     }
     renaming?.let { day ->
         var text by remember(day) { mutableStateOf(day.name) }
-        ForgeDialog("Day name", { renaming = null }, "Save", {
+        ForgeDialog(t("Day name"), { renaming = null }, t("Save"), {
             day.name = text.trim().ifBlank { day.name }; touch(); renaming = null
         }) {
-            ForgeField(text, { text = it.take(40) }, "Name, e.g. Push or Legs")
+            ForgeField(text, { text = it.take(40) }, t("Name, e.g. Push or Legs"))
         }
     }
     removingDay?.let { di ->
-        ForgeDialog("Remove ${days.getOrNull(di)?.name ?: "day"}?", { removingDay = null }, "Remove", {
+        ForgeDialog(t("Remove %s?", days.getOrNull(di)?.name ?: t("day")), { removingDay = null }, t("Remove"), {
             days.removeAt(di)
             for (i in schedule.indices) {
                 val v = schedule[i]
@@ -425,12 +427,12 @@ fun ProgramEditorScreen(nav: Nav, programId: String) {
             }
             touch(); removingDay = null
         }, destructive = true) {
-            Text("Its exercises are removed from the program. Workouts you already logged stay in your history.", style = T.Body, color = C.Mid)
+            Text(t("Its exercises are removed from the program. Workouts you already logged stay in your history."), style = T.Body, color = C.Mid)
         }
     }
     if (confirmLeave) {
-        ForgeDialog("Discard changes?", { confirmLeave = false }, "Discard", { confirmLeave = false; nav.back() }, dismiss = "Keep editing", destructive = true) {
-            Text("Your edits to this program haven't been saved.", style = T.Body, color = C.Mid)
+        ForgeDialog(t("Discard changes?"), { confirmLeave = false }, t("Discard"), { confirmLeave = false; nav.back() }, dismiss = t("Keep editing"), destructive = true) {
+            Text(t("Your edits to this program haven't been saved."), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -453,12 +455,12 @@ private fun PrescriptionDialog(pe: ProgramExercise, onDismiss: () -> Unit, onSav
     var max by remember { mutableIntStateOf(pe.repMax) }
     var unit by remember { mutableStateOf(pe.unit) }
     val timed = unit.timed
-    ForgeDialog(pe.exercise.name, onDismiss, "Save", {
+    ForgeDialog(pe.exercise.name, onDismiss, t("Save"), {
         onSave(pe.copy(sets = sets, repMin = minOf(min, max), repMax = maxOf(min, max), unit = unit))
     }) {
-        Eyebrow("Counted in")
+        Eyebrow(t("Counted in"))
         Gap(6.dp)
-        Segmented(listOf("Reps", "Seconds"), if (timed) 1 else 0, { i ->
+        Segmented(listOf(t("Reps"), t("Seconds")), if (timed) 1 else 0, { i ->
             val toTimed = i == 1
             if (toTimed != timed) {
                 unit = when {
@@ -471,9 +473,9 @@ private fun PrescriptionDialog(pe: ProgramExercise, onDismiss: () -> Unit, onSav
             }
         }, colors = listOf(C.Volt, C.Volt))
         Gap(10.dp)
-        Eyebrow("Each side separately")
+        Eyebrow(t("Each side separately"))
         Gap(6.dp)
-        Segmented(listOf("No", "Per side", "Per leg"), when (unit) { RepUnit.SIDE, RepUnit.SEC_SIDE -> 1; RepUnit.LEG -> 2; else -> 0 }, { i ->
+        Segmented(listOf(t("No"), t("Per side"), t("Per leg")), when (unit) { RepUnit.SIDE, RepUnit.SEC_SIDE -> 1; RepUnit.LEG -> 2; else -> 0 }, { i ->
             unit = when {
                 timed -> if (i == 0) RepUnit.SEC else RepUnit.SEC_SIDE
                 i == 1 -> RepUnit.SIDE
@@ -484,22 +486,22 @@ private fun PrescriptionDialog(pe: ProgramExercise, onDismiss: () -> Unit, onSav
         Gap(14.dp)
         val step = if (timed) 5 else 1
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Sets", style = T.BodyM, color = C.Hi, modifier = Modifier.width(90.dp))
+            Text(t("Sets"), style = T.BodyM, color = C.Hi, modifier = Modifier.width(90.dp))
             Stepper("$sets", { sets = (sets - 1).coerceAtLeast(1) }, { sets = (sets + 1).coerceAtMost(10) }, Modifier.weight(1f))
         }
         Gap(8.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(if (timed) "Min sec" else "Min reps", style = T.BodyM, color = C.Hi, modifier = Modifier.width(90.dp))
+            Text(if (timed) t("Min sec") else t("Min reps"), style = T.BodyM, color = C.Hi, modifier = Modifier.width(90.dp))
             Stepper("$min", { min = (min - step).coerceAtLeast(1) }, { min = (min + step).coerceAtMost(600) }, Modifier.weight(1f))
         }
         Gap(8.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(if (timed) "Max sec" else "Max reps", style = T.BodyM, color = C.Hi, modifier = Modifier.width(90.dp))
+            Text(if (timed) t("Max sec") else t("Max reps"), style = T.BodyM, color = C.Hi, modifier = Modifier.width(90.dp))
             Stepper("$max", { max = (max - step).coerceAtLeast(1) }, { max = (max + step).coerceAtMost(600) }, Modifier.weight(1f))
         }
         Gap(8.dp)
         Text(
-            "Work in the range. When every set hits the top, the app tells you to add weight.",
+            t("Work in the range. When every set hits the top, the app tells you to add weight."),
             style = T.Small, color = C.Lo,
         )
     }
@@ -523,7 +525,7 @@ fun ExercisePickerSheet(onDismiss: () -> Unit, onPick: (Exercise) -> Unit) {
     val q = query.trim().lowercase()
     val list = all.filter { e ->
         (equip == null || e.equip == equip) && (group == null || e.group == group) &&
-            (q.isEmpty() || e.name.lowercase().contains(q) || e.muscles.lowercase().contains(q))
+            (q.isEmpty() || e.name.lowercase().contains(q) || e.en.lowercase().contains(q) || e.muscles.lowercase().contains(q))
     }
 
     ModalBottomSheet(
@@ -535,26 +537,26 @@ fun ExercisePickerSheet(onDismiss: () -> Unit, onPick: (Exercise) -> Unit) {
     ) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(0.92f).imePadding()) {
             Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("ADD EXERCISE", style = T.H2, color = C.Hi, modifier = Modifier.weight(1f))
-                TextAction("Create your own", { creating = true })
+                Text(t("ADD EXERCISE"), style = T.H2, color = C.Hi, modifier = Modifier.weight(1f))
+                TextAction(t("Create your own"), { creating = true })
             }
             Gap(10.dp)
-            Box(Modifier.padding(horizontal = 20.dp)) { ForgeField(query, { query = it }, "Search ${all.size} exercises") }
+            Box(Modifier.padding(horizontal = 20.dp)) { ForgeField(query, { query = it }, t("Search %s exercises", all.size)) }
             Gap(10.dp)
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Chip("All muscles", group == null, { group = null })
+                Chip(t("All muscles"), group == null, { group = null })
                 MuscleGroup.entries.forEach { g -> Chip(g.label, group == g, { group = if (group == g) null else g }) }
             }
             Gap(6.dp)
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Chip("Any equipment", equip == null, { equip = null })
+                Chip(t("Any equipment"), equip == null, { equip = null })
                 Equip.entries.forEach { e -> Chip(e.label, equip == e, { equip = if (equip == e) null else e }) }
             }
             Gap(8.dp)
             LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
                 if (list.isEmpty()) {
                     item {
-                        Text("Nothing matches. Clear a filter, or create it as your own exercise.", style = T.Small, color = C.Lo, modifier = Modifier.padding(vertical = 12.dp))
+                        Text(t("Nothing matches. Clear a filter, or create it as your own exercise."), style = T.Small, color = C.Lo, modifier = Modifier.padding(vertical = 12.dp))
                     }
                 }
                 items(list, key = { it.id }) { e ->
@@ -564,11 +566,12 @@ fun ExercisePickerSheet(onDismiss: () -> Unit, onPick: (Exercise) -> Unit) {
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(e.name, style = T.BodyS, color = C.Hi)
+                            com.forge.app.ui.components.EnglishName(e)
                             Text("${e.group.label} · ${e.equip.label}" + if (e.muscles.isNotBlank() && !e.custom) " · ${e.muscles}" else "", style = T.Small, color = C.Mid, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         if (e.custom) {
-                            Tag("Yours")
-                            IconBtn(Icons.Rounded.Close, "Delete ${e.name}", { deleting = e }, tint = C.Lo, size = 36.dp)
+                            Tag(t("Yours"))
+                            IconBtn(Icons.Rounded.Close, t("Delete %s", e.name), { deleting = e }, tint = C.Lo, size = 36.dp)
                         }
                     }
                     Hairline()
@@ -588,10 +591,10 @@ fun ExercisePickerSheet(onDismiss: () -> Unit, onPick: (Exercise) -> Unit) {
         }
     }
     deleting?.let { e ->
-        ForgeDialog("Delete ${e.name}?", { deleting = null }, "Delete", {
+        ForgeDialog(t("Delete %s?", e.name), { deleting = null }, t("Delete"), {
             deleting = null; scope.launch { repo.deleteCustomExercise(e.id) }
         }, destructive = true) {
-            Text("It disappears from this list. Programs and workouts that already use it keep it.", style = T.Body, color = C.Mid)
+            Text(t("It disappears from this list. Programs and workouts that already use it keep it."), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -602,23 +605,23 @@ private fun CustomExerciseDialog(onDismiss: () -> Unit, onCreate: (String, Equip
     var equip by remember { mutableStateOf(Equip.DUMBBELL) }
     var group by remember { mutableStateOf(MuscleGroup.CHEST) }
     var rest by remember { mutableIntStateOf(90) }
-    ForgeDialog("Your own exercise", onDismiss, "Create", { if (name.isNotBlank()) onCreate(name, equip, group, rest) }) {
-        ForgeField(name, { name = it.take(40) }, "Name")
+    ForgeDialog(t("Your own exercise"), onDismiss, t("Create"), { if (name.isNotBlank()) onCreate(name, equip, group, rest) }) {
+        ForgeField(name, { name = it.take(40) }, t("Name"))
         Gap(12.dp)
-        Eyebrow("Equipment")
+        Eyebrow(t("Equipment"))
         Gap(6.dp)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Equip.entries.forEach { e -> Chip(e.label, equip == e, { equip = e }) }
         }
         Gap(12.dp)
-        Eyebrow("Muscle group")
+        Eyebrow(t("Muscle group"))
         Gap(6.dp)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             MuscleGroup.entries.forEach { g -> Chip(g.label, group == g, { group = g }) }
         }
         Gap(12.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Rest", style = T.BodyM, color = C.Hi, modifier = Modifier.width(70.dp))
+            Text(t("Rest"), style = T.BodyM, color = C.Hi, modifier = Modifier.width(70.dp))
             Stepper("${rest}s", { rest = (rest - 15).coerceAtLeast(15) }, { rest = (rest + 15).coerceAtMost(300) }, Modifier.weight(1f))
         }
     }

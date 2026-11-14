@@ -1,5 +1,7 @@
 package com.forge.app.update
 
+import com.forge.app.i18n.t
+
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
@@ -90,7 +92,7 @@ object Updater {
             when (conn.responseCode) {
                 404 -> return@withContext null // no releases published yet
                 in 200..299 -> {}
-                else -> error("GitHub answered ${conn.responseCode}")
+                else -> error(t("GitHub answered %s", conn.responseCode))
             }
             val rel = json.decodeFromString(GhRelease.serializer(), conn.inputStream.bufferedReader().use { it.readText() })
             if (rel.draft || rel.prerelease) return@withContext null
@@ -107,7 +109,7 @@ object Updater {
         _state.value = State.Checking
         val next = runCatching { fetchLatest() }.fold(
             onSuccess = { info -> if (info == null) State.UpToDate(System.currentTimeMillis()) else State.Available(info) },
-            onFailure = { State.Failed("Couldn't reach GitHub. Check your connection.") },
+            onFailure = { State.Failed(t("Couldn't reach GitHub. Check your connection.")) },
         )
         _state.value = next
         return next
@@ -133,7 +135,7 @@ object Updater {
                     setRequestProperty("User-Agent", "Forge-Android-Updater")
                 }
                 try {
-                    if (conn.responseCode !in 200..299) error("Download failed (${conn.responseCode})")
+                    if (conn.responseCode !in 200..299) error(t("Download failed (%s)", conn.responseCode))
                     val total = conn.contentLengthLong.takeIf { it > 0 } ?: info.size
                     conn.inputStream.use { input ->
                         out.outputStream().use { output ->
@@ -161,7 +163,7 @@ object Updater {
         }
         _state.value = result.fold(
             onSuccess = { State.Ready(info, it) },
-            onFailure = { State.Failed(it.message ?: "Download failed", info) },
+            onFailure = { State.Failed(it.message ?: t("Download failed"), info) },
         )
     }
 
@@ -180,16 +182,16 @@ object Updater {
     private fun verify(ctx: Context, apk: File) {
         val pm = ctx.packageManager
         val flags = if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES else PackageManager.GET_SIGNATURES
-        val archive = pm.getPackageArchiveInfo(apk.absolutePath, flags) ?: error("The downloaded file isn't a valid app.")
-        if (archive.packageName != ctx.packageName) error("The download is a different app. Not installing.")
+        val archive = pm.getPackageArchiveInfo(apk.absolutePath, flags) ?: error(t("The downloaded file isn't a valid app."))
+        if (archive.packageName != ctx.packageName) error(t("The download is a different app. Not installing."))
         val installed = pm.getPackageInfo(ctx.packageName, flags)
         val newCode = if (Build.VERSION.SDK_INT >= 28) archive.longVersionCode else archive.versionCode.toLong()
         val oldCode = if (Build.VERSION.SDK_INT >= 28) installed.longVersionCode else installed.versionCode.toLong()
-        if (newCode <= oldCode) error("The download isn't newer than what you have.")
+        if (newCode <= oldCode) error(t("The download isn't newer than what you have."))
         val a = signatures(archive)
         val b = signatures(installed)
         if (a.isEmpty() || b.isEmpty() || a.intersect(b).isEmpty()) {
-            error("Signed with a different key. Installing it would require wiping your data, so it was blocked.")
+            error(t("Signed with a different key. Installing it would require wiping your data, so it was blocked."))
         }
     }
 
@@ -206,7 +208,7 @@ object Updater {
 
     /** Backs up first, then opens the system installer. */
     suspend fun install(ctx: Context, file: File) {
-        runCatching { AutoBackup.run(ctx, reason = "before update") }
+        runCatching { AutoBackup.run(ctx, reason = t("before update")) }
         val uri = FileProvider.getUriForFile(ctx, "${ctx.packageName}.files", file)
         val intent = Intent(Intent.ACTION_VIEW)
             .setDataAndType(uri, "application/vnd.android.package-archive")

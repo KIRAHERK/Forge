@@ -66,23 +66,54 @@ val BarlowCondensed = FontFamily(
     Font(R.font.barlow_condensed_bold, FontWeight.Bold),
 )
 
+val Changa = FontFamily(
+    Font(R.font.changa_medium, FontWeight.Medium),
+    Font(R.font.changa_semi_bold, FontWeight.SemiBold),
+    Font(R.font.changa_bold, FontWeight.Bold),
+)
+
+val Cairo = FontFamily(
+    Font(R.font.cairo_regular, FontWeight.Normal),
+    Font(R.font.cairo_medium, FontWeight.Medium),
+    Font(R.font.cairo_semi_bold, FontWeight.SemiBold),
+    Font(R.font.cairo_bold, FontWeight.Bold),
+)
+
+/**
+ * Type scale. English: Barlow Condensed titles, Barlow body. Arabic: Changa titles, Cairo body,
+ * no letter spacing (it breaks joined letters) and taller lines (Arabic needs the room).
+ */
 object T {
     private const val TNUM = "tnum"
+    private val ar get() = com.forge.app.i18n.Lang.arabic
 
-    val Hero = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 64.sp, lineHeight = 58.sp, letterSpacing = (-0.01).em, fontFeatureSettings = TNUM)
-    val Display = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 40.sp, lineHeight = 40.sp, letterSpacing = 0.em, fontFeatureSettings = TNUM)
-    val H1 = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = 32.sp, letterSpacing = 0.01.em)
-    val H2 = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 26.sp, letterSpacing = 0.02.em)
-    val H3 = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, lineHeight = 22.sp, letterSpacing = 0.03.em)
-    val Num = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 24.sp, fontFeatureSettings = TNUM)
-    val NumL = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = 30.sp, fontFeatureSettings = TNUM)
-    val Eyebrow = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 0.14.em)
-    val Body = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 21.sp)
-    val BodyM = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 21.sp)
-    val BodyS = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 21.sp)
-    val Small = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp)
-    val Tiny = TextStyle(fontFamily = Barlow, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 14.sp, fontFeatureSettings = TNUM)
-    val Button = TextStyle(fontFamily = BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 20.sp, letterSpacing = 0.06.em)
+    private fun title(weight: FontWeight, size: Float, line: Float, spacing: Float = 0f, tnum: Boolean = false) =
+        if (ar) TextStyle(fontFamily = Changa, fontWeight = weight, fontSize = (size * 0.86f).sp, lineHeight = (size * 1.22f).sp, fontFeatureSettings = if (tnum) TNUM else null)
+        else TextStyle(fontFamily = BarlowCondensed, fontWeight = weight, fontSize = size.sp, lineHeight = line.sp, letterSpacing = spacing.em, fontFeatureSettings = if (tnum) TNUM else null)
+
+    private fun body(weight: FontWeight, size: Float, line: Float, spacing: Float = 0f, tnum: Boolean = false) =
+        if (ar) TextStyle(fontFamily = Cairo, fontWeight = weight, fontSize = size.sp, lineHeight = (line * 1.12f).sp, fontFeatureSettings = if (tnum) TNUM else null)
+        else TextStyle(fontFamily = Barlow, fontWeight = weight, fontSize = size.sp, lineHeight = line.sp, letterSpacing = spacing.em, fontFeatureSettings = if (tnum) TNUM else null)
+
+    val Hero get() = title(FontWeight.Bold, 64f, 58f, -0.01f, tnum = true)
+    val Display get() = title(FontWeight.Bold, 40f, 40f, 0f, tnum = true)
+    val H1 get() = title(FontWeight.Bold, 30f, 32f, 0.01f)
+    val H2 get() = title(FontWeight.SemiBold, 22f, 26f, 0.02f)
+    val H3 get() = title(FontWeight.SemiBold, 18f, 22f, 0.03f)
+    // Numbers keep Barlow Condensed in both languages: digits are Western either way.
+    val Num get() = TextStyle(fontFamily = if (ar) Changa else BarlowCondensed, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = if (ar) 28.sp else 24.sp, fontFeatureSettings = TNUM)
+    val NumL get() = TextStyle(fontFamily = if (ar) Changa else BarlowCondensed, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = if (ar) 36.sp else 30.sp, fontFeatureSettings = TNUM)
+    val Eyebrow get() = body(FontWeight.SemiBold, 11f, 14f, 0.14f)
+    val Body get() = body(FontWeight.Normal, 15f, 21f)
+    val BodyM get() = body(FontWeight.Medium, 15f, 21f)
+    val BodyS get() = body(FontWeight.SemiBold, 15f, 21f)
+    val Small get() = body(FontWeight.Medium, 13f, 18f)
+    val Tiny get() = body(FontWeight.Medium, 11f, 14f, tnum = true)
+    val Button get() = title(FontWeight.Bold, 18f, 20f, 0.06f)
+
+    /** A big title at [size] sp (e.g. onboarding). Keeps Arabic line height sane. */
+    fun hero(size: Int, line: Int = size - 2): TextStyle =
+        if (ar) title(FontWeight.Bold, size.toFloat(), line.toFloat()) else Hero.copy(fontSize = size.sp, lineHeight = line.sp)
 }
 
 private fun scheme() = darkColorScheme(
@@ -107,7 +138,7 @@ private fun scheme() = darkColorScheme(
     onError = C.Hi,
 )
 
-private val typography = Typography(
+private fun typography() = Typography(
     bodyLarge = T.Body,
     bodyMedium = T.Body,
     bodySmall = T.Small,
@@ -127,5 +158,5 @@ private val typography = Typography(
 
 @Composable
 fun ForgeTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = scheme(), typography = typography, content = content)
+    MaterialTheme(colorScheme = scheme(), typography = typography(), content = content)
 }

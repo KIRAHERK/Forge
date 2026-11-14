@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -151,11 +153,11 @@ fun OnboardingScreen() {
                     1 -> ColorStep(scope)
                     2 -> {
                         Gap(12.dp)
-                        Eyebrow("Step 3 of 5")
+                        Eyebrow(t("Step 3 of 5"))
                         Gap(6.dp)
-                        Text("PICK YOUR\nPROGRAM.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
+                        Text(t("PICK YOUR\nPROGRAM."), style = T.hero(52, 50), color = C.Hi)
                         Gap(6.dp)
-                        Text("Start from one of these. You can edit it or build your own any time.", style = T.Small, color = C.Mid)
+                        Text(t("Start from one of these. You can edit it or build your own any time."), style = T.Small, color = C.Mid)
                         Gap(14.dp)
                         com.forge.app.domain.Templates.all.forEach { t ->
                             val sel = t.id == templateId
@@ -166,82 +168,82 @@ fun OnboardingScreen() {
                                 padding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                             ) {
                                 Text(t.name.uppercase(), style = T.H3, color = if (sel) C.Volt else C.Hi)
-                                Text("${t.daysPerWeek} days a week · ${t.equipment}" + (t.credit?.let { " · $it" } ?: ""), style = T.Small, color = C.Mid)
+                                Text(t("%1${'$'}s days a week · %2${'$'}s", t.daysPerWeek, t.equipment) + (t.credit?.let { " · $it" } ?: ""), style = T.Small, color = C.Mid)
                             }
                             Gap(8.dp)
                         }
                         Gap(10.dp)
-                        Eyebrow("Your week starts on")
+                        Eyebrow(t("Your week starts on"))
                         Gap(8.dp)
                         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY).forEach { d ->
-                                Chip(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), weekStart == d, { weekStart = d })
+                                Chip(d.getDisplayName(TextStyle.SHORT, com.forge.app.i18n.Lang.locale), weekStart == d, { weekStart = d })
                             }
                         }
                         Gap(16.dp)
                         Panel {
-                            Eyebrow("Your training week")
+                            Eyebrow(t("Your training week"))
                             Gap(8.dp)
                             val t = com.forge.app.domain.Templates.byId(templateId) ?: com.forge.app.domain.Templates.forge
                             (0..6).forEach { i ->
                                 val d = weekStart.plus(i.toLong())
                                 val day = t.week[d.value - 1]?.let { t.days[it] }
                                 Row(Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-                                    Text(d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH), style = T.BodyM, color = C.Mid, modifier = Modifier.width(52.dp))
-                                    Text(day?.name ?: "Rest", style = T.BodyM, color = if (day != null) C.Hi else C.Lo)
+                                    Text(d.getDisplayName(TextStyle.SHORT, com.forge.app.i18n.Lang.locale), style = T.BodyM, color = C.Mid, modifier = Modifier.width(52.dp))
+                                    Text(day?.name ?: t("Rest"), style = T.BodyM, color = if (day != null) C.Hi else C.Lo)
                                 }
                             }
                         }
                         Gap(14.dp)
                         Panel {
-                            ValueRow("Workout reminder", Fmt.time(workoutTime)) { timeEdit = "workout" }
+                            ValueRow(t("Workout reminder"), Fmt.time(workoutTime)) { timeEdit = "workout" }
                             Hairline()
-                            ValueRow("Deadline", Fmt.time(deadline), "Not done by then counts as a miss", valueColor = C.Red) { timeEdit = "deadline" }
+                            ValueRow(t("Deadline"), Fmt.time(deadline), t("Not done by then counts as a miss"), valueColor = C.Red) { timeEdit = "deadline" }
                         }
                         Gap(8.dp)
-                        Text("You can change all of this later in Settings.", style = T.Small, color = C.Lo)
+                        Text(t("You can change all of this later in Settings."), style = T.Small, color = C.Lo)
                     }
                     3 -> {
                         Gap(12.dp)
-                        Eyebrow("Step 4 of 5")
+                        Eyebrow(t("Step 4 of 5"))
                         Gap(6.dp)
-                        Text("YOUR NUMBERS.\nYOUR HABITS.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
+                        Text(t("YOUR NUMBERS.\nYOUR HABITS."), style = T.hero(52, 50), color = C.Hi)
                         Gap(18.dp)
-                        Eyebrow("Your numbers")
+                        Eyebrow(t("Your numbers"))
                         Gap(8.dp)
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            ForgeField(weight, { weight = it }, "Weight today", Modifier.weight(1f), number = true, suffix = "kg")
-                            ForgeField(goal, { goal = it }, "Milestone", Modifier.weight(1f), number = true, suffix = "kg")
+                            ForgeField(weight, { weight = it }, t("Weight today"), Modifier.weight(1f), number = true, suffix = t("kg"))
+                            ForgeField(goal, { goal = it }, t("Milestone"), Modifier.weight(1f), number = true, suffix = t("kg"))
                         }
                         Gap(10.dp)
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            ForgeField(kcal, { kcal = it }, "Calories / day", Modifier.weight(1f), number = true, suffix = "kcal")
-                            ForgeField(protein, { protein = it }, "Protein / day", Modifier.weight(1f), number = true, suffix = "g")
+                            ForgeField(kcal, { kcal = it }, t("Calories / day"), Modifier.weight(1f), number = true, suffix = t("kcal"))
+                            ForgeField(protein, { protein = it }, t("Protein / day"), Modifier.weight(1f), number = true, suffix = t("g"))
                         }
                         Gap(6.dp)
-                        Text("Prefilled from the built-in plan. Fat and carbs are in Settings.", style = T.Small, color = C.Lo)
+                        Text(t("Prefilled from the built-in plan. Fat and carbs are in Settings."), style = T.Small, color = C.Lo)
                         Gap(22.dp)
-                        Eyebrow("Habits (optional)")
+                        Eyebrow(t("Habits (optional)"))
                         Gap(6.dp)
-                        Text("Something to build daily, or something to quit. You can add more later in the Habits tab.", style = T.Small, color = C.Mid)
+                        Text(t("Something to build daily, or something to quit. You can add more later in the Habits tab."), style = T.Small, color = C.Mid)
                         Gap(10.dp)
                         Panel {
                             habits.forEachIndexed { i, (name, kind) ->
                                 Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Text(name, style = T.BodyM, color = C.Hi, modifier = Modifier.weight(1f))
-                                    Text(if (kind == com.forge.app.data.HabitDef.KIND_QUIT) "Quit" else "Build", style = T.Small, color = C.Mid)
+                                    Text(if (kind == com.forge.app.data.HabitDef.KIND_QUIT) t("Quit") else t("Build"), style = T.Small, color = C.Mid)
                                     HGap(8.dp)
-                                    TextAction("Remove", { habits.removeAt(i) }, color = C.Lo, style = T.Small)
+                                    TextAction(t("Remove"), { habits.removeAt(i) }, color = C.Lo, style = T.Small)
                                 }
                                 Hairline()
                             }
                             if (habits.isNotEmpty()) Gap(10.dp)
-                            ForgeField(habitName, { habitName = it.take(40) }, "Habit name")
+                            ForgeField(habitName, { habitName = it.take(40) }, t("Habit name"))
                             Gap(10.dp)
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Segmented(listOf("Build", "Quit"), if (habitQuit) 1 else 0, { habitQuit = it == 1 }, colors = listOf(C.Volt, C.Amber))
+                                Segmented(listOf(t("Build"), t("Quit")), if (habitQuit) 1 else 0, { habitQuit = it == 1 }, colors = listOf(C.Volt, C.Amber))
                                 HGap(10.dp)
-                                SecondaryButton("Add", {
+                                SecondaryButton(t("Add"), {
                                     if (habitName.isNotBlank()) {
                                         habits.add(habitName.trim() to if (habitQuit) com.forge.app.data.HabitDef.KIND_QUIT else com.forge.app.data.HabitDef.KIND_BUILD)
                                         habitName = ""
@@ -254,22 +256,22 @@ fun OnboardingScreen() {
                         val notifOk = remember(refresh) { Notifier.canPost(ctx) }
                         val batteryOk = remember(refresh) { isIgnoringBattery(ctx) }
                         Gap(12.dp)
-                        Eyebrow("Step 5 of 5")
+                        Eyebrow(t("Step 5 of 5"))
                         Gap(6.dp)
-                        Text("LET IT\nPUSH YOU.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
+                        Text(t("LET IT\nPUSH YOU."), style = T.hero(52, 50), color = C.Hi)
                         Gap(14.dp)
-                        Text("Reminders are the point. Without these permissions the app can't warn you before a deadline.", style = T.Body, color = C.Mid)
+                        Text(t("Reminders are the point. Without these permissions the app can't warn you before a deadline."), style = T.Body, color = C.Mid)
                         Gap(18.dp)
                         Panel {
-                            PermRow("Notifications", "Reminders, deadlines, penalties", notifOk) {
+                            PermRow(t("Notifications"), t("Reminders, deadlines, penalties"), notifOk) {
                                 if (Build.VERSION.SDK_INT >= 33) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) else openNotificationSettings(ctx)
                             }
                             Hairline()
-                            PermRow("Battery: unrestricted", "Stops the phone from killing reminders", batteryOk) { requestBatteryExemption(ctx) }
+                            PermRow(t("Battery: unrestricted"), t("Stops the phone from killing reminders"), batteryOk) { requestBatteryExemption(ctx) }
                         }
                         Gap(14.dp)
                         Text(
-                            "On Xiaomi, Samsung, Huawei or Oppo also enable Autostart for Forge in system settings.",
+                            t("On Xiaomi, Samsung, Huawei or Oppo also enable Autostart for Forge in system settings."),
                             style = T.Small, color = C.Lo,
                         )
                     }
@@ -279,11 +281,11 @@ fun OnboardingScreen() {
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             if (step > 0) {
-                TextAction("Back", { step-- }, color = C.Mid, style = T.Button)
+                TextAction(t("Back"), { step-- }, color = C.Mid, style = T.Button)
                 HGap(12.dp)
             }
             PrimaryButton(
-                when (step) { 0 -> "Set it up"; 4 -> "Start"; else -> "Continue" },
+                when (step) { 0 -> t("Set it up"); 4 -> t("Start"); else -> t("Continue") },
                 { if (step < 4) step++ else finish() },
                 Modifier.weight(1f),
             )
@@ -292,7 +294,7 @@ fun OnboardingScreen() {
 
     timeEdit?.let { which ->
         TimeDialog(
-            if (which == "workout") "Workout reminder" else "Deadline",
+            if (which == "workout") t("Workout reminder") else t("Deadline"),
             if (which == "workout") workoutTime else deadline,
             { timeEdit = null },
         ) { v ->
@@ -307,31 +309,33 @@ fun OnboardingScreen() {
 
 @Composable
 private fun Intro() {
-    Gap(20.dp)
-    Eyebrow("Forge · by ${com.forge.app.Credits.AUTHOR}", color = C.Volt)
     Gap(8.dp)
-    Text("YOUR PLAN.\nENFORCED.", style = T.Hero.copy(fontSize = 64.sp, lineHeight = 60.sp), color = C.Hi)
+    com.forge.app.ui.components.LanguagePicker(showSystem = false)
+    Gap(16.dp)
+    Eyebrow(t("Forge · by %s", com.forge.app.Credits.AUTHOR), color = C.Volt)
+    Gap(8.dp)
+    Text(t("YOUR PLAN.\nENFORCED."), style = T.hero(64, 60), color = C.Hi)
     Gap(14.dp)
-    Text("Your training program and nutrition plan, with reminders, deadlines and consequences.", style = T.Body, color = C.Mid)
+    Text(t("Your training program and nutrition plan, with reminders, deadlines and consequences."), style = T.Body, color = C.Mid)
     Gap(24.dp)
     Panel {
         Row(Modifier.fillMaxWidth()) {
-            Stat("Programs", "${com.forge.app.domain.Templates.all.size}", Modifier.weight(1f), unit = "ready")
-            Stat("Exercises", "${com.forge.app.domain.Exercises.builtIn.size}", Modifier.weight(1f), unit = "with guides")
+            Stat(t("Programs"), "${com.forge.app.domain.Templates.all.size}", Modifier.weight(1f), unit = t("ready"))
+            Stat(t("Exercises"), "${com.forge.app.domain.Exercises.builtIn.size}", Modifier.weight(1f), unit = t("with guides"))
         }
         Gap(16.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("Protein", "${Plan.PROTEIN}", Modifier.weight(1f), unit = "g / day", color = C.Volt)
-            Stat("Calories", Fmt.num(Plan.KCAL), Modifier.weight(1f), unit = "/ day")
+            Stat(t("Protein"), "${Plan.PROTEIN}", Modifier.weight(1f), unit = t("g / day"), color = C.Volt)
+            Stat(t("Calories"), Fmt.num(Plan.KCAL), Modifier.weight(1f), unit = t("/ day"))
         }
     }
     Gap(20.dp)
     listOf(
-        "Reminds you before every session and warns you before the deadline.",
-        "Logs every set and tells you when to add weight.",
-        "Tracks calories, protein and morning weight against the plan.",
-        "Tracks the habits you choose, every day.",
-        "Misses cost you: penalties that double if ignored, streaks that reset, XP you lose.",
+        t("Reminds you before every session and warns you before the deadline."),
+        t("Logs every set and tells you when to add weight."),
+        t("Tracks calories, protein and morning weight against the plan."),
+        t("Tracks the habits you choose, every day."),
+        t("Misses cost you: penalties that double if ignored, streaks that reset, XP you lose."),
     ).forEach {
         Row(Modifier.padding(vertical = 6.dp)) {
             Box(Modifier.padding(top = 8.dp).size(6.dp).clip(RoundedCornerShape(1.dp)).background(C.Volt))
@@ -344,15 +348,15 @@ private fun Intro() {
 @Composable
 private fun ColorStep(scope: kotlinx.coroutines.CoroutineScope) {
     Gap(12.dp)
-    Eyebrow("Step 2 of 5")
+    Eyebrow(t("Step 2 of 5"))
     Gap(6.dp)
-    Text("PICK YOUR\nCOLOR.", style = T.Hero.copy(fontSize = 52.sp, lineHeight = 50.sp), color = C.Hi)
+    Text(t("PICK YOUR\nCOLOR."), style = T.hero(52, 50), color = C.Hi)
     Gap(6.dp)
-    Text("It runs through the whole app and the pictures you share. You can change it any time in Settings.", style = T.Small, color = C.Mid)
+    Text(t("It runs through the whole app and the pictures you share. You can change it any time in Settings."), style = T.Small, color = C.Mid)
     Gap(18.dp)
     Panel { AccentPicker(C.accent, { pickAccent(scope, it) }) }
     Gap(14.dp)
-    Eyebrow("Preview")
+    Eyebrow(t("Preview"))
     Gap(8.dp)
     AccentPreview()
 }
@@ -367,14 +371,14 @@ fun AccentPreview() {
             }
             HGap(16.dp)
             Column(Modifier.weight(1f)) {
-                Text("PROTEIN TODAY", style = T.H3, color = C.Hi)
-                Text("94 of 130 g · 36 g to go", style = T.Small, color = C.Mid)
+                Text(t("PROTEIN TODAY"), style = T.H3, color = C.Hi)
+                Text(t("94 of 130 g · 36 g to go"), style = T.Small, color = C.Mid)
                 Gap(10.dp)
                 Bar(0.72f)
             }
         }
         Gap(16.dp)
-        PrimaryButton("Start workout", {}, Modifier.fillMaxWidth())
+        PrimaryButton(t("Start workout"), {}, Modifier.fillMaxWidth())
     }
 }
 
@@ -385,7 +389,7 @@ private fun PermRow(title: String, sub: String, ok: Boolean, onAllow: () -> Unit
             Text(title, style = T.BodyM, color = C.Hi)
             Text(sub, style = T.Small, color = C.Mid)
         }
-        if (ok) Text("ON", style = T.Button, color = C.Volt)
-        else SecondaryButton("Allow", onAllow, height = 40.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f))
+        if (ok) Text(t("ON"), style = T.Button, color = C.Volt)
+        else SecondaryButton(t("Allow"), onAllow, height = 40.dp, color = C.Volt, border = C.Volt.copy(alpha = 0.5f))
     }
 }

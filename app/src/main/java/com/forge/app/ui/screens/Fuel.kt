@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -141,17 +143,17 @@ fun FuelScreen(nav: Nav) {
     }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
-        item { ScreenHeader("Plan · ${s.startWeight.roundToInt()} → ${s.goalWeight.roundToInt()} kg", "Fuel") }
+        item { ScreenHeader(t("Plan · %1${'$'}s → %2${'$'}s kg", s.startWeight.roundToInt(), s.goalWeight.roundToInt()), t("Fuel")) }
 
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                IconBtn(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, "Previous day", { date = date.minusDays(1) }, tint = C.Mid)
+                IconBtn(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, t("Previous day"), { date = date.minusDays(1) }, tint = C.Mid)
                 Text(
-                    if (date == today) "TODAY" else if (date == today.minusDays(1)) "YESTERDAY" else Fmt.day(date).uppercase(),
+                    if (date == today) t("TODAY") else if (date == today.minusDays(1)) t("YESTERDAY") else Fmt.day(date).uppercase(),
                     style = T.H3, color = C.Hi, modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
                 IconBtn(
-                    Icons.AutoMirrored.Rounded.KeyboardArrowRight, "Next day",
+                    Icons.AutoMirrored.Rounded.KeyboardArrowRight, t("Next day"),
                     { if (date.isBefore(today)) date = date.plusDays(1) },
                     tint = if (date.isBefore(today)) C.Mid else C.S3,
                 )
@@ -163,7 +165,7 @@ fun FuelScreen(nav: Nav) {
             Panel(accent = true) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
-                        Eyebrow("Calories")
+                        Eyebrow(t("Calories"))
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(Fmt.num(m.kcal), style = T.Display, color = C.Hi)
                             Text(" / ${Fmt.num(s.kcal)}", style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 4.dp))
@@ -171,10 +173,10 @@ fun FuelScreen(nav: Nav) {
                     }
                     Column(horizontalAlignment = Alignment.End) {
                         if (Stats.kcalOver(m.kcal, s.kcal)) {
-                            Eyebrow("Over", color = C.Amber)
+                            Eyebrow(t("Over"), color = C.Amber)
                             Text("+" + Fmt.num(m.kcal - s.kcal), style = T.NumL, color = C.Amber)
                         } else {
-                            Eyebrow("Left")
+                            Eyebrow(t("Left"))
                             Text(Fmt.num((s.kcal - m.kcal).coerceAtLeast(0)), style = T.NumL, color = if (Stats.kcalHit(m.kcal, s.kcal)) C.Volt else C.Hi)
                         }
                     }
@@ -186,38 +188,38 @@ fun FuelScreen(nav: Nav) {
                 Gap(18.dp)
                 Row(verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
-                        Eyebrow("Protein")
+                        Eyebrow(t("Protein"))
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(Fmt.g(m.protein), style = T.Display, color = C.Volt)
-                            Text(" / ${s.protein} g", style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 4.dp))
+                            Text(" / " + t("%s g", s.protein), style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 4.dp))
                         }
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Eyebrow("Left")
-                        Text("${(s.protein - m.protein).roundToInt().coerceAtLeast(0)} g", style = T.NumL, color = C.Hi)
+                        Eyebrow(t("Left"))
+                        Text(t("%s g", (s.protein - m.protein).roundToInt().coerceAtLeast(0)), style = T.NumL, color = C.Hi)
                     }
                 }
                 Gap(10.dp)
                 Bar((m.protein / s.protein).toFloat(), height = 8.dp)
                 Gap(18.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(Modifier.weight(1f)) { MacroLine("Fat", "${Fmt.g(m.fat)} / ${s.fat} g", (m.fat / s.fat).toFloat(), C.Mid) }
-                    Box(Modifier.weight(1f)) { MacroLine("Carbs", "${Fmt.g(m.carbs)} / ${s.carbs} g", (m.carbs / s.carbs).toFloat(), C.Mid) }
+                    Box(Modifier.weight(1f)) { MacroLine(t("Fat"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(m.fat), s.fat), (m.fat / s.fat).toFloat(), C.Mid) }
+                    Box(Modifier.weight(1f)) { MacroLine(t("Carbs"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(m.carbs), s.carbs), (m.carbs / s.carbs).toFloat(), C.Mid) }
                 }
                 Gap(16.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PrimaryButton("Add food", { sheetScan = false; sheet = true }, Modifier.weight(1.3f), icon = Icons.Rounded.Add, height = 48.dp)
-                    SecondaryButton("Recipes", { nav.go("recipes") }, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
-                    com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", { sheetScan = true; sheet = true })
+                    PrimaryButton(t("Add food"), { sheetScan = false; sheet = true }, Modifier.weight(1.3f), icon = Icons.Rounded.Add, height = 48.dp)
+                    SecondaryButton(t("Recipes"), { nav.go("recipes") }, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
+                    com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, t("Scan a barcode or label"), { sheetScan = true; sheet = true })
                 }
             }
             Gap(12.dp)
         }
 
-        item { SectionTitle("Logged · ${foods.size}") }
+        item { SectionTitle(t("Logged · %s", foods.size)) }
         if (foods.isEmpty()) {
             item {
-                Text("Nothing logged for this day yet.", style = T.Small, color = C.Lo)
+                Text(t("Nothing logged for this day yet."), style = T.Small, color = C.Lo)
                 Gap(12.dp)
             }
         }
@@ -257,16 +259,16 @@ private fun WeekPanel(s: Settings, weekStart: LocalDate, weekFoods: List<FoodEnt
     val hits = logged.count { values[it] >= target * 0.95f }
     Panel {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Eyebrow("This week", modifier = Modifier.weight(1f))
+            Eyebrow(t("This week"), modifier = Modifier.weight(1f))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Chip("Protein", !showKcal, { showKcal = false })
-                Chip("Calories", showKcal, { showKcal = true })
+                Chip(t("Protein"), !showKcal, { showKcal = false })
+                Chip(t("Calories"), showKcal, { showKcal = true })
             }
         }
         Gap(14.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("Daily avg", avg?.let { Fmt.num(it.roundToInt()) } ?: "—", Modifier.weight(1f), unit = if (showKcal) "kcal" else "g")
-            Stat("Target hit", "$hits/${logged.size}", Modifier.weight(1f), color = if (logged.isNotEmpty() && hits == logged.size) C.Volt else C.Hi)
+            Stat(t("Daily avg"), avg?.let { Fmt.num(it.roundToInt()) } ?: "—", Modifier.weight(1f), unit = if (showKcal) t("kcal") else t("g"))
+            Stat(t("Target hit"), "$hits/${logged.size}", Modifier.weight(1f), color = if (logged.isNotEmpty() && hits == logged.size) C.Volt else C.Hi)
         }
         Gap(16.dp)
         BarChart(
@@ -291,7 +293,7 @@ private fun FoodRow(f: FoodEntity, onDelete: () -> Unit) {
             Text(f.name + if (f.servings != 1.0) " ×${Fmt.kg(f.servings).removeSuffix(".0")}" else "", style = T.BodyS, color = C.Hi)
             Text("$time · ${macroText(Macros(f.kcal, f.protein, f.fat, f.carbs))}", style = T.Small, color = C.Mid)
         }
-        IconBtn(Icons.Rounded.Close, "Remove", onDelete, tint = C.Lo, size = 40.dp)
+        IconBtn(Icons.Rounded.Close, t("Remove"), onDelete, tint = C.Lo, size = 40.dp)
     }
 }
 
@@ -300,9 +302,9 @@ private fun PlanPanel(s: Settings, open: Boolean, onToggle: () -> Unit) {
     Panel(onClick = onToggle) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Eyebrow("Your nutrition plan")
+                Eyebrow(t("Your nutrition plan"))
                 Gap(2.dp)
-                Text("${Fmt.num(s.kcal)} kcal · ${s.protein} g P · ${s.fat} g F · ${s.carbs} g C", style = T.BodyS, color = C.Hi)
+                Text(t("%1${'$'}s kcal · %2${'$'}s g P · %3${'$'}s g F · %4${'$'}s g C", Fmt.num(s.kcal), s.protein, s.fat, s.carbs), style = T.BodyS, color = C.Hi)
             }
             Icon(if (open) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null, tint = C.Mid)
         }
@@ -311,10 +313,10 @@ private fun PlanPanel(s: Settings, open: Boolean, onToggle: () -> Unit) {
                 Gap(14.dp)
                 Text(Plan.GOAL_TEXT, style = T.Body, color = C.Hi)
                 Gap(10.dp)
-                Text("Expected rate: ${Plan.RATE_MIN}–${Plan.RATE_MAX} kg per week. ${Plan.TIMELINE}.", style = T.Small, color = C.Mid)
+                Text(t("Expected rate: %1${'$'}s–%2${'$'}s kg per week. %3${'$'}s.", Plan.RATE_MIN, Plan.RATE_MAX, Plan.TIMELINE), style = T.Small, color = C.Mid)
                 Text(Plan.RATE_NOTE, style = T.Small, color = C.Lo)
                 Gap(14.dp)
-                Eyebrow("2-week check-in")
+                Eyebrow(t("2-week check-in"))
                 Gap(6.dp)
                 Plan.checkIn.forEachIndexed { i, l ->
                     Row(Modifier.padding(vertical = 3.dp)) {
@@ -323,7 +325,7 @@ private fun PlanPanel(s: Settings, open: Boolean, onToggle: () -> Unit) {
                     }
                 }
                 Gap(14.dp)
-                Eyebrow("Low-cost food options")
+                Eyebrow(t("Low-cost food options"))
                 Gap(6.dp)
                 Plan.lowCost.forEach { (k, v) ->
                     Row(Modifier.padding(vertical = 3.dp)) {
@@ -335,7 +337,7 @@ private fun PlanPanel(s: Settings, open: Boolean, onToggle: () -> Unit) {
                 if (s.planNote.isNotBlank()) {
                     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.AmberSoft).padding(12.dp)) {
                         Column {
-                            Eyebrow("Your plan notes", color = C.Amber)
+                            Eyebrow(t("Your plan notes"), color = C.Amber)
                             Gap(4.dp)
                             Text(s.planNote, style = T.Small, color = C.Hi)
                         }
@@ -411,12 +413,12 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
     ) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(0.92f).imePadding()) {
             Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("ADD FOOD", style = T.H2, color = C.Hi, modifier = Modifier.weight(1f))
+                Text(t("ADD FOOD"), style = T.H2, color = C.Hi, modifier = Modifier.weight(1f))
                 if (added > 0) Tag("$added added", color = C.OnVolt, bg = C.Volt)
             }
             Gap(12.dp)
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("Foods", "Recipes", "Quick add", "My foods").forEachIndexed { i, l ->
+                listOf(t("Foods"), t("Recipes"), t("Quick add"), t("My foods")).forEachIndexed { i, l ->
                     Chip(l, tab == i, { tab = i; pick = null })
                 }
             }
@@ -430,29 +432,29 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
             when (tab) {
                 0 -> {
                     Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.weight(1f)) { ForgeField(query, { query = it }, "Search foods, dishes, products") }
+                        Box(Modifier.weight(1f)) { ForgeField(query, { query = it }, t("Search foods, dishes, products")) }
                         HGap(10.dp)
                         Box(
                             Modifier.padding(top = 6.dp).size(56.dp).clip(RoundedCornerShape(14.dp)).background(C.S2)
                                 .border(1.dp, C.LineStrong, RoundedCornerShape(14.dp)).clickable { scanning = true },
                             contentAlignment = Alignment.Center,
-                        ) { Icon(Icons.Rounded.DocumentScanner, "Scan a barcode or label", tint = C.Volt, modifier = Modifier.size(24.dp)) }
+                        ) { Icon(Icons.Rounded.DocumentScanner, t("Scan a barcode or label"), tint = C.Volt, modifier = Modifier.size(24.dp)) }
                     }
                     Gap(8.dp)
                     val recents = recent.distinctBy { it.name }.take(6).filter { q.isEmpty() || TextMatch.matches(q, it.name) }
                     val dishes = book?.dishes.orEmpty().filter { it.matches(q) }
                     LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
                         if (recents.isNotEmpty()) {
-                            item { Eyebrow("Recent", modifier = Modifier.padding(vertical = 8.dp)) }
+                            item { Eyebrow(t("Recent"), modifier = Modifier.padding(vertical = 8.dp)) }
                             items(recents, key = { "r" + it.id }) { e ->
                                 PickRow(e.name, macroText(Macros(e.kcal, e.protein, e.fat, e.carbs))) { pick = recentPick(e) }
                             }
                         }
                         if (dishes.isNotEmpty()) {
-                            item { Eyebrow("Syrian dishes", modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
+                            item { Eyebrow(t("Syrian dishes"), modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
                             items(dishes, key = { "d" + it.id }) { d ->
                                 val first = d.portions.firstOrNull()
-                                val amount = first?.let { "${it.label} · ${Fmt.g(it.g)} g" } ?: "100 g"
+                                val amount = first?.let { "${it.label} · " + t("%s g", Fmt.g(it.g)) } ?: com.forge.app.i18n.t("%s g", 100)
                                 val m = d.per100.per(first?.g ?: 100.0)
                                 PickRow(d.name, "$amount · ${macroText(m)}", aside = d.ar.ifBlank { null }) { pick = book!!.pick(d) }
                             }
@@ -463,7 +465,7 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
                                 item { Eyebrow(g.label, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
                                 items(list, key = { it.id }) { f ->
                                     PickRow(f.name, "${f.serving} · ${macroText(f.m)}") {
-                                        pick = FoodPick(f.name, base = f.m, source = "food:${f.id}", sourceNote = "${f.serving} · USDA FoodData Central")
+                                        pick = FoodPick(f.name, base = f.m, source = "food:${f.id}", sourceNote = t("%s · USDA FoodData Central", f.serving))
                                     }
                                 }
                             }
@@ -471,29 +473,29 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
                         if (q.isNotEmpty()) {
                             item {
                                 Row(Modifier.padding(top = 14.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Eyebrow("Online · Open Food Facts", modifier = Modifier.weight(1f))
+                                    Eyebrow(t("Online · Open Food Facts"), modifier = Modifier.weight(1f))
                                     if (online == Online.Loading) CircularProgressIndicator(color = C.Volt, strokeWidth = 2.dp, modifier = Modifier.size(14.dp))
                                 }
                             }
                             when (val o = online) {
-                                Online.Idle -> item { Text("Type at least 3 letters to search packaged foods online.", style = T.Small, color = C.Lo) }
-                                Online.Loading -> item { Text("Searching…", style = T.Small, color = C.Lo) }
-                                Online.Offline -> item { Text("Couldn't reach Open Food Facts. Check your connection, or scan the label.", style = T.Small, color = C.Amber) }
+                                Online.Idle -> item { Text(t("Type at least 3 letters to search packaged foods online."), style = T.Small, color = C.Lo) }
+                                Online.Loading -> item { Text(t("Searching…"), style = T.Small, color = C.Lo) }
+                                Online.Offline -> item { Text(t("Couldn't reach Open Food Facts. Check your connection, or scan the label."), style = T.Small, color = C.Amber) }
                                 is Online.Done -> if (o.items.isEmpty()) {
-                                    item { Text("No products with full nutrition data for \"$q\". Try another word, or scan the label.", style = T.Small, color = C.Lo) }
+                                    item { Text(t("No products with full nutrition data for \"%s\". Try another word, or scan the label.", q), style = T.Small, color = C.Lo) }
                                 } else {
                                     items(o.items, key = { "o" + it.code }) { p ->
-                                        PickRow(p.name, listOf(p.brand, "per 100 g", macroText(p.per100)).filter { it.isNotBlank() }.joinToString(" · ")) { pick = p.pick() }
+                                        PickRow(p.name, listOf(p.brand, t("per 100 g"), macroText(p.per100)).filter { it.isNotBlank() }.joinToString(" · ")) { pick = p.pick() }
                                     }
                                 }
                             }
                         }
                         item {
                             Gap(16.dp)
-                            Details("Where the numbers come from") {
+                            Details(t("Where the numbers come from")) {
                                 Text(
-                                    "Basics: USDA FoodData Central. Syrian dishes: lab-measured or FAO values, tap one to see its source. " +
-                                        "Online: Open Food Facts, from product labels. Brands and home recipes differ, so check when you can.",
+                                    t("Basics: USDA FoodData Central. Syrian dishes: lab-measured or FAO values, tap one to see its source. ") +
+                                        t("Online: Open Food Facts, from product labels. Brands and home recipes differ, so check when you can."),
                                     style = T.Tiny, color = C.Lo,
                                 )
                             }
@@ -506,17 +508,17 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
                         val list = Recipes.all.filter { it.type == t }
                         item { Eyebrow(t.label, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)) }
                         items(list, key = { it.id }) { r ->
-                            PickRow(r.name, macroText(r.perServing)) { pick = FoodPick(r.name, base = r.perServing, source = "recipe:${r.id}", sourceNote = "1 serving") }
+                            PickRow(r.name, macroText(r.perServing)) { pick = FoodPick(r.name, base = r.perServing, source = "recipe:${r.id}", sourceNote = t("1 serving")) }
                         }
                     }
                     item { Gap(40.dp) }
                 }
                 2 -> QuickAdd(onAdd = { name, m, save ->
-                    log(LogItem(name, m, 1.0, "quick", if (save) name to "1 serving" else null))
+                    log(LogItem(name, m, 1.0, "quick", if (save) name to t("1 serving") else null))
                 })
                 3 -> LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
                     if (custom.isEmpty()) item {
-                        Text("Foods you save from Quick add, a search or a scan show up here.", style = T.Small, color = C.Lo, modifier = Modifier.padding(vertical = 12.dp))
+                        Text(t("Foods you save from Quick add, a search or a scan show up here."), style = T.Small, color = C.Lo, modifier = Modifier.padding(vertical = 12.dp))
                     }
                     items(custom, key = { it.id }) { c ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -525,7 +527,7 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
                                     pick = FoodPick(c.name, base = Macros(c.kcal, c.protein, c.fat, c.carbs), source = "custom", sourceNote = c.serving)
                                 }
                             }
-                            IconBtn(Icons.Rounded.Close, "Delete", { scope.launch { repo.deleteCustomFood(c.id) } }, tint = C.Lo, size = 36.dp)
+                            IconBtn(Icons.Rounded.Close, t("Delete"), { scope.launch { repo.deleteCustomFood(c.id) } }, tint = C.Lo, size = 36.dp)
                         }
                     }
                     item { Gap(40.dp) }
@@ -546,25 +548,25 @@ private fun QuickAdd(onAdd: (String, Macros, Boolean) -> Unit) {
     var c by remember { mutableStateOf("") }
     var save by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
-        ForgeField(name, { name = it }, "Name")
+        ForgeField(name, { name = it }, t("Name"))
         Gap(10.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ForgeField(kcal, { kcal = it }, "Calories", Modifier.weight(1f), number = true, suffix = "kcal")
-            ForgeField(p, { p = it }, "Protein", Modifier.weight(1f), number = true, suffix = "g")
+            ForgeField(kcal, { kcal = it }, t("Calories"), Modifier.weight(1f), number = true, suffix = t("kcal"))
+            ForgeField(p, { p = it }, t("Protein"), Modifier.weight(1f), number = true, suffix = t("g"))
         }
         Gap(10.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ForgeField(f, { f = it }, "Fat", Modifier.weight(1f), number = true, suffix = "g")
-            ForgeField(c, { c = it }, "Carbs", Modifier.weight(1f), number = true, suffix = "g")
+            ForgeField(f, { f = it }, t("Fat"), Modifier.weight(1f), number = true, suffix = t("g"))
+            ForgeField(c, { c = it }, t("Carbs"), Modifier.weight(1f), number = true, suffix = t("g"))
         }
         Gap(8.dp)
-        com.forge.app.ui.components.ToggleRow("Save to My foods", null, save) { save = it }
+        com.forge.app.ui.components.ToggleRow(t("Save to My foods"), null, save) { save = it }
         Gap(8.dp)
         val k = kcal.replace(',', '.').toDoubleOrNull()
-        PrimaryButton("Add", {
+        PrimaryButton(t("Add"), {
             if (k != null) {
                 onAdd(
-                    name.ifBlank { "Quick add" },
+                    name.ifBlank { t("Quick add") },
                     Macros(k.roundToInt(), p.replace(',', '.').toDoubleOrNull() ?: 0.0, f.replace(',', '.').toDoubleOrNull() ?: 0.0, c.replace(',', '.').toDoubleOrNull() ?: 0.0),
                     save,
                 )
@@ -581,11 +583,11 @@ private fun QuickAdd(onAdd: (String, Macros, Boolean) -> Unit) {
 fun RecipesScreen(nav: Nav) {
     var filter by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize()) {
-        TopBar("Recipes", "Budget, high-protein, from your plan's food list", onBack = { nav.back() })
+        TopBar(t("Recipes"), t("Budget, high-protein, from your plan's food list"), onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp)) {
             item {
-                SectionTitle("Full-day plans")
-                Text("Each one lands close to ${Plan.KCAL} kcal. Log meals as you eat them.", style = T.Small, color = C.Mid)
+                SectionTitle(t("Full-day plans"))
+                Text(t("Each one lands close to %s kcal. Log meals as you eat them.", Plan.KCAL), style = T.Small, color = C.Mid)
                 Gap(10.dp)
             }
             items(DayPlans.all, key = { it.id }) { p ->
@@ -605,11 +607,11 @@ fun RecipesScreen(nav: Nav) {
                 Gap(10.dp)
             }
             item {
-                SectionTitle("Meals")
+                SectionTitle(t("Meals"))
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Chip("All", filter == null, { filter = null })
+                    Chip(t("All"), filter == null, { filter = null })
                     MealType.entries.forEach { t -> Chip(t.label, filter == t.name, { filter = t.name }) }
-                    Chip("Batch cook", filter == "BATCH", { filter = "BATCH" })
+                    Chip(t("Batch cook"), filter == "BATCH", { filter = "BATCH" })
                 }
                 Gap(12.dp)
             }
@@ -634,18 +636,18 @@ private fun RecipeCard(r: Recipe, onClick: () -> Unit) {
     Panel(onClick = onClick, padding = PaddingValues(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Eyebrow("${r.type.label} · ${r.minutes} min" + if (r.servings > 1) " · serves ${r.servings}" else "")
+                Eyebrow(t("%1${'$'}s · %2${'$'}s min", r.type.label, r.minutes) + if (r.servings > 1) t(" · serves %s", r.servings) else "")
                 Gap(4.dp)
                 Text(r.name.uppercase(), style = T.H3, color = C.Hi)
             }
-            if (r.batch) Tag("Batch")
+            if (r.batch) Tag(t("Batch"))
         }
         Gap(10.dp)
         Row(Modifier.fillMaxWidth()) {
-            MacroCell("kcal", Fmt.num(r.perServing.kcal), C.Hi, Modifier.weight(1f))
-            MacroCell("protein", "${Fmt.g(r.perServing.protein)} g", C.Volt, Modifier.weight(1f))
-            MacroCell("fat", "${Fmt.g(r.perServing.fat)} g", C.Mid, Modifier.weight(1f))
-            MacroCell("carbs", "${Fmt.g(r.perServing.carbs)} g", C.Mid, Modifier.weight(1f))
+            MacroCell(t("kcal"), Fmt.num(r.perServing.kcal), C.Hi, Modifier.weight(1f))
+            MacroCell("protein", t("%s g", Fmt.g(r.perServing.protein)), C.Volt, Modifier.weight(1f))
+            MacroCell("fat", t("%s g", Fmt.g(r.perServing.fat)), C.Mid, Modifier.weight(1f))
+            MacroCell("carbs", t("%s g", Fmt.g(r.perServing.carbs)), C.Mid, Modifier.weight(1f))
         }
     }
 }
@@ -668,7 +670,7 @@ fun RecipeScreen(nav: Nav, id: String) {
     var logged by remember { mutableIntStateOf(0) }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar(r.name, "${r.type.label} · ${r.minutes} min", onBack = { nav.back() })
+        TopBar(r.name, t("%1${'$'}s · %2${'$'}s min", r.type.label, r.minutes), onBack = { nav.back() })
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)) {
             Gap(6.dp)
             Text(r.name.uppercase(), style = T.H1, color = C.Hi)
@@ -676,22 +678,22 @@ fun RecipeScreen(nav: Nav, id: String) {
             Text(r.why, style = T.Body, color = C.Mid)
             Gap(18.dp)
             Panel {
-                Eyebrow("Per serving" + if (r.servings > 1) " · recipe makes ${r.servings}" else "")
+                Eyebrow(t("Per serving") + if (r.servings > 1) t(" · recipe makes %s", r.servings) else "")
                 Gap(10.dp)
                 Row(Modifier.fillMaxWidth()) {
-                    Stat("kcal", Fmt.num(r.perServing.kcal), Modifier.weight(1f))
-                    Stat("Protein", Fmt.g(r.perServing.protein), Modifier.weight(1f), unit = "g", color = C.Volt)
-                    Stat("Fat", Fmt.g(r.perServing.fat), Modifier.weight(0.8f), unit = "g")
-                    Stat("Carbs", Fmt.g(r.perServing.carbs), Modifier.weight(0.8f), unit = "g")
+                    Stat(t("kcal"), Fmt.num(r.perServing.kcal), Modifier.weight(1f))
+                    Stat(t("Protein"), Fmt.g(r.perServing.protein), Modifier.weight(1f), unit = t("g"), color = C.Volt)
+                    Stat(t("Fat"), Fmt.g(r.perServing.fat), Modifier.weight(0.8f), unit = t("g"))
+                    Stat(t("Carbs"), Fmt.g(r.perServing.carbs), Modifier.weight(0.8f), unit = t("g"))
                 }
                 Gap(12.dp)
                 Text(
-                    "${r.perServing.kcal * 100 / s.kcal}% of your calories and ${(r.perServing.protein * 100 / s.protein).roundToInt()}% of your protein.",
+                    t("%1${'$'}s%% of your calories and %2${'$'}s%% of your protein.", r.perServing.kcal * 100 / s.kcal, (r.perServing.protein * 100 / s.protein).roundToInt()),
                     style = T.Small, color = C.Mid,
                 )
             }
             Gap(20.dp)
-            Text("INGREDIENTS", style = T.H3, color = C.Hi)
+            Text(t("INGREDIENTS"), style = T.H3, color = C.Hi)
             Gap(8.dp)
             r.ingredients.forEachIndexed { i, ing ->
                 val on = i in checked
@@ -708,7 +710,7 @@ fun RecipeScreen(nav: Nav, id: String) {
                 }
             }
             Gap(18.dp)
-            Text("METHOD", style = T.H3, color = C.Hi)
+            Text(t("METHOD"), style = T.H3, color = C.Hi)
             Gap(8.dp)
             r.steps.forEachIndexed { i, st ->
                 Row(Modifier.padding(vertical = 6.dp)) {
@@ -719,12 +721,12 @@ fun RecipeScreen(nav: Nav, id: String) {
             Gap(12.dp)
             Hairline()
             Gap(10.dp)
-            Text("Macros calculated from USDA values for the amounts listed.", style = T.Tiny, color = C.Lo)
+            Text(t("Macros calculated from USDA values for the amounts listed."), style = T.Tiny, color = C.Lo)
             Gap(24.dp)
         }
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) {
             PrimaryButton(
-                if (logged == 0) "Log 1 serving" else "Logged ×$logged · add another",
+                if (logged == 0) t("Log 1 serving") else t("Logged ×%s · add another", logged),
                 { scope.launch { repo.addFood(LocalDate.now(), r.name, r.perServing, 1.0, "recipe:${r.id}") }; logged++ },
                 icon = if (logged == 0) Icons.Rounded.Add else Icons.Rounded.Check,
             )
@@ -745,15 +747,15 @@ fun PlanScreen(nav: Nav, id: String) {
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)) {
             item {
                 Panel {
-                    Eyebrow("Day total vs plan")
+                    Eyebrow(t("Day total vs plan"))
                     Gap(12.dp)
-                    MacroLine("Calories", "${Fmt.num(t.kcal)} / ${Fmt.num(s.kcal)}", t.kcal.toFloat() / s.kcal, C.Hi)
+                    MacroLine(t("Calories"), "${Fmt.num(t.kcal)} / ${Fmt.num(s.kcal)}", t.kcal.toFloat() / s.kcal, C.Hi)
                     Gap(10.dp)
-                    MacroLine("Protein", "${Fmt.g(t.protein)} / ${s.protein} g", (t.protein / s.protein).toFloat())
+                    MacroLine(t("Protein"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(t.protein), s.protein), (t.protein / s.protein).toFloat())
                     Gap(10.dp)
-                    MacroLine("Fat", "${Fmt.g(t.fat)} / ${s.fat} g", (t.fat / s.fat).toFloat(), C.Mid)
+                    MacroLine(t("Fat"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(t.fat), s.fat), (t.fat / s.fat).toFloat(), C.Mid)
                     Gap(10.dp)
-                    MacroLine("Carbs", "${Fmt.g(t.carbs)} / ${s.carbs} g", (t.carbs / s.carbs).toFloat(), C.Mid)
+                    MacroLine(t("Carbs"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(t.carbs), s.carbs), (t.carbs / s.carbs).toFloat(), C.Mid)
                 }
                 Gap(14.dp)
             }
@@ -768,7 +770,7 @@ fun PlanScreen(nav: Nav, id: String) {
                         }
                         val done = r.id in loggedIds
                         SecondaryButton(
-                            if (done) "Logged" else "Log",
+                            if (done) t("Logged") else t("Log"),
                             { if (!done) { scope.launch { repo.addFood(LocalDate.now(), r.name, r.perServing, 1.0, "recipe:${r.id}") }; loggedIds.add(r.id) } },
                             height = 38.dp, color = if (done) C.Mid else C.Volt, border = if (done) C.Line else C.Volt.copy(alpha = 0.5f),
                         )
@@ -777,7 +779,7 @@ fun PlanScreen(nav: Nav, id: String) {
                 Gap(10.dp)
             }
             item {
-                Text("Swap any meal for another recipe with similar protein. The total is what matters.", style = T.Small, color = C.Lo)
+                Text(t("Swap any meal for another recipe with similar protein. The total is what matters."), style = T.Small, color = C.Lo)
                 BottomSpace()
             }
         }

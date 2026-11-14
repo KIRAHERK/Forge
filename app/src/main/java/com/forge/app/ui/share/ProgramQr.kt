@@ -1,5 +1,7 @@
 package com.forge.app.ui.share
 
+import com.forge.app.i18n.t
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -105,7 +107,7 @@ fun ShareProgramDialog(program: UserProgram, onDismiss: () -> Unit) {
 private fun ProgramQrCard(program: UserProgram, qr: ImageBitmap) {
     CardFrame(
         date = LocalDate.now(),
-        eyebrow = "Program · ${program.daysPerWeek} days a week",
+        eyebrow = t("Program · %s days a week", program.daysPerWeek),
         title = program.name,
         badge = null,
         line = null,
@@ -114,16 +116,16 @@ private fun ProgramQrCard(program: UserProgram, qr: ImageBitmap) {
             Column(Modifier.weight(1f).padding(end = 12.dp)) {
                 program.days.take(6).forEach { d ->
                     Text(d.name, style = T.Small, color = C.Hi, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("${d.exercises.size} exercises · ${d.totalSets} sets", style = T.Tiny, color = C.Mid)
+                    Text(t("%1${'$'}s exercises · %2${'$'}s sets", d.exercises.size, d.totalSets), style = T.Tiny, color = C.Mid)
                     Gap(6.dp)
                 }
             }
             Box(Modifier.size(170.dp).clip(RoundedCornerShape(12.dp)).background(C.Hi).padding(6.dp)) {
-                Image(qr, "QR code of the program", Modifier.fillMaxSize(), filterQuality = FilterQuality.None)
+                Image(qr, t("QR code of the program"), Modifier.fillMaxSize(), filterQuality = FilterQuality.None)
             }
         }
         Gap(10.dp)
-        Text("Scan in Forge: Train · Programs · Scan a program", style = T.Small, color = C.Volt, maxLines = 2)
+        Text(t("Scan in Forge: Train · Programs · Scan a program"), style = T.Small, color = C.Volt, maxLines = 2)
     }
 }
 
@@ -147,17 +149,17 @@ fun ScanProgramDialog(onDismiss: () -> Unit, onCode: (ProgramCode.Shared) -> Uni
     fun handle(raw: String?): Boolean {
         val shared = raw?.let { ProgramCode.decode(it) }
         if (shared != null) { latest(shared); return true }
-        message = if (raw == null) "No QR code found in that picture." else "That QR code isn't a Forge program."
+        message = if (raw == null) t("No QR code found in that picture.") else t("That QR code isn't a Forge program.")
         return false
     }
 
     val photo = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
-        val image = runCatching { InputImage.fromFilePath(ctx, uri) }.getOrNull() ?: run { message = "Couldn't open that picture."; return@rememberLauncherForActivityResult }
+        val image = runCatching { InputImage.fromFilePath(ctx, uri) }.getOrNull() ?: run { message = t("Couldn't open that picture."); return@rememberLauncherForActivityResult }
         val scanner = BarcodeScanning.getClient(qrOptions)
         scanner.process(image)
             .addOnSuccessListener { codes -> handle(codes.firstNotNullOfOrNull { it.rawValue }) }
-            .addOnFailureListener { message = "Couldn't read that picture." }
+            .addOnFailureListener { message = t("Couldn't read that picture.") }
             .addOnCompleteListener { scanner.close() }
     }
 
@@ -166,18 +168,18 @@ fun ScanProgramDialog(onDismiss: () -> Unit, onCode: (ProgramCode.Shared) -> Uni
             if (granted) QrCamera { raw -> handle(raw) }
             Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconBtn(Icons.Rounded.Close, "Close", onDismiss, bg = C.S1)
-                    Text("SCAN A PROGRAM", style = T.H3, color = C.Hi, modifier = Modifier.weight(1f).padding(start = 12.dp))
+                    IconBtn(Icons.Rounded.Close, t("Close"), onDismiss, bg = C.S1)
+                    Text(t("SCAN A PROGRAM"), style = T.H3, color = C.Hi, modifier = Modifier.weight(1f).padding(start = 12.dp))
                 }
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(260.dp).border(3.dp, C.Volt, RoundedCornerShape(24.dp)))
                     if (!granted) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
-                            Text("CAMERA IS OFF", style = T.H2, color = C.Hi)
+                            Text(t("CAMERA IS OFF"), style = T.H2, color = C.Hi)
                             Gap(6.dp)
-                            Text("Allow the camera to scan, or pick a photo of the code.", style = T.Body, color = C.Mid, textAlign = TextAlign.Center)
+                            Text(t("Allow the camera to scan, or pick a photo of the code."), style = T.Body, color = C.Mid, textAlign = TextAlign.Center)
                             Gap(12.dp)
-                            TextAction("Allow camera", { permission.launch(Manifest.permission.CAMERA) })
+                            TextAction(t("Allow camera"), { permission.launch(Manifest.permission.CAMERA) })
                         }
                     }
                 }
@@ -185,9 +187,9 @@ fun ScanProgramDialog(onDismiss: () -> Unit, onCode: (ProgramCode.Shared) -> Uni
                     Text(it, style = T.BodyS, color = C.Amber, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                     Gap(10.dp)
                 }
-                Text("Point at the QR code a coach or friend shared, or pick a screenshot of it.", style = T.Small, color = C.Mid, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text(t("Point at the QR code a coach or friend shared, or pick a screenshot of it."), style = T.Small, color = C.Mid, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 Gap(12.dp)
-                SecondaryButton("From a photo", {
+                SecondaryButton(t("From a photo"), {
                     message = null
                     photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }, Modifier.fillMaxWidth(), icon = Icons.Rounded.PhotoLibrary, height = 50.dp)
@@ -258,10 +260,10 @@ fun ImportProgramDialog(shared: ProgramCode.Shared, onDismiss: () -> Unit, onAdd
     ForgeDialog(
         title = shared.n,
         onDismiss = onDismiss,
-        confirm = "Add and use",
+        confirm = t("Add and use"),
         onConfirm = { onAdd(true) },
     ) {
-        Eyebrow("${ProgramCode.daysPerWeek(shared)} days a week · ${shared.d.size} workouts")
+        Eyebrow(t("%1${'$'}s days a week · %2${'$'}s workouts", ProgramCode.daysPerWeek(shared), shared.d.size))
         Gap(10.dp)
         shared.d.forEach { d ->
             Text(d.n, style = T.BodyS, color = C.Hi)
@@ -269,10 +271,10 @@ fun ImportProgramDialog(shared: ProgramCode.Shared, onDismiss: () -> Unit, onAdd
             Gap(6.dp)
         }
         if (shared.c.isNotEmpty()) {
-            Text("Adds ${shared.c.size} exercise${if (shared.c.size == 1) "" else "s"} to your own: ${shared.c.joinToString(", ") { it.n }}.", style = T.Small, color = C.Lo)
+            Text(if (shared.c.size == 1) t("Adds 1 exercise to your own: %s.", shared.c.joinToString(", ") { it.n }) else t("Adds %1${'$'}s exercises to your own: %2${'$'}s.", shared.c.size, shared.c.joinToString(", ") { it.n }), style = T.Small, color = C.Lo)
             Gap(6.dp)
         }
-        TextAction("Add without using it", { onAdd(false) }, color = C.Mid, style = T.Small)
+        TextAction(t("Add without using it"), { onAdd(false) }, color = C.Mid, style = T.Small)
     }
 }
 

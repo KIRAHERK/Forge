@@ -1,5 +1,7 @@
 package com.forge.app.notify
 
+import com.forge.app.i18n.t
+
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -45,8 +47,8 @@ class AlarmReceiver : BroadcastReceiver() {
             RestTimer.clearIfExpired()
             if (!appInForeground()) {
                 Notifier.post(
-                    ctx, Notifier.ID_TIMER, Notifier.CH_TIMER, "Rest over",
-                    label ?: "Next set. Go.", route = "workout", timeoutMs = 5 * 60_000L,
+                    ctx, Notifier.ID_TIMER, Notifier.CH_TIMER, t("Rest over"),
+                    label ?: t("Next set. Go."), route = "workout", timeoutMs = 5 * 60_000L,
                 )
             }
             return
@@ -65,19 +67,19 @@ class AlarmReceiver : BroadcastReceiver() {
 
         when (r) {
             Rem.WEIGH_IN -> if (Graph.db.weights().get(today.toEpochDay()) == null) {
-                postWeighIn(ctx, "Step on the scale", "Bathroom first, then the scale, before you eat or drink. Type the number below.")
+                postWeighIn(ctx, t("Step on the scale"), t("Bathroom first, then the scale, before you eat or drink. Type the number below."))
             }
 
             Rem.WEIGH_LATE -> if (Graph.db.weights().get(today.toEpochDay()) == null) {
-                postWeighIn(ctx, "Still no weigh-in today", "Haven't eaten yet? Weigh in now. Already eaten? Skip today and do it first thing tomorrow.")
+                postWeighIn(ctx, t("Still no weigh-in today"), t("Haven't eaten yet? Weigh in now. Already eaten? Skip today and do it first thing tomorrow."))
             }
 
             Rem.WORKOUT, Rem.NUDGE, Rem.FINAL -> if (s.isTraining(today) && !s.isSick(today) && !doneToday && day != null) {
                 val left = Fmt.left(now, s.deadlineAt(today))
                 val (title, text) = when (r) {
-                    Rem.WORKOUT -> day.title to Lines.reminder("${day.exercises.size} exercises, ${day.totalSets} sets, about ${day.estMinutes} min.", Fmt.time(s.deadline))
-                    Rem.NUDGE -> "Not started: ${day.title}" to Lines.nudge(left)
-                    else -> "Last call — $left left" to Lines.final(left)
+                    Rem.WORKOUT -> day.title to Lines.reminder(t("%1${'$'}s exercises, %2${'$'}s sets, about %3${'$'}s min.", day.exercises.size, day.totalSets, day.estMinutes), Fmt.time(s.deadline))
+                    Rem.NUDGE -> t("Not started: %s", day.title) to Lines.nudge(left)
+                    else -> t("Last call — %s left", left) to Lines.final(left)
                 }
                 Notifier.post(
                     ctx, Notifier.ID_WORKOUT, Notifier.CH_WORKOUT, title, text, route = "start",
@@ -97,7 +99,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     else Lines.kcalLow(today.toEpochDay() + r.code, kLeft)
                     Notifier.post(
                         ctx, Notifier.ID_PROTEIN, Notifier.CH_NUTRITION,
-                        "${Fmt.g(m.protein)} / ${s.protein} g protein · ${Fmt.num(m.kcal)} / ${Fmt.num(s.kcal)} kcal",
+                        t("%1${'$'}s / %2${'$'}s g protein · %3${'$'}s / %4${'$'}s kcal", Fmt.g(m.protein), s.protein, Fmt.num(m.kcal), Fmt.num(s.kcal)),
                         text, route = "fuel",
                     )
                 }
@@ -121,9 +123,9 @@ class AlarmReceiver : BroadcastReceiver() {
                         if (open.isNotEmpty()) add(Notifier.Action("Open", Notifier.openIntent(ctx, "habits", 602)))
                     }
                     Notifier.post(
-                        ctx, Notifier.ID_NIGHT, Notifier.CH_HABITS, "Close out today",
+                        ctx, Notifier.ID_NIGHT, Notifier.CH_HABITS, t("Close out today"),
                         "Log your ${parts.joinToString(" and ")} before bed. Be honest — it only works if you are.",
-                        route = "habits", actions = actions, publicText = "Daily check-in",
+                        route = "habits", actions = actions, publicText = t("Daily check-in"),
                     )
                 }
             }
@@ -136,13 +138,13 @@ class AlarmReceiver : BroadcastReceiver() {
                     Graph.db.weights().allNow(), Graph.db.habits().defsNow(), Graph.db.habits().logsNow(),
                 )
                 val verdict = when {
-                    score.score >= 85 -> "Strong week."
-                    score.score >= 65 -> "Decent. Not good enough to coast."
-                    else -> "Weak week. Next one starts tomorrow."
+                    score.score >= 85 -> t("Strong week.")
+                    score.score >= 65 -> t("Decent. Not good enough to coast.")
+                    else -> t("Weak week. Next one starts tomorrow.")
                 }
                 Notifier.post(
-                    ctx, Notifier.ID_WEEKLY, Notifier.CH_WEEKLY, "Week score: ${score.score}",
-                    "$verdict Workouts ${score.workoutsDone}/${score.workoutsDue} · protein ${score.proteinDays}/${score.proteinDen} · calories ${score.kcalDays}/${score.kcalDen} · weigh-ins ${score.weighIns}/${score.weighDen}.",
+                    ctx, Notifier.ID_WEEKLY, Notifier.CH_WEEKLY, t("Week score: %s", score.score),
+                    t("%1${'$'}s Workouts %2${'$'}s/%3${'$'}s · protein %4${'$'}s/%5${'$'}s · calories %6${'$'}s/%7${'$'}s · weigh-ins %8${'$'}s/%9${'$'}s.", verdict, score.workoutsDone, score.workoutsDue, score.proteinDays, score.proteinDen, score.kcalDays, score.kcalDen, score.weighIns, score.weighDen),
                     route = "progress",
                 )
             }
@@ -151,8 +153,8 @@ class AlarmReceiver : BroadcastReceiver() {
                 val nowMs = System.currentTimeMillis()
                 Graph.db.penalties().activeNow().filter { it.dueAt - nowMs in 1..(3 * 3_600_000L + 120_000L) }.firstOrNull()?.let { p ->
                     Notifier.post(
-                        ctx, Notifier.ID_PENALTY, Notifier.CH_PENALTY, "Penalty due in ${Fmt.leftMillis(p.dueAt - nowMs)}",
-                        "${p.taskText}. Miss it and it doubles.", route = "today",
+                        ctx, Notifier.ID_PENALTY, Notifier.CH_PENALTY, t("Penalty due in %s", Fmt.leftMillis(p.dueAt - nowMs)),
+                        t("%s. Miss it and it doubles.", p.taskText), route = "today",
                     )
                 }
             }
@@ -172,29 +174,29 @@ suspend fun notifyEval(ctx: Context, eval: EvalResult) {
     val s = Graph.settings.current()
     eval.newMisses.lastOrNull()?.let { p ->
         Notifier.post(
-            ctx, Notifier.ID_MISSED, Notifier.CH_PENALTY, "Missed. Streak reset.",
-            "${p.reason}. Penalty: ${p.taskText} within 24 h. Make the session up within 48 h to restore the streak." +
+            ctx, Notifier.ID_MISSED, Notifier.CH_PENALTY, t("Missed. Streak reset."),
+            t("%1${'$'}s. Penalty: %2${'$'}s within 24 h. Make the session up within 48 h to restore the streak.", p.reason, p.taskText) +
                 if (s.jarAmount > 0) " Jar: +${s.jarAmount}${s.jarCurrency.let { if (it.isBlank()) "" else " $it" }}." else "",
             route = "today",
         )
     }
     eval.escalated.lastOrNull()?.let { p ->
         Notifier.post(
-            ctx, Notifier.ID_PENALTY, Notifier.CH_PENALTY, "Penalty overdue — doubled",
-            "Now ${p.taskText}. You have 24 h. Miss this and it's recorded as failed.", route = "today",
+            ctx, Notifier.ID_PENALTY, Notifier.CH_PENALTY, t("Penalty overdue — doubled"),
+            t("Now %s. You have 24 h. Miss this and it's recorded as failed.", p.taskText), route = "today",
         )
     }
     eval.failed.lastOrNull()?.let { p ->
         Notifier.post(
-            ctx, Notifier.ID_PENALTY, Notifier.CH_PENALTY, "Penalty failed",
-            "${p.reason}: never paid. It stays on your record.", route = "today",
+            ctx, Notifier.ID_PENALTY, Notifier.CH_PENALTY, t("Penalty failed"),
+            t("%s: never paid. It stays on your record.", p.reason), route = "today",
         )
     }
 }
 
 /** Weigh-in reminder with a text field right in the notification. */
 fun postWeighIn(ctx: Context, title: String, text: String) {
-    val input = androidx.core.app.RemoteInput.Builder(ActionReceiver.KEY_KG).setLabel("Weight in kg, e.g. 81.4").build()
+    val input = androidx.core.app.RemoteInput.Builder(ActionReceiver.KEY_KG).setLabel(t("Weight in kg, e.g. 81.4")).build()
     Notifier.post(
         ctx, Notifier.ID_WEIGH, Notifier.CH_NUTRITION, title, text, route = "weigh",
         actions = listOf(
@@ -222,13 +224,13 @@ class ActionReceiver : BroadcastReceiver() {
                 val raw = androidx.core.app.RemoteInput.getResultsFromIntent(intent)?.getCharSequence(KEY_KG)?.toString()
                 val kg = raw?.trim()?.replace(',', '.')?.filter { it.isDigit() || it == '.' }?.toDoubleOrNull()
                 if (kg == null || kg !in 30.0..250.0) {
-                    postWeighIn(context, "Couldn't read that", "Type just the number, like 81.4.")
+                    postWeighIn(context, t("Couldn't read that"), t("Type just the number, like 81.4."))
                 } else {
                     Graph.repo.logWeight(LocalDate.now(), kg)
                     val avg = Stats.movingAverage(Graph.db.weights().allNow()).lastOrNull()?.second
                     Notifier.post(
-                        context, Notifier.ID_WEIGH, Notifier.CH_NUTRITION, "Logged ${Fmt.kg(kg)} kg",
-                        avg?.let { "7-day average: ${Fmt.kg(it)} kg. +10 XP." } ?: "+10 XP.",
+                        context, Notifier.ID_WEIGH, Notifier.CH_NUTRITION, t("Logged %s kg", Fmt.kg(kg)),
+                        avg?.let { t("7-day average: %s kg. +10 XP.", Fmt.kg(it)) } ?: t("+10 XP."),
                         route = "weigh", timeoutMs = 8_000L,
                     )
                 }

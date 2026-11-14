@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -70,66 +72,66 @@ fun UpdateScreen(nav: Nav) {
     val canInstall = remember(refresh) { Updater.canInstall(ctx) }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Updates", "By ${com.forge.app.Credits.AUTHOR} · github.com/${Updater.repo}", onBack = { nav.back() })
+        TopBar(t("Updates"), t("By %1${'$'}s · github.com/%2${'$'}s", com.forge.app.Credits.AUTHOR, Updater.repo), onBack = { nav.back() })
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             Gap(6.dp)
             Panel {
-                Eyebrow("Installed")
+                Eyebrow(t("Installed"))
                 Text("v${Updater.currentVersion}", style = T.Display, color = C.Hi)
                 Gap(14.dp)
                 when (val st = state) {
                     Updater.State.Idle -> {
-                        Text("Check GitHub for a newer version.", style = T.Body, color = C.Mid)
+                        Text(t("Check GitHub for a newer version."), style = T.Body, color = C.Mid)
                         Gap(14.dp)
-                        PrimaryButton("Check for updates", { scope.launch { Updater.check() } }, icon = Icons.Rounded.Refresh)
+                        PrimaryButton(t("Check for updates"), { scope.launch { Updater.check() } }, icon = Icons.Rounded.Refresh)
                     }
                     Updater.State.Checking -> {
-                        Text("Checking GitHub…", style = T.Body, color = C.Mid)
+                        Text(t("Checking GitHub…"), style = T.Body, color = C.Mid)
                         Gap(14.dp)
-                        PrimaryButton("Checking…", {}, enabled = false)
+                        PrimaryButton(t("Checking…"), {}, enabled = false)
                     }
                     is Updater.State.UpToDate -> {
-                        Text("You're on the latest version.", style = T.BodyS, color = C.Volt)
+                        Text(t("You're on the latest version."), style = T.BodyS, color = C.Volt)
                         Text("Checked at ${SimpleDateFormat("HH:mm", Locale.US).format(Date(st.at))}.", style = T.Small, color = C.Lo)
                         Gap(14.dp)
-                        SecondaryButton("Check again", { scope.launch { Updater.check() } }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Refresh)
+                        SecondaryButton(t("Check again"), { scope.launch { Updater.check() } }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Refresh)
                     }
                     is Updater.State.Available -> {
-                        Eyebrow("New version", color = C.Volt)
+                        Eyebrow(t("New version"), color = C.Volt)
                         Text("v${st.info.version}", style = T.H1, color = C.Hi)
                         Notes(st.info.notes)
                         Gap(14.dp)
                         PrimaryButton(
-                            "Download · ${sizeText(st.info.size)}",
+                            t("Download · %s", sizeText(st.info.size)),
                             { scope.launch { Updater.download(ctx, st.info) } },
                             icon = Icons.Rounded.Download,
                         )
                     }
                     is Updater.State.Downloading -> {
-                        Eyebrow("Downloading v${st.info.version}", color = C.Volt)
+                        Eyebrow(t("Downloading v%s", st.info.version), color = C.Volt)
                         Gap(10.dp)
                         Bar(st.progress, height = 8.dp)
                         Gap(6.dp)
                         Text("${(st.progress * 100).roundToInt()}%", style = T.Small, color = C.Mid)
                     }
                     is Updater.State.Ready -> {
-                        Eyebrow("Ready to install", color = C.Volt)
+                        Eyebrow(t("Ready to install"), color = C.Volt)
                         Text("v${st.info.version}", style = T.H1, color = C.Hi)
                         Gap(6.dp)
-                        Text("Signature checked: same app, same key. Your data stays where it is, and a backup is saved right before installing.", style = T.Small, color = C.Mid)
+                        Text(t("Signature checked: same app, same key. Your data stays where it is, and a backup is saved right before installing."), style = T.Small, color = C.Mid)
                         Gap(14.dp)
                         if (!canInstall) {
-                            Text("Android needs your OK once to let Forge install its own updates.", style = T.Small, color = C.Amber)
+                            Text(t("Android needs your OK once to let Forge install its own updates."), style = T.Small, color = C.Amber)
                             Gap(10.dp)
-                            SecondaryButton("Allow updates from Forge", { Updater.openInstallPermission(ctx) }, Modifier.fillMaxWidth(), color = C.Amber, border = C.Amber.copy(alpha = 0.5f))
+                            SecondaryButton(t("Allow updates from Forge"), { Updater.openInstallPermission(ctx) }, Modifier.fillMaxWidth(), color = C.Amber, border = C.Amber.copy(alpha = 0.5f))
                             Gap(10.dp)
                         }
-                        PrimaryButton("Install update", { scope.launch { Updater.install(ctx, st.file) } }, enabled = canInstall, icon = Icons.Rounded.SystemUpdate)
+                        PrimaryButton(t("Install update"), { scope.launch { Updater.install(ctx, st.file) } }, enabled = canInstall, icon = Icons.Rounded.SystemUpdate)
                     }
                     is Updater.State.Failed -> {
                         Text(st.message, style = T.Body, color = C.Red)
                         Gap(14.dp)
-                        SecondaryButton("Try again", {
+                        SecondaryButton(t("Try again"), {
                             scope.launch { if (st.info != null) Updater.download(ctx, st.info) else Updater.check() }
                         }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Refresh)
                     }
@@ -137,16 +139,16 @@ fun UpdateScreen(nav: Nav) {
             }
             Gap(12.dp)
             Panel {
-                ToggleRow("Check daily", "A notification when a new version is published", s.autoUpdateCheck) { v ->
+                ToggleRow(t("Check daily"), t("A notification when a new version is published"), s.autoUpdateCheck) { v ->
                     scope.launch { Graph.settings.update { it.copy(autoUpdateCheck = v) } }
                 }
                 Hairline()
-                ToggleRow("Daily automatic backup", "Also saved to Downloads/Forge, so even a reinstall can't lose it", s.autoBackup) { v ->
+                ToggleRow(t("Daily automatic backup"), t("Also saved to Downloads/Forge, so even a reinstall can't lose it"), s.autoBackup) { v ->
                     scope.launch { Graph.settings.update { it.copy(autoBackup = v) } }
                 }
                 if (s.lastBackupAt > 0) {
                     Text(
-                        "Last backup: ${Fmt.day(java.time.Instant.ofEpochMilli(s.lastBackupAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate())} " +
+                        t("Last backup: %s ", Fmt.day(java.time.Instant.ofEpochMilli(s.lastBackupAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate())) +
                             SimpleDateFormat("HH:mm", Locale.US).format(Date(s.lastBackupAt)) +
                             (if (s.lastBackupReason.isNotBlank()) " · ${s.lastBackupReason}" else ""),
                         style = T.Small, color = C.Lo,
@@ -154,7 +156,7 @@ fun UpdateScreen(nav: Nav) {
                 }
             }
             Gap(12.dp)
-            SecondaryButton("All releases on GitHub", {
+            SecondaryButton(t("All releases on GitHub"), {
                 runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Updater.releasesPage))) }
             }, Modifier.fillMaxWidth())
             Gap(40.dp)
@@ -182,4 +184,4 @@ private fun Notes(notes: String) {
 }
 
 private fun sizeText(bytes: Long): String =
-    if (bytes <= 0) "APK" else String.format(Locale.US, "%.1f MB", bytes / 1_048_576.0)
+    if (bytes <= 0) t("APK") else String.format(Locale.US, t("%.1f MB"), bytes / 1_048_576.0)

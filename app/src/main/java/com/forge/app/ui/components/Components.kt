@@ -1,5 +1,7 @@
 package com.forge.app.ui.components
 
+import com.forge.app.i18n.t
+
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
@@ -23,6 +25,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.widthIn
@@ -235,7 +238,7 @@ fun TopBar(title: String, subtitle: String? = null, onBack: () -> Unit, trailing
         Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconBtn(Icons.AutoMirrored.Rounded.ArrowBack, "Back", onBack)
+        IconBtn(Icons.AutoMirrored.Rounded.ArrowBack, t("Back"), onBack)
         Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
             Text(title.uppercase(), style = T.H3, color = C.Hi, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (subtitle != null) Text(subtitle, style = T.Small, color = C.Mid, maxLines = 1)
@@ -349,7 +352,7 @@ fun Tag(text: String, color: Color = C.Mid, bg: Color = C.S2, modifier: Modifier
     Box(
         modifier.clip(RoundedCornerShape(8.dp)).background(bg).padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
-        Text(text.uppercase(), style = T.Eyebrow.copy(letterSpacing = T.Eyebrow.letterSpacing * 0.6f), color = color, maxLines = 1)
+        Text(text.uppercase(), style = T.Eyebrow.let { e -> if (e.letterSpacing.isSpecified) e.copy(letterSpacing = e.letterSpacing * 0.6f) else e }, color = color, maxLines = 1)
     }
 }
 
@@ -517,7 +520,7 @@ fun Stepper(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(btn, 40.dp).clickable { haptic(false); onMinus() }, contentAlignment = Alignment.Center) {
-            Icon(Icons.Rounded.Remove, "Less", tint = C.Mid, modifier = Modifier.size(16.dp))
+            Icon(Icons.Rounded.Remove, t("Less"), tint = C.Mid, modifier = Modifier.size(16.dp))
         }
         Box(
             Modifier.weight(1f).heightIn(min = 40.dp).let { if (onValueClick != null) it.clickable(onClick = onValueClick) else it },
@@ -526,7 +529,7 @@ fun Stepper(
             Text(value, style = T.Num.copy(fontSize = T.Num.fontSize * 0.95f), color = if (dim) C.Mid else C.Hi, textAlign = TextAlign.Center, maxLines = 1)
         }
         Box(Modifier.size(btn, 40.dp).clickable { haptic(false); onPlus() }, contentAlignment = Alignment.Center) {
-            Icon(Icons.Rounded.Add, "More", tint = C.Mid, modifier = Modifier.size(16.dp))
+            Icon(Icons.Rounded.Add, t("More"), tint = C.Mid, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -573,7 +576,7 @@ fun NumberDialog(
     ForgeDialog(
         title = title,
         onDismiss = onDismiss,
-        confirm = "Save",
+        confirm = t("Save"),
         onConfirm = { text.replace(',', '.').toDoubleOrNull()?.let(onConfirm) },
     ) {
         if (message != null) {
@@ -590,7 +593,7 @@ fun ForgeDialog(
     onDismiss: () -> Unit,
     confirm: String,
     onConfirm: () -> Unit,
-    dismiss: String = "Cancel",
+    dismiss: String = t("Cancel"),
     destructive: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -625,7 +628,7 @@ fun ForgeDialog(
  */
 @Composable
 fun Details(
-    label: String = "Details",
+    label: String = t("Details"),
     modifier: Modifier = Modifier,
     initiallyOpen: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
@@ -639,7 +642,7 @@ fun Details(
         ) {
             Text(label, style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
             Icon(
-                Icons.Rounded.ExpandMore, if (open) "Hide $label" else "Show $label", tint = C.Mid,
+                Icons.Rounded.ExpandMore, if (open) t("Hide %s", label) else t("Show %s", label), tint = C.Mid,
                 modifier = Modifier.size(20.dp).graphicsLayer { rotationZ = rot },
             )
         }
@@ -673,7 +676,7 @@ fun LegendItem(label: String, color: Color, line: Boolean = false, dashed: Boole
 private const val DAY_MS = 86_400_000L
 
 /** Range picker shared by the time-series charts. */
-enum class ChartRange(val label: String, val days: Long?) { M1("1M", 30), M3("3M", 90), Y1("1Y", 365), ALL("All", null) }
+enum class ChartRange(val label: String, val days: Long?) { M1("1M", 30), M3("3M", 90), Y1("1Y", 365), ALL(t("All"), null) }
 
 @Composable
 fun RangePicker(selected: ChartRange, onSelect: (ChartRange) -> Unit, modifier: Modifier = Modifier) {
@@ -691,7 +694,7 @@ fun RangePicker(selected: ChartRange, onSelect: (ChartRange) -> Unit, modifier: 
 private fun niceLabel(v: Double, decimals: Int): String =
     if (decimals == 0) Math.round(v).toString() else String.format(java.util.Locale.US, "%.${decimals}f", v)
 
-private val shortDate = java.time.format.DateTimeFormatter.ofPattern("d MMM", java.util.Locale.ENGLISH)
+private val shortDate get() = java.time.format.DateTimeFormatter.ofPattern("d MMM", com.forge.app.i18n.Lang.locale)
 
 /**
  * Time-series line chart with labelled axes. [points] are drawn as faint dots
@@ -707,7 +710,7 @@ fun LineChart(
     height: Dp = 170.dp,
     decimals: Int = 1,
     lineColor: Color = C.Volt,
-    empty: String = "Not enough data yet.",
+    empty: String = t("Not enough data yet."),
 ) {
     val xs = (points.map { it.first } + line.map { it.first })
     if (xs.distinct().size < 2) {
@@ -789,12 +792,12 @@ fun WeightChart(points: List<Pair<Long, Double>>, avg: List<Pair<Long, Double>>,
     Column(modifier.fillMaxWidth()) {
         RangePicker(range, { range = it }, Modifier.align(Alignment.End))
         Gap(12.dp)
-        LineChart(cut(points), cut(avg), goal = goal, empty = "Log at least two mornings to see the trend.")
+        LineChart(cut(points), cut(avg), goal = goal, empty = t("Log at least two mornings to see the trend."))
         Gap(10.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            LegendItem("Average", C.Volt, line = true)
-            LegendItem("Daily", C.Mid)
-            if (goal != null) LegendItem("Goal", C.Hi.copy(alpha = 0.5f), line = true, dashed = true)
+            LegendItem(t("Average"), C.Volt, line = true)
+            LegendItem(t("Daily"), C.Mid)
+            if (goal != null) LegendItem(t("Goal"), C.Hi.copy(alpha = 0.5f), line = true, dashed = true)
         }
     }
 }
@@ -922,7 +925,7 @@ fun AccentPicker(selected: com.forge.app.domain.Accent, onPick: (com.forge.app.d
                     if (sel) Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.fillMaxSize(0.5f))
                 }
                 Gap(6.dp)
-                Text(a.label, style = T.Small, color = if (sel) C.Hi else C.Mid, maxLines = 1)
+                Text(t(a.label), style = T.Small, color = if (sel) C.Hi else C.Mid, maxLines = 1)
             }
         }
     }
@@ -935,5 +938,39 @@ fun pickAccent(scope: kotlinx.coroutines.CoroutineScope, a: com.forge.app.domain
         com.forge.app.Graph.settings.update { it.copy(accent = a.name, accentChosen = true) }
         com.forge.app.domain.Accent.current = a
         runCatching { com.forge.app.widget.ForgeWidget.refresh(com.forge.app.Graph.appContext) }
+    }
+}
+
+/** Phone's language · English · العربية. Changing it restarts the app. */
+@Composable
+fun LanguagePicker(modifier: Modifier = Modifier, showSystem: Boolean = true) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val current = remember { com.forge.app.i18n.Lang.pref(ctx) }
+    val options = buildList {
+        if (showSystem) add(com.forge.app.i18n.Lang.SYSTEM to t("Phone's language"))
+        add(com.forge.app.i18n.Lang.EN to "English")
+        add(com.forge.app.i18n.Lang.AR to "العربية")
+    }
+    // Without the system option, show what's actually in use.
+    val selected = if (!showSystem && current == com.forge.app.i18n.Lang.SYSTEM) {
+        if (com.forge.app.i18n.Lang.arabic) com.forge.app.i18n.Lang.AR else com.forge.app.i18n.Lang.EN
+    } else current
+    Row(modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        options.forEach { (value, label) ->
+            Chip(label, selected == value, {
+                (ctx as? android.app.Activity)?.let { com.forge.app.i18n.switchLanguage(it, value) }
+            })
+        }
+    }
+}
+
+/** In Arabic, the exercise's English name in small type under the Arabic one. Nothing in English. */
+@Composable
+fun EnglishName(ex: com.forge.app.domain.Exercise, modifier: Modifier = Modifier) {
+    if (com.forge.app.i18n.Lang.arabic && ex.en != ex.name) {
+        Text(
+            ex.en, style = T.Tiny.copy(textDirection = androidx.compose.ui.text.style.TextDirection.Ltr),
+            color = C.Lo, maxLines = 1, modifier = modifier,
+        )
     }
 }

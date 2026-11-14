@@ -286,31 +286,32 @@ object Stats {
 }
 
 object Fmt {
-    private val dayFmt = DateTimeFormatter.ofPattern("EEE d MMM", Locale.ENGLISH)
-    private val longDay = DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.ENGLISH)
-    private val shortDow = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH)
+    private val dayFmt get() = DateTimeFormatter.ofPattern("EEE d MMM", com.forge.app.i18n.Lang.locale)
+    private val longDay get() = DateTimeFormatter.ofPattern("EEEE d MMMM", com.forge.app.i18n.Lang.locale)
+    private val shortDow get() = DateTimeFormatter.ofPattern("EEE", com.forge.app.i18n.Lang.locale)
 
     fun time(minutes: Int) = String.format(Locale.US, "%02d:%02d", minutes / 60, minutes % 60)
     fun day(d: LocalDate): String = d.format(dayFmt)
     fun longDay(d: LocalDate): String = d.format(longDay)
     fun dow(d: LocalDate): String = d.format(shortDow)
-    fun dowLetter(d: LocalDate): String = d.format(shortDow).take(1)
+    fun dowLetter(d: LocalDate): String =
+        if (com.forge.app.i18n.Lang.arabic) "نثرخجسح"[d.dayOfWeek.value - 1].toString() else d.format(shortDow).take(1)
 
     fun left(from: LocalDateTime, to: LocalDateTime): String {
         val mins = ChronoUnit.MINUTES.between(from, to).coerceAtLeast(0)
         val h = mins / 60
         val m = mins % 60
         return when {
-            h >= 24 -> "${h / 24}d ${h % 24}h"
-            h > 0 -> "${h}h ${m}m"
-            else -> "${m}m"
+            h >= 24 -> com.forge.app.i18n.t("%1${'$'}sd %2${'$'}sh", h / 24, h % 24)
+            h > 0 -> com.forge.app.i18n.t("%1${'$'}sh %2${'$'}sm", h, m)
+            else -> com.forge.app.i18n.t("%sm", m)
         }
     }
 
     fun leftMillis(ms: Long): String {
         val mins = (ms / 60000).coerceAtLeast(0)
         val h = mins / 60
-        return if (h > 0) "${h}h ${mins % 60}m" else "${mins}m"
+        return if (h > 0) com.forge.app.i18n.t("%1${'$'}sh %2${'$'}sm", h, mins % 60) else com.forge.app.i18n.t("%sm", mins)
     }
 
     fun kg(v: Double): String = String.format(Locale.US, "%.1f", v)

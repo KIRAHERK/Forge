@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -96,21 +98,21 @@ fun ProgressScreen(nav: Nav) {
     val level = Xp.level(xp)
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
-        item { ScreenHeader("${s.startWeight.roundToInt()} → ${s.goalWeight.roundToInt()} kg", "Progress") }
+        item { ScreenHeader(t("%1${'$'}s → %2${'$'}s kg", s.startWeight.roundToInt(), s.goalWeight.roundToInt()), t("Progress")) }
 
         // ---------------- weight
         item {
             Panel(accent = true) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
-                        Eyebrow("7-day average")
+                        Eyebrow(t("7-day average"))
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(currentAvg?.let { Fmt.kg(it) } ?: "—", style = T.Display, color = C.Hi)
-                            if (currentAvg != null) Text(" kg", style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 4.dp))
+                            if (currentAvg != null) Text(t(" kg"), style = T.H3, color = C.Mid, modifier = Modifier.padding(bottom = 4.dp))
                         }
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Eyebrow("Per week")
+                        Eyebrow(t("Per week"))
                         val col = when {
                             rate == null -> C.Mid
                             rate < Plan.RATE_MIN - 0.05 -> C.Red
@@ -118,7 +120,7 @@ fun ProgressScreen(nav: Nav) {
                             else -> C.Volt
                         }
                         Text(rate?.let { (if (it >= 0) "+" else "") + String.format(Locale.US, "%.2f", it) } ?: "—", style = T.NumL, color = col)
-                        Text("target ${Plan.RATE_MIN}–${Plan.RATE_MAX}", style = T.Tiny, color = C.Lo)
+                        Text(t("target %1${'$'}s–%2${'$'}s", Plan.RATE_MIN, Plan.RATE_MAX), style = T.Tiny, color = C.Lo)
                     }
                     HGap(6.dp)
                     com.forge.app.ui.share.ShareIcon { sharing = true }
@@ -130,28 +132,28 @@ fun ProgressScreen(nav: Nav) {
                 val cur = currentAvg ?: weights.lastOrNull()?.kg ?: start
                 val p = ((cur - start) / (s.goalWeight - start)).toFloat()
                 Row {
-                    Text("${Fmt.kg(start)} kg", style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
-                    Text("${Fmt.kg(s.goalWeight)} kg", style = T.Tiny, color = C.Volt)
+                    Text(t("%s kg", Fmt.kg(start)), style = T.Tiny, color = C.Mid, modifier = Modifier.weight(1f))
+                    Text(t("%s kg", Fmt.kg(s.goalWeight)), style = T.Tiny, color = C.Volt)
                 }
                 Gap(6.dp)
                 Bar(p, height = 8.dp)
                 Gap(8.dp)
                 val gained = cur - start
                 val toGo = (s.goalWeight - cur).coerceAtLeast(0.0)
-                Text("${if (gained >= 0) "+" else ""}${Fmt.kg(gained)} kg so far · ${Fmt.kg(toGo)} kg to go", style = T.Small, color = C.Hi)
+                Text(t("%1${'$'}s kg so far · %2${'$'}s kg to go", (if (gained >= 0) "+" else "") + Fmt.kg(gained), Fmt.kg(toGo)), style = T.Small, color = C.Hi)
                 val eta = if (rate != null && rate > 0.05 && toGo > 0) {
                     val weeks = ceil(toGo / rate).toLong()
-                    "At this rate: about $weeks weeks (${today.plusWeeks(weeks).format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH))}). Plan estimate: ${Plan.TIMELINE.lowercase()}."
-                } else "Plan estimate: ${Plan.TIMELINE.lowercase()}. Needs two weeks of weigh-ins for your own estimate."
-                Details("When will I get there?") {
+                    "At this rate: about $weeks weeks (${today.plusWeeks(weeks).format(DateTimeFormatter.ofPattern("MMM yyyy", com.forge.app.i18n.Lang.locale))}). Plan estimate: ${Plan.TIMELINE.lowercase()}."
+                } else t("Plan estimate: %s. Needs two weeks of weigh-ins for your own estimate.", Plan.TIMELINE.lowercase())
+                Details(t("When will I get there?")) {
                     Text(eta, style = T.Small, color = C.Mid)
                 }
                 Gap(6.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (weights.none { it.date == today.toEpochDay() }) {
-                        PrimaryButton("Log weight", { showWeigh = true }, Modifier.weight(1f), height = 46.dp)
+                        PrimaryButton(t("Log weight"), { showWeigh = true }, Modifier.weight(1f), height = 46.dp)
                     }
-                    SecondaryButton("Weight log", { nav.go("weight") }, Modifier.weight(1f), height = 46.dp)
+                    SecondaryButton(t("Weight log"), { nav.go("weight") }, Modifier.weight(1f), height = 46.dp)
                 }
             }
             Gap(12.dp)
@@ -192,16 +194,16 @@ fun ProgressScreen(nav: Nav) {
                     Text("${level.level}", style = T.Hero, color = C.Hi)
                     HGap(14.dp)
                     Column(Modifier.weight(1f)) {
-                        Eyebrow("Level · $xp XP total")
+                        Eyebrow(t("Level · %s XP total", xp))
                         Text(level.title.uppercase(), style = T.H2, color = C.Volt)
-                        Text("${level.into} / ${level.needed} XP to level ${level.level + 1}", style = T.Small, color = C.Mid)
+                        Text(t("%1${'$'}s / %2${'$'}s XP to level %3${'$'}s", level.into, level.needed, level.level + 1), style = T.Small, color = C.Mid)
                     }
                 }
                 Gap(10.dp)
                 Bar(level.progress)
                 if (xpRecent.isNotEmpty()) {
                     Gap(6.dp)
-                    Details("Recent XP") {
+                    Details(t("Recent XP")) {
                         xpRecent.take(8).forEach { e ->
                             Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                                 Text(e.reason, style = T.Small, color = C.Mid, modifier = Modifier.weight(1f), maxLines = 1)
@@ -217,13 +219,13 @@ fun ProgressScreen(nav: Nav) {
         // ---------------- totals
         item {
             Panel {
-                Eyebrow("All time")
+                Eyebrow(t("All time"))
                 Gap(10.dp)
                 Row(Modifier.fillMaxWidth()) {
-                    Stat("Workouts", "${finished.size}", Modifier.weight(1f))
-                    Stat("Sets", Fmt.num(doneSets.size), Modifier.weight(1f))
-                    Stat("Volume", String.format(Locale.US, "%.1f", finished.sumOf { it.volumeKg } / 1000), Modifier.weight(1f), unit = "t")
-                    Stat("PRs", "${finished.sumOf { it.prs }}", Modifier.weight(0.8f), color = C.Volt)
+                    Stat(t("Workouts"), "${finished.size}", Modifier.weight(1f))
+                    Stat(t("Sets"), Fmt.num(doneSets.size), Modifier.weight(1f))
+                    Stat(t("Volume"), String.format(Locale.US, "%.1f", finished.sumOf { it.volumeKg } / 1000), Modifier.weight(1f), unit = t("t"))
+                    Stat(t("PRs"), "${finished.sumOf { it.prs }}", Modifier.weight(0.8f), color = C.Volt)
                 }
             }
             Gap(12.dp)
@@ -231,7 +233,7 @@ fun ProgressScreen(nav: Nav) {
 
         // ---------------- lifts
         item {
-            SectionTitle("Lifts", action = if (finished.isNotEmpty()) "History" else null, onAction = { nav.go("history") })
+            SectionTitle(t("Lifts"), action = if (finished.isNotEmpty()) t("History") else null, onAction = { nav.go("history") })
             val active = com.forge.app.ui.LocalPrograms.current?.active
             // Lifts in the current program first, then anything else ever logged.
             val exIds = (active?.days.orEmpty().flatMap { d -> d.exercises.map { it.exerciseId } } + doneSets.map { it.exerciseId }).distinct()
@@ -249,8 +251,9 @@ fun ProgressScreen(nav: Nav) {
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(ex.name, style = T.BodyM, color = C.Hi)
+                            com.forge.app.ui.components.EnglishName(ex)
                             Text(
-                                best?.let { if (ex.loaded || it.weightKg > 0) "Best ${it.reps} × ${Progression.fmtKg(it.weightKg)} kg" else "Best ${it.reps} reps" } ?: "Not logged yet",
+                                best?.let { if (ex.loaded || it.weightKg > 0) t("Best %1${'$'}s × %2${'$'}s kg", it.reps, Progression.fmtKg(it.weightKg)) else t("Best %s reps", it.reps) } ?: t("Not logged yet"),
                                 style = T.Small, color = if (best != null) C.Mid else C.Lo,
                             )
                         }
@@ -273,10 +276,10 @@ fun ProgressScreen(nav: Nav) {
     if (sharing) com.forge.app.ui.share.ShareProgressDialog { sharing = false }
     if (showWeigh) {
         NumberDialog(
-            title = "Morning weight",
+            title = t("Morning weight"),
             initial = Fmt.kg(weights.lastOrNull()?.kg ?: s.startWeight),
-            suffix = "kg",
-            message = "After the bathroom, before food or water.",
+            suffix = t("kg"),
+            message = t("After the bathroom, before food or water."),
             onDismiss = { showWeigh = false },
             onConfirm = { v -> scope.launch { repo.logWeight(today, v) }; showWeigh = false },
         )
@@ -298,16 +301,16 @@ private fun WeeklyTrainingPanel(s: com.forge.app.data.Settings, finished: List<c
     val past = values.dropLast(1).filter { it > 0f }
     Panel {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Eyebrow("Last 8 weeks", modifier = Modifier.weight(1f))
+            Eyebrow(t("Last 8 weeks"), modifier = Modifier.weight(1f))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                com.forge.app.ui.components.Chip("Workouts", !volume, { volume = false })
-                com.forge.app.ui.components.Chip("Volume", volume, { volume = true })
+                com.forge.app.ui.components.Chip(t("Workouts"), !volume, { volume = false })
+                com.forge.app.ui.components.Chip(t("Volume"), volume, { volume = true })
             }
         }
         Gap(14.dp)
         Row(Modifier.fillMaxWidth()) {
-            Stat("This week", if (volume) String.format(Locale.US, "%.1f", values.last()) else "${values.last().toInt()}", Modifier.weight(1f), unit = if (volume) "t" else "/ $perWeek")
-            Stat("Weekly avg", if (past.isEmpty()) "—" else String.format(Locale.US, if (volume) "%.1f" else "%.1f", past.average()), Modifier.weight(1f), unit = if (volume && past.isNotEmpty()) "t" else null)
+            Stat(t("This week"), if (volume) String.format(Locale.US, "%.1f", values.last()) else "${values.last().toInt()}", Modifier.weight(1f), unit = if (volume) "t" else "/ $perWeek")
+            Stat(t("Weekly avg"), if (past.isEmpty()) "—" else String.format(Locale.US, if (volume) "%.1f" else "%.1f", past.average()), Modifier.weight(1f), unit = if (volume && past.isNotEmpty()) "t" else null)
         }
         Gap(16.dp)
         BarChart(
@@ -324,41 +327,41 @@ private fun WeeklyTrainingPanel(s: com.forge.app.data.Settings, finished: List<c
 @Composable
 private fun CheckInPanel(ci: CheckIn?, onAdjust: (Int) -> Unit, onAck: () -> Unit) {
     Panel(border = C.Volt.copy(alpha = 0.45f)) {
-        Eyebrow("2-week check-in", color = C.Volt)
+        Eyebrow(t("2-week check-in"), color = C.Volt)
         Gap(6.dp)
         if (ci == null) {
-            Text("Not enough data yet.", style = T.H3, color = C.Hi)
+            Text(t("Not enough data yet."), style = T.H3, color = C.Hi)
             Gap(4.dp)
-            Text("Weigh in at least 3 mornings in each of the last two weeks. The plan compares weekly averages, not single readings.", style = T.Small, color = C.Mid)
+            Text(t("Weigh in at least 3 mornings in each of the last two weeks. The plan compares weekly averages, not single readings."), style = T.Small, color = C.Mid)
             Gap(12.dp)
-            SecondaryButton("Remind me later", onAck, Modifier.fillMaxWidth(), height = 44.dp)
+            SecondaryButton(t("Remind me later"), onAck, Modifier.fillMaxWidth(), height = 44.dp)
             return@Panel
         }
         val r = String.format(Locale.US, "%+.2f", ci.rate)
-        Text("$r kg per week", style = T.H2, color = C.Hi)
-        Text("Average ${Fmt.kg(ci.priorAvg)} → ${Fmt.kg(ci.recentAvg)} kg", style = T.Small, color = C.Mid)
+        Text(t("%s kg per week", r), style = T.H2, color = C.Hi)
+        Text(t("Average %1${'$'}s → %2${'$'}s kg", Fmt.kg(ci.priorAvg), Fmt.kg(ci.recentAvg)), style = T.Small, color = C.Mid)
         Gap(10.dp)
         when (ci.verdict) {
             CheckIn.Verdict.NOT_RISING -> {
-                Text("Average weight is not rising. Your plan says: add 150–200 calories a day.", style = T.Body, color = C.Hi)
+                Text(t("Average weight is not rising. Your plan says: add 150–200 calories a day."), style = T.Body, color = C.Hi)
                 Gap(12.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PrimaryButton("Add 175 kcal", { onAdjust(175) }, Modifier.weight(1f), height = 46.dp)
-                    SecondaryButton("Not now", onAck, Modifier.weight(1f), height = 46.dp)
+                    PrimaryButton(t("Add 175 kcal"), { onAdjust(175) }, Modifier.weight(1f), height = 46.dp)
+                    SecondaryButton(t("Not now"), onAck, Modifier.weight(1f), height = 46.dp)
                 }
             }
             CheckIn.Verdict.TOO_FAST -> {
-                Text("Rising much faster than 0.2–0.4 kg a week. Your plan says: reduce intake slightly.", style = T.Body, color = C.Hi)
+                Text(t("Rising much faster than 0.2–0.4 kg a week. Your plan says: reduce intake slightly."), style = T.Body, color = C.Hi)
                 Gap(12.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PrimaryButton("Remove 150 kcal", { onAdjust(-150) }, Modifier.weight(1f), height = 46.dp, color = C.Amber)
-                    SecondaryButton("Not now", onAck, Modifier.weight(1f), height = 46.dp)
+                    PrimaryButton(t("Remove 150 kcal"), { onAdjust(-150) }, Modifier.weight(1f), height = 46.dp, color = C.Amber)
+                    SecondaryButton(t("Not now"), onAck, Modifier.weight(1f), height = 46.dp)
                 }
             }
             CheckIn.Verdict.ON_TRACK -> {
-                Text("Inside the target range. Change nothing.", style = T.Body, color = C.Hi)
+                Text(t("Inside the target range. Change nothing."), style = T.Body, color = C.Hi)
                 Gap(12.dp)
-                PrimaryButton("Got it", onAck, height = 46.dp)
+                PrimaryButton(t("Got it"), onAck, height = 46.dp)
             }
         }
     }

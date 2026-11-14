@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -154,7 +156,7 @@ fun TodayScreen(nav: Nav) {
             ScreenHeader(
                 eyebrow = Fmt.longDay(today),
                 // Short enough to stay on one line beside the level ring and icons.
-                title = if (streak > 0) "Streak $streak" else "Today",
+                title = if (streak > 0) t("Streak %s", streak) else t("Today"),
             ) {
                 Box(Modifier.clip(CircleShape).clickable { nav.tab("progress") }) {
                     Ring(level.progress, size = 46.dp, stroke = 3.dp) {
@@ -162,8 +164,8 @@ fun TodayScreen(nav: Nav) {
                     }
                 }
                 HGap(2.dp)
-                IconBtn(Icons.AutoMirrored.Rounded.HelpOutline, "Guide", { com.forge.app.ui.UiEvents.guideRequest.value = true }, tint = C.Mid)
-                IconBtn(Icons.Rounded.Settings, "Settings", { nav.go("settings") }, tint = C.Mid)
+                IconBtn(Icons.AutoMirrored.Rounded.HelpOutline, t("Guide"), { com.forge.app.ui.UiEvents.guideRequest.value = true }, tint = C.Mid)
+                IconBtn(Icons.Rounded.Settings, t("Settings"), { nav.go("settings") }, tint = C.Mid)
             }
         }
 
@@ -172,9 +174,9 @@ fun TodayScreen(nav: Nav) {
             val seed = today.toEpochDay()
             val line = when {
                 activePenalties.isNotEmpty() -> Lines.missed(seed)
-                status == DayStatus.SICK -> "Sick day. Rest, eat, drink water. Back at it when you're well."
+                status == DayStatus.SICK -> t("Sick day. Rest, eat, drink water. Back at it when you're well.")
                 status == DayStatus.DONE -> Lines.done(seed)
-                status == DayStatus.PENDING && day != null -> Lines.preWorkout(seed, day.name)
+                status == DayStatus.PENDING && day != null -> Lines.preWorkout(seed, t(day.name))
                 now.hour >= 18 && macros.protein < s.protein * 0.7 -> Lines.proteinLow(seed, (s.protein - macros.protein).roundToInt())
                 day == null -> Lines.restDay(seed)
                 streak >= 3 -> Lines.streak(seed, streak)
@@ -254,16 +256,16 @@ fun TodayScreen(nav: Nav) {
             val avg = Stats.movingAverage(weights).lastOrNull()?.second ?: latest
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp), onClick = { nav.tab("train") }) {
-                    Stat("Streak", "$streak", caption = if (streak == 1) "session" else "sessions", color = if (streak > 0) C.Volt else C.Hi)
+                    Stat(t("Streak"), "$streak", caption = if (streak == 1) "session" else "sessions", color = if (streak > 0) C.Volt else C.Hi)
                 }
                 Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp), onClick = { nav.tab("habits") }) {
-                    Stat("Week", "${score.score}", unit = "/100", color = when {
+                    Stat(t("Week"), "${score.score}", unit = "/100", color = when {
                         score.score >= 80 -> C.Volt; score.score >= 55 -> C.Hi; else -> C.Red
                     })
                 }
                 Panel(Modifier.weight(1f).fillMaxHeight(), padding = PaddingValues(14.dp), onClick = { nav.go("weight") }) {
                     val toGo = avg?.let { (s.goalWeight - it).coerceAtLeast(0.0) }
-                    Stat("To ${s.goalWeight.roundToInt()} kg", toGo?.let { Fmt.kg(it) } ?: "—", unit = if (toGo != null) "kg" else null)
+                    Stat(t("To %s kg", s.goalWeight.roundToInt()), toGo?.let { Fmt.kg(it) } ?: "—", unit = if (toGo != null) t("kg") else null)
                     Gap(8.dp)
                     Sparkline(Stats.movingAverage(weights).takeLast(21).map { it.second }, Modifier.fillMaxWidth().height(18.dp))
                 }
@@ -283,19 +285,19 @@ fun TodayScreen(nav: Nav) {
     sickAsk?.let { date ->
         val left = Penalties.SICK_LIMIT - s.sickDays.count { it > today.toEpochDay() - Penalties.SICK_WINDOW_DAYS && it <= today.toEpochDay() }
         ForgeDialog(
-            title = if (date == today) "Sick today?" else "Sick yesterday?",
+            title = if (date == today) t("Sick today?") else t("Sick yesterday?"),
             onDismiss = { sickAsk = null },
-            confirm = "Mark sick",
+            confirm = t("Mark sick"),
             onConfirm = { sickAsk = null; scope.launch { repo.setSick(date, true) } },
         ) {
             Text(
-                "${s.dayFor(date)?.title ?: "The workout"} is skipped with no penalty and no XP lost. " +
-                    "Your streak pauses instead of resetting.",
+                t("%s is skipped with no penalty and no XP lost.", s.dayFor(date)?.title ?: t("The workout")) + " " +
+                    t("Your streak pauses instead of resetting."),
                 style = T.Body, color = C.Mid,
             )
             Gap(10.dp)
             Text(
-                "Use it only when you're actually sick. After this you have ${left - 1} of ${Penalties.SICK_LIMIT} left in the next ${Penalties.SICK_WINDOW_DAYS} days.",
+                t("Use it only when you're actually sick. After this you have %1${'$'}s of %2${'$'}s left in the next %3${'$'}s days.", left - 1, Penalties.SICK_LIMIT, Penalties.SICK_WINDOW_DAYS),
                 style = T.Small, color = C.Lo,
             )
         }
@@ -327,20 +329,20 @@ private fun HeroCard(
     var sharing by remember { mutableStateOf(false) }
     if (sharing && todaySession != null) com.forge.app.ui.share.ShareWorkoutDialog(todaySession.id) { sharing = false }
     val next = (1..7).map { today.plusDays(it.toLong()) }.firstOrNull { s.isTraining(it) }
-    val nextText = next?.let { "Next: ${s.dayFor(it)?.title} · ${Fmt.dow(it)}" }
+    val nextText = next?.let { t("Next: %1${'$'}s · %2${'$'}s", s.dayFor(it)?.title, Fmt.dow(it)) }
 
     if (active != null) {
         val activeDay = Program.day(active.dayId)
         Panel(border = C.Volt.copy(alpha = 0.5f), accent = true) {
-            Eyebrow(if (active.makeUp) "Make-up in progress" else "In progress", color = C.Volt)
+            Eyebrow(if (active.makeUp) t("Make-up in progress") else t("In progress"), color = C.Volt)
             Gap(8.dp)
             Text(activeDay?.name?.uppercase() ?: "", style = T.Display, color = C.Hi)
             Gap(14.dp)
             com.forge.app.ui.components.Bar(if (activeProgress.second == 0) 0f else activeProgress.first.toFloat() / activeProgress.second)
             Gap(8.dp)
-            Text("${activeProgress.first} of ${activeProgress.second} sets done", style = T.Small, color = C.Mid)
+            Text(t("%1${'$'}s of %2${'$'}s sets done", activeProgress.first, activeProgress.second), style = T.Small, color = C.Mid)
             Gap(16.dp)
-            PrimaryButton("Resume workout", onResume, icon = Icons.Rounded.PlayArrow)
+            PrimaryButton(t("Resume workout"), onResume, icon = Icons.Rounded.PlayArrow)
         }
         return
     }
@@ -354,17 +356,17 @@ private fun HeroCard(
                     }
                     HGap(12.dp)
                     Column(Modifier.weight(1f)) {
-                        Eyebrow("Today · done", color = C.Volt)
-                        Text((day?.title ?: todaySession?.let { Program.day(it.dayId)?.title } ?: "Session").uppercase(), style = T.H2, color = C.Hi)
+                        Eyebrow(t("Today · done"), color = C.Volt)
+                        Text((day?.title ?: todaySession?.let { Program.day(it.dayId)?.title } ?: t("Session")).uppercase(), style = T.H2, color = C.Hi)
                     }
                     if (todaySession != null) com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 todaySession?.let { ts ->
                     Gap(16.dp)
                     Row(Modifier.fillMaxWidth()) {
-                        Stat("XP", "+${ts.xp}", Modifier.weight(1f), color = C.Volt)
-                        Stat("Volume", Fmt.num(ts.volumeKg.roundToInt()), Modifier.weight(1f), unit = "kg")
-                        Stat("Time", "${((ts.finishedAt ?: ts.startedAt) - ts.startedAt) / 60000}", Modifier.weight(1f), unit = "min")
+                        Stat(t("XP"), "+${ts.xp}", Modifier.weight(1f), color = C.Volt)
+                        Stat(t("Volume"), Fmt.num(ts.volumeKg.roundToInt()), Modifier.weight(1f), unit = t("kg"))
+                        Stat(t("Time"), "${((ts.finishedAt ?: ts.startedAt) - ts.startedAt) / 60000}", Modifier.weight(1f), unit = t("min"))
                     }
                 }
                 if (nextText != null) {
@@ -379,13 +381,13 @@ private fun HeroCard(
         status == DayStatus.SICK -> {
             Panel {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Eyebrow("Today · sick day", modifier = Modifier.weight(1f))
-                    TextAction("Undo", onUndoSick, color = C.Mid, style = T.Small)
+                    Eyebrow(t("Today · sick day"), modifier = Modifier.weight(1f))
+                    TextAction(t("Undo"), onUndoSick, color = C.Mid, style = T.Small)
                 }
                 Gap(8.dp)
-                Text("REST UP.", style = T.Display, color = C.Hi)
+                Text(t("REST UP."), style = T.Display, color = C.Hi)
                 Gap(6.dp)
-                Text("${day?.title ?: "Today's workout"} is skipped. No penalty, and your streak is paused, not lost.", style = T.Body, color = C.Mid)
+                Text(t("%s is skipped. No penalty, and your streak is paused, not lost.", day?.title ?: t("Today's workout")), style = T.Body, color = C.Mid)
                 if (nextText != null) {
                     Gap(14.dp)
                     Hairline()
@@ -397,16 +399,16 @@ private fun HeroCard(
 
         day == null -> {
             Panel(accent = true) {
-                Eyebrow("Today")
+                Eyebrow(t("Today"))
                 Gap(8.dp)
-                Text("REST DAY", style = T.Display, color = C.Hi)
+                Text(t("REST DAY"), style = T.Display, color = C.Hi)
                 if (nextText != null) {
                     Gap(16.dp)
                     Hairline()
                     Gap(12.dp)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(nextText, style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
-                        TextAction("Train anyway", onTrain)
+                        TextAction(t("Train anyway"), onTrain)
                     }
                 }
             }
@@ -422,19 +424,19 @@ private fun HeroCard(
             }
             Panel(accent = true) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Eyebrow("Today · Day ${day.number}", modifier = Modifier.weight(1f))
-                    Tag("Due ${Fmt.time(s.deadline)}", color = urgency, bg = urgency.copy(alpha = 0.14f))
+                    Eyebrow(t("Today · Day %s", day.number), modifier = Modifier.weight(1f))
+                    Tag(t("Due %s", Fmt.time(s.deadline)), color = urgency, bg = urgency.copy(alpha = 0.14f))
                 }
                 Gap(10.dp)
-                Text(day.name.uppercase(), style = T.Display, color = C.Hi)
+                Text(t(day.name).uppercase(), style = T.Display, color = C.Hi)
                 Gap(16.dp)
                 Row(Modifier.fillMaxWidth()) {
-                    Stat("Exercises", "${day.exercises.size}", Modifier.weight(1f))
-                    Stat("Sets", "${day.totalSets}", Modifier.weight(1f))
-                    Stat("Time left", Fmt.left(now, deadline), Modifier.weight(1.3f), color = urgency)
+                    Stat(t("Exercises"), "${day.exercises.size}", Modifier.weight(1f))
+                    Stat(t("Sets"), "${day.totalSets}", Modifier.weight(1f))
+                    Stat(t("Time left"), Fmt.left(now, deadline), Modifier.weight(1.3f), color = urgency)
                 }
                 Gap(8.dp)
-                Details("Exercises") {
+                Details(t("Exercises")) {
                     day.exercises.forEach { pe ->
                         Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
                             Text(pe.displayName, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f))
@@ -443,19 +445,19 @@ private fun HeroCard(
                     }
                 }
                 Gap(8.dp)
-                PrimaryButton("Start workout", onStart, icon = Icons.Rounded.PlayArrow)
-                SickRow(sick, "I'm sick today", onSick)
+                PrimaryButton(t("Start workout"), onStart, icon = Icons.Rounded.PlayArrow)
+                SickRow(sick, t("I'm sick today"), onSick)
             }
         }
 
         else -> {
             Panel(color = Color(0xFF1C1212), border = C.Red.copy(alpha = 0.5f)) {
-                Eyebrow("Today · missed", color = C.Red)
+                Eyebrow(t("Today · missed"), color = C.Red)
                 Gap(8.dp)
-                Text(day.name.uppercase(), style = T.Display, color = C.Hi)
+                Text(t(day.name).uppercase(), style = T.Display, color = C.Hi)
                 Gap(6.dp)
-                Text("Missed at ${Fmt.time(s.deadline)}. You can still make it up.", style = T.Body, color = C.Mid)
-                SickRow(sick, "I was sick today", onSick)
+                Text(t("Missed at %s. You can still make it up.", Fmt.time(s.deadline)), style = T.Body, color = C.Mid)
+                SickRow(sick, t("I was sick today"), onSick)
             }
         }
     }
@@ -490,8 +492,8 @@ private fun PenaltyCard(p: PenaltyEntity, now: LocalDateTime, onSeen: () -> Unit
     val left = p.dueAt - Graph.repo.millis(now)
     Panel(color = Color(0xFF1C1212), border = C.Red.copy(alpha = 0.55f)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Eyebrow(if (p.escalated) "Penalty · doubled" else "Penalty", color = C.Red, modifier = Modifier.weight(1f))
-            Text(if (rolling) "rolling…" else "due in ${Fmt.leftMillis(left)}", style = T.Small, color = C.Red)
+            Eyebrow(if (p.escalated) t("Penalty · doubled") else t("Penalty"), color = C.Red, modifier = Modifier.weight(1f))
+            Text(if (rolling) t("rolling…") else t("due in %s", Fmt.leftMillis(left)), style = T.Small, color = C.Red)
         }
         Gap(10.dp)
         AnimatedContent(
@@ -505,20 +507,20 @@ private fun PenaltyCard(p: PenaltyEntity, now: LocalDateTime, onSeen: () -> Unit
         Text(p.reason, style = T.Small, color = C.Mid)
         if (p.jarAmount > 0) {
             Gap(4.dp)
-            Text("+${p.jarAmount} to the penalty jar", style = T.Small, color = C.Amber)
+            Text(t("+%s to the penalty jar", p.jarAmount), style = T.Small, color = C.Amber)
         }
         Gap(14.dp)
-        PrimaryButton("I paid it", { confirm = true }, color = C.Red, textColor = C.Hi, height = 48.dp, enabled = !rolling)
+        PrimaryButton(t("I paid it"), { confirm = true }, color = C.Red, textColor = C.Hi, height = 48.dp, enabled = !rolling)
     }
     if (confirm) {
         ForgeDialog(
-            title = "Paid in full?",
+            title = t("Paid in full?"),
             onDismiss = { confirm = false },
-            confirm = "Yes, done",
+            confirm = t("Yes, done"),
             onConfirm = { confirm = false; onPaid() },
-            dismiss = "Not yet",
+            dismiss = t("Not yet"),
         ) {
-            Text("${p.taskText}. All of it, not most of it.", style = T.Body, color = C.Mid)
+            Text(t("%s. All of it, not most of it.", p.taskText), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -528,16 +530,16 @@ private fun MakeUpCard(day: WorkoutDay, date: LocalDate, now: LocalDateTime, s: 
     val closes = s.deadlineAt(date).plusHours(Penalties.MAKE_UP_HOURS)
     Panel(color = Color(0xFF1C1810), border = C.Amber.copy(alpha = 0.45f)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Eyebrow("Make-up window", color = C.Amber, modifier = Modifier.weight(1f))
+            Eyebrow(t("Make-up window"), color = C.Amber, modifier = Modifier.weight(1f))
             Text("${Fmt.left(now, closes)} left", style = T.Small, color = C.Amber)
         }
         Gap(8.dp)
         Text(day.title.uppercase(), style = T.H2, color = C.Hi)
         Gap(4.dp)
-        Text("Missed ${Fmt.day(date)}. Restores your streak.", style = T.Small, color = C.Mid)
+        Text(t("Missed %s. Restores your streak.", Fmt.day(date)), style = T.Small, color = C.Mid)
         Gap(14.dp)
-        PrimaryButton("Make it up", onStart, color = C.Amber, height = 48.dp)
-        SickRow(sick, if (date == now.toLocalDate()) "I was sick today" else "I was sick yesterday", onSick)
+        PrimaryButton(t("Make it up"), onStart, color = C.Amber, height = 48.dp)
+        SickRow(sick, if (date == now.toLocalDate()) t("I was sick today") else t("I was sick yesterday"), onSick)
     }
 }
 
@@ -554,7 +556,7 @@ private fun SickRow(sick: SickCheck, label: String, onSick: () -> Unit) {
         is SickCheck.LimitReached -> {
             Gap(8.dp)
             Text(
-                "Sick days used: ${Penalties.SICK_LIMIT} of ${Penalties.SICK_LIMIT}. Next one frees up ${Fmt.day(sick.nextFree)}.",
+                t("Sick days used: %1${'$'}s of %2${'$'}s. Next one frees up %3${'$'}s.", Penalties.SICK_LIMIT, Penalties.SICK_LIMIT, Fmt.day(sick.nextFree)),
                 style = T.Tiny, color = C.Lo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -566,12 +568,12 @@ private fun SickRow(sick: SickCheck, label: String, onSick: () -> Unit) {
 private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs: Double, onOpen: () -> Unit, onAdd: () -> Unit, onScan: () -> Unit, onRecipes: () -> Unit) {
     Panel(onClick = onOpen) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Eyebrow("Fuel today", modifier = Modifier.weight(1f))
+            Eyebrow(t("Fuel today"), modifier = Modifier.weight(1f))
             val left = s.kcal - kcal
             when {
-                Stats.kcalOver(kcal, s.kcal) -> Text("${Fmt.num(-left)} kcal over", style = T.Small, color = C.Amber)
-                left > 0 -> Text("${Fmt.num(left)} kcal left", style = T.Small, color = C.Mid)
-                else -> Text("Target hit", style = T.Small, color = C.Volt)
+                Stats.kcalOver(kcal, s.kcal) -> Text(t("%s kcal over", Fmt.num(-left)), style = T.Small, color = C.Amber)
+                left > 0 -> Text(t("%s kcal left", Fmt.num(left)), style = T.Small, color = C.Mid)
+                else -> Text(t("Target hit"), style = T.Small, color = C.Volt)
             }
         }
         Gap(16.dp)
@@ -579,26 +581,26 @@ private fun FuelCard(s: Settings, kcal: Int, protein: Double, fat: Double, carbs
             Ring(kcal.toFloat() / s.kcal, size = 132.dp, stroke = 11.dp, color = C.Hi) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(Fmt.num(kcal), style = T.NumL, color = C.Hi)
-                    Text("of ${Fmt.num(s.kcal)} kcal", style = T.Tiny, color = C.Mid)
+                    Text(t("of %s kcal", Fmt.num(s.kcal)), style = T.Tiny, color = C.Mid)
                 }
             }
             Ring(protein.toFloat() / s.protein, size = 132.dp, stroke = 11.dp, color = C.Volt) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(Fmt.g(protein), style = T.NumL, color = C.Volt)
-                    Text("of ${s.protein} g protein", style = T.Tiny, color = C.Mid)
+                    Text(t("of %s g protein", s.protein), style = T.Tiny, color = C.Mid)
                 }
             }
         }
         Gap(18.dp)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(Modifier.weight(1f)) { MacroLine("Fat", "${Fmt.g(fat)} / ${s.fat} g", (fat / s.fat).toFloat(), color = C.Mid) }
-            Box(Modifier.weight(1f)) { MacroLine("Carbs", "${Fmt.g(carbs)} / ${s.carbs} g", (carbs / s.carbs).toFloat(), color = C.Mid) }
+            Box(Modifier.weight(1f)) { MacroLine(t("Fat"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(fat), s.fat), (fat / s.fat).toFloat(), color = C.Mid) }
+            Box(Modifier.weight(1f)) { MacroLine(t("Carbs"), com.forge.app.i18n.t("%1\$s / %2\$s g", Fmt.g(carbs), s.carbs), (carbs / s.carbs).toFloat(), color = C.Mid) }
         }
         Gap(16.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            PrimaryButton("Add food", onAdd, Modifier.weight(1.3f), icon = Icons.Rounded.Add, height = 48.dp)
-            SecondaryButton("Recipes", onRecipes, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
-            com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, "Scan a barcode or label", onScan)
+            PrimaryButton(t("Add food"), onAdd, Modifier.weight(1.3f), icon = Icons.Rounded.Add, height = 48.dp)
+            SecondaryButton(t("Recipes"), onRecipes, Modifier.weight(1f), height = 48.dp, hPad = 8.dp)
+            com.forge.app.ui.components.IconSquareButton(Icons.Rounded.DocumentScanner, t("Scan a barcode or label"), onScan)
         }
     }
 }
@@ -615,14 +617,14 @@ private fun CheckInCard(
     onAddHabit: () -> Unit,
 ) {
     Panel {
-        Eyebrow("Daily check-in")
+        Eyebrow(t("Daily check-in"))
         Gap(6.dp)
         Row(Modifier.fillMaxWidth().clickable(onClick = onWeigh).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Morning weight", style = T.BodyM, color = C.Hi)
+                Text(t("Morning weight"), style = T.BodyM, color = C.Hi)
             }
-            if (weightLogged != null) Text("${Fmt.kg(weightLogged)} kg", style = T.Num, color = C.Volt)
-            else SecondaryButton("Log", onWeigh, height = 40.dp)
+            if (weightLogged != null) Text(t("%s kg", Fmt.kg(weightLogged)), style = T.Num, color = C.Volt)
+            else SecondaryButton(t("Log"), onWeigh, height = 40.dp)
         }
         val d = today.toEpochDay()
         defs.filter { it.startDate <= d }.forEach { def ->
@@ -630,7 +632,7 @@ private fun CheckInCard(
             val log = logs.firstOrNull { it.habitId == def.id && it.date == d }
             val streak = Stats.habitStreak(def, logs, today)
             val sub = if (def.isQuit) {
-                "$streak ${if (streak == 1) "day" else "days"} clean" + (log?.value?.takeIf { def.counted && it > 0 }?.let { " · $it today" } ?: "")
+                "$streak ${if (streak == 1) "day" else "days"} clean" + (log?.value?.takeIf { def.counted && it > 0 }?.let { t(" · %s today", it) } ?: "")
             } else {
                 "$streak ${if (streak == 1) "day" else "days"} in a row"
             }
@@ -642,16 +644,16 @@ private fun CheckInCard(
                 HGap(8.dp)
                 if (def.isQuit) {
                     // Clean is the good answer, so it sits first and in the accent colour.
-                    Segmented(listOf("Clean", "Slipped"), when (log?.value) { null -> null; 0 -> 0; else -> 1 }, { i -> onHabit(def, if (i == 0) 0 else 1) })
+                    Segmented(listOf(t("Clean"), t("Slipped")), when (log?.value) { null -> null; 0 -> 0; else -> 1 }, { i -> onHabit(def, if (i == 0) 0 else 1) })
                 } else {
-                    Segmented(listOf("Done", "Not yet"), when (log?.value) { null -> null; 0 -> 1; else -> 0 }, { i -> onHabit(def, if (i == 0) 1 else 0) })
+                    Segmented(listOf(t("Done"), t("Not yet")), when (log?.value) { null -> null; 0 -> 1; else -> 0 }, { i -> onHabit(def, if (i == 0) 1 else 0) })
                 }
             }
         }
         if (defs.none { it.startDate <= d }) {
             Hairline()
             Text(
-                "Add habits to check in on them here",
+                t("Add habits to check in on them here"),
                 style = T.Small, color = C.Volt,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onAddHabit).padding(vertical = 12.dp),
             )
@@ -659,7 +661,7 @@ private fun CheckInCard(
         if (defs.any { it.isQuit }) {
             Gap(6.dp)
             Text(
-                "Having an urge? Start the urge timer",
+                t("Having an urge? Start the urge timer"),
                 style = T.Small, color = C.Volt,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onUrge).padding(vertical = 8.dp),
             )
@@ -678,10 +680,10 @@ private fun UpdateBanner(onOpen: () -> Unit) {
     Panel(onClick = onOpen, border = C.Volt.copy(alpha = 0.45f), padding = PaddingValues(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Eyebrow("Update available", color = C.Volt)
-                Text("Forge v$version", style = T.H3, color = C.Hi)
+                Eyebrow(t("Update available"), color = C.Volt)
+                Text(t("Forge v%s", version), style = T.H3, color = C.Hi)
             }
-            Text("See what's new", style = T.Small, color = C.Volt)
+            Text(t("See what's new"), style = T.Small, color = C.Volt)
         }
     }
     Gap(12.dp)

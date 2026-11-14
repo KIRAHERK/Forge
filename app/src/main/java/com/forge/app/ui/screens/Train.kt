@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -92,8 +94,8 @@ fun TrainScreen(nav: Nav) {
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
         item {
-            ScreenHeader(program?.name ?: "Program", "Train") {
-                TextAction("Programs", { nav.go("programs") })
+            ScreenHeader(program?.name?.let { t(it) } ?: t("Program"), t("Train")) {
+                TextAction(t("Programs"), { nav.go("programs") })
             }
         }
 
@@ -105,11 +107,11 @@ fun TrainScreen(nav: Nav) {
         if (active != null) {
             item {
                 Panel(border = C.Volt.copy(alpha = 0.5f), onClick = { nav.workout(active!!.id) }, accent = true) {
-                    Eyebrow("In progress", color = C.Volt)
+                    Eyebrow(t("In progress"), color = C.Volt)
                     Gap(6.dp)
                     Text(Program.day(active!!.dayId)?.title?.uppercase() ?: "", style = T.H2, color = C.Hi)
                     Gap(12.dp)
-                    PrimaryButton("Resume", { nav.workout(active!!.id) }, icon = Icons.Rounded.PlayArrow, height = 48.dp)
+                    PrimaryButton(t("Resume"), { nav.workout(active!!.id) }, icon = Icons.Rounded.PlayArrow, height = 48.dp)
                 }
                 Gap(14.dp)
             }
@@ -117,8 +119,8 @@ fun TrainScreen(nav: Nav) {
 
         item {
             SectionTitle(
-                "The program · ${program?.daysPerWeek ?: 0} days a week",
-                action = if (program != null) "Edit" else null,
+                t("The program · %s days a week", program?.daysPerWeek ?: 0),
+                action = if (program != null) t("Edit") else null,
                 onAction = { program?.let { nav.go("program/${it.id}") } },
             )
         }
@@ -130,9 +132,9 @@ fun TrainScreen(nav: Nav) {
         if (program != null && program.days.isEmpty()) {
             item {
                 Panel(onClick = { nav.go("program/${program.id}") }) {
-                    Text("NO WORKOUTS YET", style = T.H3, color = C.Hi)
+                    Text(t("NO WORKOUTS YET"), style = T.H3, color = C.Hi)
                     Gap(4.dp)
-                    Text("Add days and exercises to this program.", style = T.Small, color = C.Mid)
+                    Text(t("Add days and exercises to this program."), style = T.Small, color = C.Mid)
                 }
                 Gap(12.dp)
             }
@@ -140,7 +142,7 @@ fun TrainScreen(nav: Nav) {
 
         item {
             Panel(padding = PaddingValues(horizontal = 18.dp, vertical = 4.dp)) {
-                Details("Training rules") {
+                Details(t("Training rules")) {
                     Text(Exercises.EFFORT_RULE, style = T.Body, color = C.Hi)
                     Gap(8.dp)
                     Text(Exercises.PROGRESSION_RULE, style = T.Body, color = C.Mid)
@@ -152,10 +154,10 @@ fun TrainScreen(nav: Nav) {
         }
 
         item {
-            SectionTitle("Recent sessions", action = if (sessions.any { it.finishedAt != null }) "All" else null, onAction = { nav.go("history") })
+            SectionTitle(t("Recent sessions"), action = if (sessions.any { it.finishedAt != null }) t("All") else null, onAction = { nav.go("history") })
             val recent = sessions.filter { it.finishedAt != null }.take(4)
             if (recent.isEmpty()) {
-                Text("Nothing logged yet.", style = T.Small, color = C.Lo)
+                Text(t("Nothing logged yet."), style = T.Small, color = C.Lo)
             }
             recent.forEach { SessionRow(it); Gap(8.dp) }
             BottomSpace()
@@ -169,19 +171,19 @@ fun TrainScreen(nav: Nav) {
         val creditDate = makeUpDate ?: today
         val isMakeUp = makeUpDate != null && makeUpDate != today || (makeUpDate == today && Stats.dayStatus(s, today, now, done) == DayStatus.MAKEUP_OPEN)
         ForgeDialog(
-            title = "Start ${day.title}?",
+            title = t("Start %s?", day.title),
             onDismiss = { pick = null },
-            confirm = "Start",
+            confirm = t("Start"),
             onConfirm = {
                 pick = null
                 scope.launch { nav.workout(repo.startSession(day.id, creditDate, isMakeUp)) }
             },
         ) {
             val msg = when {
-                isMakeUp -> "This counts as the make-up for ${Fmt.day(creditDate)} and restores your streak."
-                todaySlot == day.id -> "This is today's scheduled session."
-                todaySlot == Program.REST -> "Today is a rest day. This is logged as an extra session."
-                else -> "Today's scheduled session is ${s.dayFor(today)?.title}. This one is logged in its place for today."
+                isMakeUp -> t("This counts as the make-up for %s and restores your streak.", Fmt.day(creditDate))
+                todaySlot == day.id -> t("This is today's scheduled session.")
+                todaySlot == Program.REST -> t("Today is a rest day. This is logged as an extra session.")
+                else -> t("Today's scheduled session is %s. This one is logged in its place for today.", s.dayFor(today)?.title)
             }
             Text(msg, style = T.Body, color = C.Mid)
         }
@@ -209,7 +211,7 @@ fun WeekStrip(weekStart: LocalDate, today: LocalDate, info: (LocalDate) -> Pair<
                 Text(Fmt.dowLetter(d), style = T.Tiny, color = if (st == DayStatus.DONE) C.OnVolt else C.Mid)
                 Gap(4.dp)
                 if (st == DayStatus.SICK) {
-                    Icon(Icons.Rounded.Sick, "Sick day", tint = fg, modifier = Modifier.padding(vertical = 2.dp).size(20.dp))
+                    Icon(Icons.Rounded.Sick, t("Sick day"), tint = fg, modifier = Modifier.padding(vertical = 2.dp).size(20.dp))
                 } else {
                     Text(
                         if (slot == Program.REST) "–" else (Program.day(slot)?.number?.toString() ?: "•"),
@@ -226,11 +228,11 @@ private fun DayCard(day: WorkoutDay, onExercise: (String) -> Unit, onStart: () -
     Panel(padding = PaddingValues(0.dp)) {
         Row(Modifier.padding(start = 18.dp, end = 12.dp, top = 16.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Eyebrow("Day ${day.number} · ${day.totalSets} sets · ~${day.estMinutes} min")
+                Eyebrow(t("Day %1${'$'}s · %2${'$'}s sets · ~%3${'$'}s min", day.number, day.totalSets, day.estMinutes))
                 Gap(4.dp)
-                Text(day.name.uppercase(), style = T.H2, color = C.Hi)
+                Text(t(day.name).uppercase(), style = T.H2, color = C.Hi)
             }
-            TextAction("Start", onStart)
+            TextAction(t("Start"), onStart)
         }
         day.exercises.forEachIndexed { i, pe ->
             Hairline(Modifier.padding(horizontal = 18.dp))
@@ -239,7 +241,10 @@ private fun DayCard(day: WorkoutDay, onExercise: (String) -> Unit, onStart: () -
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("${i + 1}", style = T.Num.copy(fontSize = T.Num.fontSize * 0.8f), color = C.Lo, modifier = Modifier.width(24.dp))
-                Text(pe.displayName, style = T.BodyM, color = C.Hi, modifier = Modifier.weight(1f))
+                Column(Modifier.weight(1f)) {
+                    Text(pe.displayName, style = T.BodyM, color = C.Hi)
+                    com.forge.app.ui.components.EnglishName(pe.exercise)
+                }
                 Text(pe.prescription, style = T.Small, color = C.Mid)
                 HGap(4.dp)
                 Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = C.Lo)
@@ -258,13 +263,13 @@ fun SessionRow(ses: SessionEntity) {
             Column(Modifier.weight(1f)) {
                 Text(day?.title ?: ses.dayId, style = T.BodyS, color = C.Hi)
                 Text(
-                    "${Fmt.day(LocalDate.ofEpochDay(ses.date))} · ${ses.minutes()} min · ${Fmt.num(ses.volumeKg.roundToInt())} kg",
+                    t("%1${'$'}s · %2${'$'}s min · %3${'$'}s kg", Fmt.day(LocalDate.ofEpochDay(ses.date)), ses.minutes(), Fmt.num(ses.volumeKg.roundToInt())),
                     style = T.Small, color = C.Mid,
                 )
             }
-            if (!ses.complete) { Tag("Partial", color = C.Red, bg = C.RedSoft); HGap(6.dp) }
-            if (ses.makeUp) { Tag("Make-up", color = C.Amber, bg = C.AmberSoft); HGap(6.dp) }
-            if (ses.prs > 0) { Tag("${ses.prs} PR", color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
+            if (!ses.complete) { Tag(t("Partial"), color = C.Red, bg = C.RedSoft); HGap(6.dp) }
+            if (ses.makeUp) { Tag(t("Make-up"), color = C.Amber, bg = C.AmberSoft); HGap(6.dp) }
+            if (ses.prs > 0) { Tag(t("%s PR", ses.prs), color = C.OnVolt, bg = C.Volt); HGap(6.dp) }
             Text("+${ses.xp}", style = T.Num.copy(fontSize = T.Num.fontSize * 0.8f), color = C.Volt)
             HGap(2.dp)
             com.forge.app.ui.share.ShareIcon { sharing = true }
@@ -278,7 +283,7 @@ fun HistoryScreen(nav: Nav) {
     val sessionsN by Graph.repo.sessions.collectAsState(null)
     val sessions = sessionsN ?: return Loading()
     Column(Modifier.fillMaxSize()) {
-        TopBar("Session history", "${sessions.count { it.finishedAt != null }} sessions", onBack = { nav.back() })
+        TopBar(t("Session history"), "${sessions.count { it.finishedAt != null }} sessions", onBack = { nav.back() })
         LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)) {
             items(sessions.filter { it.finishedAt != null }, key = { it.id }) { SessionRow(it); Gap(8.dp) }
             item { BottomSpace() }
@@ -304,26 +309,26 @@ fun ExerciseScreen(nav: Nav, exerciseId: String) {
                 val bySession = d.first.groupBy { it.sessionId }.toList()
                 val best = d.first.maxBy { Progression.e1rm(it.reps, it.weightKg) }
                 Panel {
-                    Eyebrow("Your numbers")
+                    Eyebrow(t("Your numbers"))
                     Gap(10.dp)
                     Row(Modifier.fillMaxWidth()) {
-                        Stat("Best set", if (ex.loaded || best.weightKg > 0) "${best.reps}×${Progression.fmtKg(best.weightKg)}" else "${best.reps}", Modifier.weight(1f), color = C.Volt)
-                        Stat("Sessions", "${bySession.size}", Modifier.weight(1f))
+                        Stat(t("Best set"), if (ex.loaded || best.weightKg > 0) "${best.reps}×${Progression.fmtKg(best.weightKg)}" else "${best.reps}", Modifier.weight(1f), color = C.Volt)
+                        Stat(t("Sessions"), "${bySession.size}", Modifier.weight(1f))
                     }
                     Gap(16.dp)
                     val series = bySession.mapNotNull { (sid, sets) ->
                         val date = d.second[sid]?.date ?: return@mapNotNull null
                         date to sets.maxOf { if (ex.loaded || it.weightKg > 0) Progression.e1rm(it.reps, it.weightKg) else it.reps.toDouble() }
                     }.groupBy { it.first }.map { (date, l) -> date to l.maxOf { it.second } }.sortedBy { it.first }
-                    Eyebrow(if (ex.loaded) "Estimated 1-rep max, kg" else "Best reps per session")
+                    Eyebrow(if (ex.loaded) t("Estimated 1-rep max, kg") else t("Best reps per session"))
                     Gap(10.dp)
                     com.forge.app.ui.components.LineChart(
                         points = emptyList(), line = series, height = 140.dp,
                         decimals = if (ex.loaded) 1 else 0,
-                        empty = "Log a second session to see the trend.",
+                        empty = t("Log a second session to see the trend."),
                     )
                     Gap(16.dp)
-                    Eyebrow("Recent sessions")
+                    Eyebrow(t("Recent sessions"))
                     Gap(6.dp)
                     bySession.takeLast(5).reversed().forEach { (sid, sets) ->
                         val ses = d.second[sid]

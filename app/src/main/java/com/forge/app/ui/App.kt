@@ -1,5 +1,7 @@
 package com.forge.app.ui
 
+import com.forge.app.i18n.t
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -137,11 +139,11 @@ class Nav(val controller: NavHostController) {
 }
 
 private val tabs = listOf(
-    Triple("today", "Today", Icons.Rounded.WbSunny),
-    Triple("train", "Train", Icons.Rounded.FitnessCenter),
-    Triple("fuel", "Fuel", Icons.Rounded.Restaurant),
-    Triple("habits", "Habits", Icons.Rounded.TaskAlt),
-    Triple("progress", "Progress", Icons.Rounded.Insights),
+    Triple("today", t("Today"), Icons.Rounded.WbSunny),
+    Triple("train", t("Train"), Icons.Rounded.FitnessCenter),
+    Triple("fuel", t("Fuel"), Icons.Rounded.Restaurant),
+    Triple("habits", t("Habits"), Icons.Rounded.TaskAlt),
+    Triple("progress", t("Progress"), Icons.Rounded.Insights),
 )
 
 @Composable
@@ -334,20 +336,20 @@ private fun LevelUp(level: Int, title: String, onDismiss: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-            Eyebrow("Level up", color = C.Volt)
+            Eyebrow(t("Level up"), color = C.Volt)
             Gap(8.dp)
             Text(
-                "$level", style = T.Hero.copy(fontSize = 160.sp, lineHeight = 150.sp), color = C.Hi,
+                "$level", style = T.hero(160, 150), color = C.Hi,
                 modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale },
             )
             Text(title.uppercase(), style = T.H1, color = C.Volt)
             Gap(16.dp)
             Text(
-                "Earned, not given. Next level needs ${Xp.stepFor(level)} XP.",
+                t("Earned, not given. Next level needs %s XP.", Xp.stepFor(level)),
                 style = T.Body, color = C.Mid, textAlign = TextAlign.Center,
             )
             Gap(32.dp)
-            PrimaryButton("Keep going", onDismiss, Modifier.width(220.dp))
+            PrimaryButton(t("Keep going"), onDismiss, Modifier.width(220.dp))
         }
     }
 }
@@ -357,13 +359,13 @@ private fun NewColorDialog() {
     val scope = rememberCoroutineScope()
     fun done() = com.forge.app.ui.components.pickAccent(scope, C.accent)
     com.forge.app.ui.components.ForgeDialog(
-        title = "New: pick your color",
+        title = t("New: pick your color"),
         onDismiss = { done() },
-        confirm = "Done",
+        confirm = t("Done"),
         onConfirm = { done() },
         dismiss = "",
     ) {
-        Text("Forge isn't only green any more. Tap one to try it. You can change it later in Settings.", style = T.Body, color = C.Mid)
+        Text(t("Forge isn't only green any more. Tap one to try it. You can change it later in Settings."), style = T.Body, color = C.Mid)
         com.forge.app.ui.components.Gap(16.dp)
         com.forge.app.ui.components.AccentPicker(C.accent, { C.accent = it }, swatch = 34.dp)
     }

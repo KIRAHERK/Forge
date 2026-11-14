@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,17 +80,17 @@ fun PhotosPanel() {
     }
 
     Panel {
-        Eyebrow("Progress photos")
+        Eyebrow(t("Progress photos"))
         Gap(4.dp)
         if (photos.isEmpty()) {
-            Text("Every two weeks. Same spot, light and pose.", style = T.Small, color = C.Mid)
+            Text(t("Every two weeks. Same spot, light and pose."), style = T.Small, color = C.Mid)
         } else {
             Gap(8.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PhotoTile(photos.first(), "Start", Modifier.weight(1f)) { viewing = photos.first() }
-                if (photos.size > 1) PhotoTile(photos.last(), "Latest", Modifier.weight(1f)) { viewing = photos.last() }
+                PhotoTile(photos.first(), t("Start"), Modifier.weight(1f)) { viewing = photos.first() }
+                if (photos.size > 1) PhotoTile(photos.last(), t("Latest"), Modifier.weight(1f)) { viewing = photos.last() }
                 else Box(Modifier.weight(1f).aspectRatio(0.75f).clip(RoundedCornerShape(16.dp)).border(1.dp, C.Line, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
-                    Text("Next one in\n2 weeks", style = T.Small, color = C.Lo)
+                    Text(t("Next one in\n2 weeks"), style = T.Small, color = C.Lo)
                 }
             }
             if (photos.size > 2) {
@@ -100,12 +102,12 @@ fun PhotosPanel() {
         }
         Gap(14.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SecondaryButton("Camera", {
+            SecondaryButton(t("Camera"), {
                 val u = Photos.cameraUri(ctx)
                 camUri = u
                 runCatching { camera.launch(u) }
             }, Modifier.weight(1f), icon = Icons.Rounded.PhotoCamera, height = 46.dp)
-            SecondaryButton("Gallery", {
+            SecondaryButton(t("Gallery"), {
                 pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }, Modifier.weight(1f), icon = Icons.Rounded.PhotoLibrary, height = 46.dp)
         }
@@ -140,16 +142,16 @@ private fun PhotoViewer(p: Photos.Photo, onClose: () -> Unit, onDelete: () -> Un
         Box(Modifier.fillMaxSize().background(C.Bg)) {
             img?.let { Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit) }
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconBtn(Icons.Rounded.Close, "Close", onClose, bg = C.S1)
+                IconBtn(Icons.Rounded.Close, t("Close"), onClose, bg = C.S1)
                 HGap(10.dp)
                 Text(Fmt.day(p.date).uppercase(), style = T.H3, color = C.Hi, modifier = Modifier.weight(1f))
-                IconBtn(Icons.Rounded.DeleteOutline, "Delete", { confirm = true }, tint = C.Red, bg = C.S1)
+                IconBtn(Icons.Rounded.DeleteOutline, t("Delete"), { confirm = true }, tint = C.Red, bg = C.S1)
             }
         }
     }
     if (confirm) {
-        ForgeDialog("Delete photo?", { confirm = false }, "Delete", { confirm = false; onDelete() }, destructive = true) {
-            Text("This photo is removed from the app for good.", style = T.Body, color = C.Mid)
+        ForgeDialog(t("Delete photo?"), { confirm = false }, t("Delete"), { confirm = false; onDelete() }, destructive = true) {
+            Text(t("This photo is removed from the app for good."), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -164,23 +166,23 @@ fun MeasurementsPanel(list: List<MeasurementEntity>) {
     Panel {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Eyebrow("Measurements · cm")
-                if (last != null) Text("Last: ${Fmt.day(LocalDate.ofEpochDay(last.date))}", style = T.Tiny, color = C.Lo)
+                Eyebrow(t("Measurements · cm"))
+                if (last != null) Text(t("Last: %s", Fmt.day(LocalDate.ofEpochDay(last.date))), style = T.Tiny, color = C.Lo)
             }
         }
         Gap(12.dp)
         if (last == null) {
-            Text("Every two weeks: chest, flexed arm, waist at the navel, mid-thigh.", style = T.Small, color = C.Mid)
+            Text(t("Every two weeks: chest, flexed arm, waist at the navel, mid-thigh."), style = T.Small, color = C.Mid)
         } else {
             Row(Modifier.fillMaxWidth()) {
-                MeasureCell("Chest", last.chest, first?.chest, Modifier.weight(1f))
-                MeasureCell("Arm", last.arm, first?.arm, Modifier.weight(1f))
-                MeasureCell("Waist", last.waist, first?.waist, Modifier.weight(1f))
-                MeasureCell("Thigh", last.thigh, first?.thigh, Modifier.weight(1f))
+                MeasureCell(t("Chest"), last.chest, first?.chest, Modifier.weight(1f))
+                MeasureCell(t("Arm"), last.arm, first?.arm, Modifier.weight(1f))
+                MeasureCell(t("Waist"), last.waist, first?.waist, Modifier.weight(1f))
+                MeasureCell(t("Thigh"), last.thigh, first?.thigh, Modifier.weight(1f))
             }
         }
         Gap(14.dp)
-        SecondaryButton("Log measurements", { editing = true }, Modifier.fillMaxWidth(), height = 46.dp)
+        SecondaryButton(t("Log measurements"), { editing = true }, Modifier.fillMaxWidth(), height = 46.dp)
     }
 
     if (editing) {
@@ -190,9 +192,9 @@ fun MeasurementsPanel(list: List<MeasurementEntity>) {
         var thigh by remember { mutableStateOf(last?.thigh?.let { Fmt.kg(it) } ?: "") }
         fun num(s: String) = s.replace(',', '.').toDoubleOrNull()
         ForgeDialog(
-            title = "Measurements",
+            title = t("Measurements"),
             onDismiss = { editing = false },
-            confirm = "Save",
+            confirm = t("Save"),
             onConfirm = {
                 editing = false
                 scope.launch {
@@ -200,16 +202,16 @@ fun MeasurementsPanel(list: List<MeasurementEntity>) {
                 }
             },
         ) {
-            Text("Relaxed, same time of day. Arm flexed at its widest point.", style = T.Small, color = C.Mid)
+            Text(t("Relaxed, same time of day. Arm flexed at its widest point."), style = T.Small, color = C.Mid)
             Gap(10.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ForgeField(chest, { chest = it }, "Chest", Modifier.weight(1f), number = true, suffix = "cm")
-                ForgeField(arm, { arm = it }, "Arm", Modifier.weight(1f), number = true, suffix = "cm")
+                ForgeField(chest, { chest = it }, t("Chest"), Modifier.weight(1f), number = true, suffix = t("cm"))
+                ForgeField(arm, { arm = it }, t("Arm"), Modifier.weight(1f), number = true, suffix = t("cm"))
             }
             Gap(8.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ForgeField(waist, { waist = it }, "Waist", Modifier.weight(1f), number = true, suffix = "cm")
-                ForgeField(thigh, { thigh = it }, "Thigh", Modifier.weight(1f), number = true, suffix = "cm")
+                ForgeField(waist, { waist = it }, t("Waist"), Modifier.weight(1f), number = true, suffix = t("cm"))
+                ForgeField(thigh, { thigh = it }, t("Thigh"), Modifier.weight(1f), number = true, suffix = t("cm"))
             }
         }
     }
@@ -222,7 +224,7 @@ private fun MeasureCell(label: String, value: Double?, first: Double?, modifier:
         Text(label, style = T.Tiny, color = C.Lo)
         if (value != null && first != null && value != first) {
             val d = value - first
-            Text(String.format(Locale.US, "%+.1f", d), style = T.Tiny, color = if (label == "Waist") C.Amber else C.Volt)
+            Text(String.format(Locale.US, "%+.1f", d), style = T.Tiny, color = if (label == t("Waist")) C.Amber else C.Volt)
         }
     }
 }

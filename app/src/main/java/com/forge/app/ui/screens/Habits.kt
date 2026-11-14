@@ -1,5 +1,7 @@
 package com.forge.app.ui.screens
 
+import com.forge.app.i18n.t
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -136,19 +138,19 @@ fun HabitsScreen(nav: Nav) {
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
         item {
-            ScreenHeader("Tracked daily, no exceptions", "Habits") {
-                IconBtn(Icons.Rounded.Add, "Add a habit", { adding = true }, tint = C.Volt)
+            ScreenHeader(t("Tracked daily, no exceptions"), t("Habits")) {
+                IconBtn(Icons.Rounded.Add, t("Add a habit"), { adding = true }, tint = C.Volt)
             }
         }
 
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                IconBtn(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, "Previous week", { weekOffset-- }, tint = C.Mid)
+                IconBtn(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, t("Previous week"), { weekOffset-- }, tint = C.Mid)
                 Text(
-                    when (weekOffset) { 0 -> "THIS WEEK"; -1 -> "LAST WEEK"; else -> "${Fmt.day(weekStart).uppercase()} – ${Fmt.day(weekStart.plusDays(6)).uppercase()}" },
+                    when (weekOffset) { 0 -> t("THIS WEEK"); -1 -> t("LAST WEEK"); else -> "${Fmt.day(weekStart).uppercase()} – ${Fmt.day(weekStart.plusDays(6)).uppercase()}" },
                     style = T.H3, color = C.Hi, modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
                 )
-                IconBtn(Icons.AutoMirrored.Rounded.KeyboardArrowRight, "Next week", { if (weekOffset < 0) weekOffset++ }, tint = if (weekOffset < 0) C.Mid else C.S3)
+                IconBtn(Icons.AutoMirrored.Rounded.KeyboardArrowRight, t("Next week"), { if (weekOffset < 0) weekOffset++ }, tint = if (weekOffset < 0) C.Mid else C.S3)
             }
             Gap(10.dp)
         }
@@ -160,18 +162,18 @@ fun HabitsScreen(nav: Nav) {
                     Ring(score.score / 100f, size = 112.dp, stroke = 9.dp, color = col) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("${score.score}", style = T.Display, color = col)
-                            Text("week score", style = T.Tiny, color = C.Mid)
+                            Text(t("week score"), style = T.Tiny, color = C.Mid)
                         }
                     }
                     HGap(18.dp)
                     Column(Modifier.weight(1f)) {
-                        ScoreLine("Workouts", "${score.workoutsDone}/${score.workoutsDue}", score.workoutsDue > 0 && score.workoutsDone == score.workoutsDue)
-                        ScoreLine("Protein", "${score.proteinDays}/${score.proteinDen}", score.proteinDen > 0 && score.proteinDays >= score.proteinDen)
-                        ScoreLine("Calories", "${score.kcalDays}/${score.kcalDen}", score.kcalDen > 0 && score.kcalDays >= score.kcalDen)
+                        ScoreLine(t("Workouts"), "${score.workoutsDone}/${score.workoutsDue}", score.workoutsDue > 0 && score.workoutsDone == score.workoutsDue)
+                        ScoreLine(t("Protein"), "${score.proteinDays}/${score.proteinDen}", score.proteinDen > 0 && score.proteinDays >= score.proteinDen)
+                        ScoreLine(t("Calories"), "${score.kcalDays}/${score.kcalDen}", score.kcalDen > 0 && score.kcalDays >= score.kcalDen)
                         if (defs.isNotEmpty()) {
-                            ScoreLine("Habits kept", "${score.cleanDays}/${score.cleanDen}", score.cleanDen > 0 && score.cleanDays >= score.cleanDen)
+                            ScoreLine(t("Habits kept"), "${score.cleanDays}/${score.cleanDen}", score.cleanDen > 0 && score.cleanDays >= score.cleanDen)
                         }
-                        ScoreLine("Weigh-ins", "${score.weighIns}/${score.weighDen}", score.weighDen > 0 && score.weighIns >= score.weighDen)
+                        ScoreLine(t("Weigh-ins"), "${score.weighIns}/${score.weighDen}", score.weighDen > 0 && score.weighIns >= score.weighDen)
                     }
                 }
             }
@@ -190,7 +192,7 @@ fun HabitsScreen(nav: Nav) {
                     }
                 }
                 Gap(8.dp)
-                GridRow("Workout", days) { d ->
+                GridRow(t("Workout"), days) { d ->
                     when (Stats.dayStatus(s, d, now, done)) {
                         DayStatus.DONE -> Cell.HIT
                         DayStatus.MISSED, DayStatus.MAKEUP_OPEN -> Cell.MISS
@@ -200,9 +202,9 @@ fun HabitsScreen(nav: Nav) {
                         DayStatus.BEFORE -> Cell.BLANK
                     } to null
                 }
-                GridRow("Calories", days) { d -> foodCell(d) { _, k -> Stats.kcalHit(k, s.kcal) } to null }
-                GridRow("Protein", days) { d -> foodCell(d) { p, _ -> Stats.proteinHit(p, s.protein) } to null }
-                GridRow("Weigh-in", days) { d ->
+                GridRow(t("Calories"), days) { d -> foodCell(d) { _, k -> Stats.kcalHit(k, s.kcal) } to null }
+                GridRow(t("Protein"), days) { d -> foodCell(d) { p, _ -> Stats.proteinHit(p, s.protein) } to null }
+                GridRow(t("Weigh-in"), days) { d ->
                     when {
                         d.isAfter(today) || d.toEpochDay() < s.trackingStart -> Cell.BLANK
                         d.toEpochDay() in weightDays -> Cell.HIT
@@ -226,23 +228,23 @@ fun HabitsScreen(nav: Nav) {
                 }
                 Gap(6.dp)
                 Text(
-                    if (defs.isEmpty()) "Add a habit to track it here." else "Tap a habit cell to change that day.",
+                    if (defs.isEmpty()) t("Add a habit to track it here.") else t("Tap a habit cell to change that day."),
                     style = T.Tiny, color = C.Lo,
                 )
             }
             Gap(12.dp)
         }
 
-        item { SectionTitle("Your habits", action = "Add", onAction = { adding = true }) }
+        item { SectionTitle(t("Your habits"), action = t("Add"), onAction = { adding = true }) }
 
         if (defs.isEmpty()) {
             item {
                 Panel {
-                    Text("NOTHING TRACKED YET", style = T.H3, color = C.Hi)
+                    Text(t("NOTHING TRACKED YET"), style = T.H3, color = C.Hi)
                     Gap(4.dp)
-                    Text("Something to build, or something to quit.", style = T.Small, color = C.Mid)
+                    Text(t("Something to build, or something to quit."), style = T.Small, color = C.Mid)
                     Gap(14.dp)
-                    PrimaryButton("Add a habit", { adding = true }, icon = Icons.Rounded.Add, height = 48.dp)
+                    PrimaryButton(t("Add a habit"), { adding = true }, icon = Icons.Rounded.Add, height = 48.dp)
                 }
                 Gap(12.dp)
             }
@@ -257,9 +259,9 @@ fun HabitsScreen(nav: Nav) {
             item {
                 Gap(2.dp)
                 Panel(onClick = { nav.go("urge") }) {
-                    Text("HAVING AN URGE?", style = T.H2, color = C.Hi)
+                    Text(t("HAVING AN URGE?"), style = T.H2, color = C.Hi)
                     Gap(12.dp)
-                    PrimaryButton("Open urge timer", { nav.go("urge") }, height = 46.dp)
+                    PrimaryButton(t("Open urge timer"), { nav.go("urge") }, height = 46.dp)
                 }
                 Gap(12.dp)
             }
@@ -270,28 +272,28 @@ fun HabitsScreen(nav: Nav) {
         if (s.jarAmount > 0 || owed > 0) {
             item {
                 Panel(color = Color(0xFF1C1810), border = C.Amber.copy(alpha = 0.4f)) {
-                    Eyebrow("Penalty jar", color = C.Amber)
+                    Eyebrow(t("Penalty jar"), color = C.Amber)
                     Gap(6.dp)
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text("$owed", style = T.Display, color = C.Hi)
                         HGap(6.dp)
                         Text("${s.jarCurrency} owed".trim(), style = T.Small, color = C.Mid, modifier = Modifier.padding(bottom = 6.dp))
                     }
-                    Details("How the jar works") {
-                        Text("Every miss and slip adds ${s.jarAmount}${if (s.jarCurrency.isNotBlank()) " " + s.jarCurrency else ""}. Put it aside for real: savings or charity.", style = T.Small, color = C.Mid)
+                    Details(t("How the jar works")) {
+                        Text(t("Every miss and slip adds %s. Put it aside for real: savings or charity.", "${s.jarAmount}" + (if (s.jarCurrency.isNotBlank()) " " + s.jarCurrency else "")), style = T.Small, color = C.Mid)
                     }
                     if (owed > 0) {
                         Gap(12.dp)
-                        SecondaryButton("I put it aside", { scope.launch { repo.payJar() } }, Modifier.fillMaxWidth(), color = C.Amber, border = C.Amber.copy(alpha = 0.5f), height = 46.dp)
+                        SecondaryButton(t("I put it aside"), { scope.launch { repo.payJar() } }, Modifier.fillMaxWidth(), color = C.Amber, border = C.Amber.copy(alpha = 0.5f), height = 46.dp)
                     }
                 }
                 Gap(12.dp)
             }
         }
 
-        item { SectionTitle("Penalty record") }
+        item { SectionTitle(t("Penalty record")) }
         if (visible.isEmpty()) {
-            item { Text("Clean record. Keep it that way.", style = T.Small, color = C.Lo) }
+            item { Text(t("Clean record. Keep it that way."), style = T.Small, color = C.Lo) }
         }
         items(visible.take(20), key = { it.id }) { p ->
             PenaltyRow(p)
@@ -345,7 +347,7 @@ private fun HabitCell(c: Cell, text: String?, onClick: (() -> Unit)?) {
             Cell.HIT -> Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.size(16.dp))
             Cell.MISS -> if (text != null) Text(text, style = T.Tiny.copy(fontSize = 12.sp), color = C.Red) else Icon(Icons.Rounded.Close, null, tint = C.Red, modifier = Modifier.size(14.dp))
             Cell.REST -> Text("–", style = T.Small, color = C.Lo)
-            Cell.SICK -> Icon(Icons.Rounded.Sick, "Sick day", tint = C.Mid, modifier = Modifier.size(16.dp))
+            Cell.SICK -> Icon(Icons.Rounded.Sick, t("Sick day"), tint = C.Mid, modifier = Modifier.size(16.dp))
             Cell.UNKNOWN -> Text("?", style = T.Tiny, color = C.Lo)
             else -> {}
         }
@@ -360,16 +362,16 @@ private fun HabitCard(def: HabitDef, logs: List<HabitLog>, today: LocalDate, wee
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Tag(if (def.isQuit) "Quit" else "Build", color = if (def.isQuit) C.Amber else C.Volt, bg = (if (def.isQuit) C.Amber else C.Volt).copy(alpha = 0.14f))
+                    Tag(if (def.isQuit) t("Quit") else t("Build"), color = if (def.isQuit) C.Amber else C.Volt, bg = (if (def.isQuit) C.Amber else C.Volt).copy(alpha = 0.14f))
                 }
                 Gap(6.dp)
                 Text(def.name, style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("Best: $best", style = T.Small, color = C.Lo)
+                Text(t("Best: %s", best), style = T.Small, color = C.Lo)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("$streak", style = T.Hero.copy(fontSize = 48.sp, lineHeight = 46.sp), color = if (streak > 0) C.Volt else C.Hi)
+                Text("$streak", style = T.hero(48, 46), color = if (streak > 0) C.Volt else C.Hi)
                 Text(
-                    if (def.isQuit) (if (streak == 1) "day clean" else "days clean") else (if (streak == 1) "day in a row" else "days in a row"),
+                    if (def.isQuit) (if (streak == 1) t("day clean") else t("days clean")) else (if (streak == 1) t("day in a row") else t("days in a row")),
                     style = T.Tiny, color = C.Mid,
                 )
             }
@@ -390,8 +392,8 @@ private fun HabitCard(def: HabitDef, logs: List<HabitLog>, today: LocalDate, wee
         })
         Gap(4.dp)
         Row {
-            Text("4 weeks ago", style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f))
-            Text("Today", style = T.Tiny, color = C.Lo)
+            Text(t("4 weeks ago"), style = T.Tiny, color = C.Lo, modifier = Modifier.weight(1f))
+            Text(t("Today"), style = T.Tiny, color = C.Lo)
         }
         if (def.isQuit && def.counted) {
             val ws = weekStart.toEpochDay()
@@ -399,12 +401,12 @@ private fun HabitCard(def: HabitDef, logs: List<HabitLog>, today: LocalDate, wee
             val lastWeek = logs.filter { it.habitId == def.id && it.date in ws - 7 until ws }.sumOf { it.value ?: 0 }
             Gap(10.dp)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("$thisWeek this week · $lastWeek last week", style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
+                Text(t("%1${'$'}s this week · %2${'$'}s last week", thisWeek, lastWeek), style = T.Small, color = C.Mid, modifier = Modifier.weight(1f))
                 val trend = when {
-                    thisWeek == 0 && lastWeek == 0 -> "Zero" to C.Volt
-                    thisWeek < lastWeek -> "Down" to C.Volt
-                    thisWeek > lastWeek -> "Up" to C.Red
-                    else -> "Flat" to C.Mid
+                    thisWeek == 0 && lastWeek == 0 -> t("Zero") to C.Volt
+                    thisWeek < lastWeek -> t("Down") to C.Volt
+                    thisWeek > lastWeek -> t("Up") to C.Red
+                    else -> t("Flat") to C.Mid
                 }
                 Tag(trend.first, color = trend.second, bg = trend.second.copy(alpha = 0.14f))
             }
@@ -415,16 +417,16 @@ private fun HabitCard(def: HabitDef, logs: List<HabitLog>, today: LocalDate, wee
 @Composable
 private fun PenaltyRow(p: PenaltyEntity) {
     val (label, color) = when (p.status) {
-        "ACTIVE" -> "Active" to C.Red
-        "DONE" -> "Paid" to C.Volt
-        "FAILED" -> "Failed" to C.Red
+        "ACTIVE" -> t("Active") to C.Red
+        "DONE" -> t("Paid") to C.Volt
+        "FAILED" -> t("Failed") to C.Red
         else -> p.status to C.Mid
     }
     Panel(padding = PaddingValues(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(p.taskText, style = T.BodyS, color = if (p.status == "DONE") C.Mid else C.Hi)
-                Text(p.reason + if (p.escalated) " · doubled" else "", style = T.Small, color = C.Lo)
+                Text(p.reason + if (p.escalated) t(" · doubled") else "", style = T.Small, color = C.Lo)
             }
             HGap(8.dp)
             Tag(label, color = color, bg = color.copy(alpha = 0.14f))
@@ -440,26 +442,26 @@ fun HabitDayDialog(def: HabitDef, date: LocalDate, log: HabitLog?, onDismiss: ()
     var value by remember(log) { mutableStateOf(log?.value) }
     fun set(v: Int?) { value = v; scope.launch { repo.setHabit(def, date, v) } }
 
-    ForgeDialog(title = def.name, onDismiss = onDismiss, confirm = "Done", onConfirm = onDismiss, dismiss = "Close") {
+    ForgeDialog(title = def.name, onDismiss = onDismiss, confirm = t("Done"), onConfirm = onDismiss, dismiss = t("Close")) {
         Text(Fmt.day(date), style = T.Small, color = C.Mid)
         Gap(10.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (def.isQuit) {
-                Segmented(listOf("Clean", "Slipped"), when (value) { null -> null; 0 -> 0; else -> 1 }, { i ->
+                Segmented(listOf(t("Clean"), t("Slipped")), when (value) { null -> null; 0 -> 0; else -> 1 }, { i ->
                     set(if (i == 0) 0 else (value?.takeIf { it > 0 } ?: 1))
                 })
             } else {
-                Segmented(listOf("Done", "Not done"), when (value) { null -> null; 0 -> 1; else -> 0 }, { i ->
+                Segmented(listOf(t("Done"), t("Not done")), when (value) { null -> null; 0 -> 1; else -> 0 }, { i ->
                     set(if (i == 0) 1 else 0)
                 }, colors = listOf(C.Volt, C.Red))
             }
             HGap(8.dp)
-            if (value == null) Text("not logged", style = T.Tiny, color = C.Lo)
-            else TextAction("Clear", { set(null) }, color = C.Mid, style = T.Small)
+            if (value == null) Text(t("not logged"), style = T.Tiny, color = C.Lo)
+            else TextAction(t("Clear"), { set(null) }, color = C.Mid, style = T.Small)
         }
         if (def.isQuit && def.counted && (value ?: 0) > 0) {
             Gap(10.dp)
-            Text("How many times?", style = T.Small, color = C.Mid)
+            Text(t("How many times?"), style = T.Small, color = C.Mid)
             Gap(6.dp)
             Stepper(
                 "${value}",
@@ -483,9 +485,9 @@ fun HabitEditor(def: HabitDef?, onDismiss: () -> Unit) {
     val valid = name.isNotBlank()
 
     ForgeDialog(
-        title = if (def == null) "New habit" else "Edit habit",
+        title = if (def == null) t("New habit") else t("Edit habit"),
         onDismiss = onDismiss,
-        confirm = if (def == null) "Add" else "Save",
+        confirm = if (def == null) t("Add") else t("Save"),
         onConfirm = {
             if (valid) {
                 scope.launch {
@@ -496,34 +498,34 @@ fun HabitEditor(def: HabitDef?, onDismiss: () -> Unit) {
             }
         },
     ) {
-        ForgeField(name, { name = it.take(40) }, "Name")
+        ForgeField(name, { name = it.take(40) }, t("Name"))
         Gap(12.dp)
         if (def == null) {
-            Segmented(listOf("Build", "Quit"), if (quit) 1 else 0, { quit = it == 1 }, colors = listOf(C.Volt, C.Amber))
+            Segmented(listOf(t("Build"), t("Quit")), if (quit) 1 else 0, { quit = it == 1 }, colors = listOf(C.Volt, C.Amber))
             Gap(8.dp)
             Text(
-                if (quit) "Something to stay clean of. Each day you log clean or slipped. A slip resets the streak and issues a penalty."
-                else "Something to do every day. Each day you log done or not. The streak counts days in a row.",
+                if (quit) t("Something to stay clean of. Each day you log clean or slipped. A slip resets the streak and issues a penalty.")
+                else t("Something to do every day. Each day you log done or not. The streak counts days in a row."),
                 style = T.Small, color = C.Mid,
             )
         } else {
-            Text(if (quit) "Quit habit" else "Build habit", style = T.Small, color = C.Mid)
+            Text(if (quit) t("Quit habit") else t("Build habit"), style = T.Small, color = C.Mid)
         }
         if (quit) {
             Gap(4.dp)
-            ToggleRow("Count how many times", "Ask for a number when you slip", counted) { counted = it }
+            ToggleRow(t("Count how many times"), t("Ask for a number when you slip"), counted) { counted = it }
         }
         if (def != null) {
             Gap(8.dp)
-            TextAction("Delete habit", { confirmDelete = true }, color = C.Red, style = T.Small)
+            TextAction(t("Delete habit"), { confirmDelete = true }, color = C.Red, style = T.Small)
         }
     }
 
     if (confirmDelete && def != null) {
         ForgeDialog(
-            title = "Delete ${def.name}?",
+            title = t("Delete %s?", def.name),
             onDismiss = { confirmDelete = false },
-            confirm = "Delete",
+            confirm = t("Delete"),
             destructive = true,
             onConfirm = {
                 confirmDelete = false
@@ -531,7 +533,7 @@ fun HabitEditor(def: HabitDef?, onDismiss: () -> Unit) {
                 onDismiss()
             },
         ) {
-            Text("Its history is deleted. Penalties already issued stay on your record.", style = T.Body, color = C.Mid)
+            Text(t("Its history is deleted. Penalties already issued stay on your record."), style = T.Body, color = C.Mid)
         }
     }
 }
@@ -568,15 +570,15 @@ fun UrgeScreen(nav: Nav) {
     }
 
     val steps = listOf(
-        "Stand up and change rooms.",
-        "Drink a full glass of cold water, slowly.",
-        "20 push-ups or 30 squats. Right now.",
-        "Breathe in for 4 seconds, out for 6. Ten times.",
-        "Go outside, call someone, or keep your hands busy until the timer ends.",
+        t("Stand up and change rooms."),
+        t("Drink a full glass of cold water, slowly."),
+        t("20 push-ups or 30 squats. Right now."),
+        t("Breathe in for 4 seconds, out for 6. Ten times."),
+        t("Go outside, call someone, or keep your hands busy until the timer ends."),
     )
 
     Column(Modifier.fillMaxSize()) {
-        TopBar("Urge timer", "Wait it out. It passes.", onBack = { nav.back() })
+        TopBar(t("Urge timer"), t("Wait it out. It passes."), onBack = { nav.back() })
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -594,9 +596,9 @@ fun UrgeScreen(nav: Nav) {
                     Text(
                         when {
                             resisted -> "logged"
-                            running -> "hold on"
-                            remaining == 0L -> "it passed"
-                            else -> "5 minutes"
+                            running -> t("hold on")
+                            remaining == 0L -> t("it passed")
+                            else -> t("5 minutes")
                         },
                         style = T.Small, color = C.Mid,
                     )
@@ -604,16 +606,16 @@ fun UrgeScreen(nav: Nav) {
             }
             Gap(22.dp)
             if (!running && remaining == URGE_MS) {
-                PrimaryButton("Start the timer", { endsAt = System.currentTimeMillis() + URGE_MS; running = true })
+                PrimaryButton(t("Start the timer"), { endsAt = System.currentTimeMillis() + URGE_MS; running = true })
                 Gap(18.dp)
             }
             Text(
-                "An urge rises, peaks and fades — usually within a few minutes. You don't have to fight it. You only have to not act on it until it passes.",
+                t("An urge rises, peaks and fades — usually within a few minutes. You don't have to fight it. You only have to not act on it until it passes."),
                 style = T.Body, color = C.Mid, textAlign = TextAlign.Center,
             )
             Gap(20.dp)
             Panel {
-                Eyebrow("Do this now")
+                Eyebrow(t("Do this now"))
                 Gap(8.dp)
                 steps.forEachIndexed { i, st ->
                     Row(Modifier.padding(vertical = 5.dp)) {
@@ -626,8 +628,8 @@ fun UrgeScreen(nav: Nav) {
         }
         if (habit != null) {
             Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SecondaryButton("I gave in", { confirmGaveIn = true }, Modifier.weight(1f), color = C.Red, border = C.Red.copy(alpha = 0.5f), height = 54.dp)
-                PrimaryButton(if (resisted) "Logged · +10 XP" else "I resisted", {
+                SecondaryButton(t("I gave in"), { confirmGaveIn = true }, Modifier.weight(1f), color = C.Red, border = C.Red.copy(alpha = 0.5f), height = 54.dp)
+                PrimaryButton(if (resisted) t("Logged · +10 XP") else t("I resisted"), {
                     if (!resisted) {
                         resisted = true
                         running = false
@@ -637,18 +639,18 @@ fun UrgeScreen(nav: Nav) {
             }
         } else {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) {
-                Text("Add a habit you're quitting to log urges against it.", style = T.Small, color = C.Mid)
+                Text(t("Add a habit you're quitting to log urges against it."), style = T.Small, color = C.Mid)
                 Gap(8.dp)
-                SecondaryButton("Go to Habits", { nav.tab("habits") }, Modifier.fillMaxWidth(), height = 50.dp)
+                SecondaryButton(t("Go to Habits"), { nav.tab("habits") }, Modifier.fillMaxWidth(), height = 50.dp)
             }
         }
     }
 
     if (confirmGaveIn && habit != null) {
         ForgeDialog(
-            title = "Log it honestly",
+            title = t("Log it honestly"),
             onDismiss = { confirmGaveIn = false },
-            confirm = "Log slip",
+            confirm = t("Log slip"),
             destructive = true,
             onConfirm = {
                 confirmGaveIn = false
@@ -659,9 +661,9 @@ fun UrgeScreen(nav: Nav) {
                     nav.back()
                 }
             },
-            dismiss = "Back",
+            dismiss = t("Back"),
         ) {
-            Text("The streak for ${habit.name} resets and a penalty is issued. Hiding it changes nothing — logging it keeps the count real.", style = T.Body, color = C.Mid)
+            Text(t("The streak for %s resets and a penalty is issued. Hiding it changes nothing — logging it keeps the count real.", habit.name), style = T.Body, color = C.Mid)
         }
     }
 }

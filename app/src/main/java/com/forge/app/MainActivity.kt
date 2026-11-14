@@ -19,6 +19,11 @@ class MainActivity : ComponentActivity() {
 
     private val routeRequest = mutableStateOf<String?>(null)
 
+    // Arabic: right-to-left layout and Arabic system text, decided before anything draws.
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.forge.app.i18n.Lang.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
