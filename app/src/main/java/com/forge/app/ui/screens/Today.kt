@@ -150,10 +150,14 @@ fun TodayScreen(nav: Nav) {
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp)) {
         item {
-            val week = s.programWeek(today)
+            // The streak says more about today than a week count with nothing to count towards.
             ScreenHeader(
                 eyebrow = Fmt.longDay(today),
-                title = "Week $week",
+                title = when (streak) {
+                    0 -> "Today"
+                    1 -> "1 session in a row"
+                    else -> "$streak sessions in a row"
+                },
             ) {
                 Box(Modifier.clip(CircleShape).clickable { nav.tab("progress") }) {
                     Ring(level.progress, size = 46.dp, stroke = 3.dp) {
