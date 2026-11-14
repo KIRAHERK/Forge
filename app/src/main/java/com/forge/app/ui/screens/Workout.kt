@@ -326,6 +326,7 @@ private fun ExerciseCard(
             HGap(12.dp)
             Column(Modifier.weight(1f)) {
                 Text(pe.displayName, style = T.H3, color = C.Hi, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                com.forge.app.ui.components.EnglishName(ex)
                 Text(t("%1${'$'}s · rest %2${'$'}ss", pe.prescription, ex.restSec), style = T.Small, color = C.Mid)
             }
             IconBtn(Icons.Outlined.Info, t("How to"), onInfo, tint = C.Mid, size = 40.dp)
@@ -505,6 +506,7 @@ fun GuideContent(ex: Exercise, pe: ProgramExercise? = null) {
     Eyebrow(ex.muscles)
     Gap(4.dp)
     Text(ex.name.uppercase(), style = T.H1, color = C.Hi)
+    com.forge.app.ui.components.EnglishName(ex)
     if (pe != null) {
         Gap(8.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

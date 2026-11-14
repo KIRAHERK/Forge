@@ -251,6 +251,7 @@ fun ProgressScreen(nav: Nav) {
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(ex.name, style = T.BodyM, color = C.Hi)
+                            com.forge.app.ui.components.EnglishName(ex)
                             Text(
                                 best?.let { if (ex.loaded || it.weightKg > 0) t("Best %1${'$'}s × %2${'$'}s kg", it.reps, Progression.fmtKg(it.weightKg)) else t("Best %s reps", it.reps) } ?: t("Not logged yet"),
                                 style = T.Small, color = if (best != null) C.Mid else C.Lo,

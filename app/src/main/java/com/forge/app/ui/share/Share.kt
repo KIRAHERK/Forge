@@ -288,7 +288,7 @@ fun WorkoutCard(sessionId: Long) {
         Gap(6.dp)
         tops.take(5).forEach { st ->
             val ex = runCatching { com.forge.app.domain.Exercises.byId(st.exerciseId) }.getOrNull()
-            val isPr = ex != null && prs.any { it.startsWith(ex.name) }
+            val isPr = ex != null && prs.any { it.startsWith(ex.name) || it.startsWith(ex.en) }
             Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(ex?.name ?: st.exerciseId, style = T.Small, color = C.Hi, modifier = Modifier.weight(1f), maxLines = 1)
                 if (isPr) { Tag(t("PR"), color = C.OnVolt, bg = C.Volt); HGap(6.dp) }

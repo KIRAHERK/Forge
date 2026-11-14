@@ -963,3 +963,14 @@ fun LanguagePicker(modifier: Modifier = Modifier, showSystem: Boolean = true) {
         }
     }
 }
+
+/** In Arabic, the exercise's English name in small type under the Arabic one. Nothing in English. */
+@Composable
+fun EnglishName(ex: com.forge.app.domain.Exercise, modifier: Modifier = Modifier) {
+    if (com.forge.app.i18n.Lang.arabic && ex.en != ex.name) {
+        Text(
+            ex.en, style = T.Tiny.copy(textDirection = androidx.compose.ui.text.style.TextDirection.Ltr),
+            color = C.Lo, maxLines = 1, modifier = modifier,
+        )
+    }
+}

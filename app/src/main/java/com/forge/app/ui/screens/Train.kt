@@ -241,7 +241,10 @@ private fun DayCard(day: WorkoutDay, onExercise: (String) -> Unit, onStart: () -
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("${i + 1}", style = T.Num.copy(fontSize = T.Num.fontSize * 0.8f), color = C.Lo, modifier = Modifier.width(24.dp))
-                Text(pe.displayName, style = T.BodyM, color = C.Hi, modifier = Modifier.weight(1f))
+                Column(Modifier.weight(1f)) {
+                    Text(pe.displayName, style = T.BodyM, color = C.Hi)
+                    com.forge.app.ui.components.EnglishName(pe.exercise)
+                }
                 Text(pe.prescription, style = T.Small, color = C.Mid)
                 HGap(4.dp)
                 Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = C.Lo)

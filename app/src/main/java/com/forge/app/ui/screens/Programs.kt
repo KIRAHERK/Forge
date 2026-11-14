@@ -525,7 +525,7 @@ fun ExercisePickerSheet(onDismiss: () -> Unit, onPick: (Exercise) -> Unit) {
     val q = query.trim().lowercase()
     val list = all.filter { e ->
         (equip == null || e.equip == equip) && (group == null || e.group == group) &&
-            (q.isEmpty() || e.name.lowercase().contains(q) || e.muscles.lowercase().contains(q))
+            (q.isEmpty() || e.name.lowercase().contains(q) || e.en.lowercase().contains(q) || e.muscles.lowercase().contains(q))
     }
 
     ModalBottomSheet(
@@ -566,6 +566,7 @@ fun ExercisePickerSheet(onDismiss: () -> Unit, onPick: (Exercise) -> Unit) {
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(e.name, style = T.BodyS, color = C.Hi)
+                            com.forge.app.ui.components.EnglishName(e)
                             Text("${e.group.label} · ${e.equip.label}" + if (e.muscles.isNotBlank() && !e.custom) " · ${e.muscles}" else "", style = T.Small, color = C.Mid, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         if (e.custom) {

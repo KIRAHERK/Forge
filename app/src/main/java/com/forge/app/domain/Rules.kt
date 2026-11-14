@@ -128,67 +128,115 @@ object Progression {
 
 object Lines {
     private val general = listOf(
-        t("Nobody is coming to do this for you."),
-        t("You don't need motivation. You need to start."),
-        t("The plan is already written. Your only job is to show up."),
-        t("Every session you skip is one you never get back."),
-        t("81 to 90 doesn't happen by thinking about it."),
-        t("Results are slow. That's not a reason to stop. It's the reason most people do."),
-        t("Small, boring, every day. That's the whole secret."),
-        t("Your excuses aren't as original as you think."),
-        t("If it were easy, everyone would look like that."),
-        t("The version of you at 90 kg didn't skip today."),
-        t("Feelings are optional. Reps are not."),
-        t("Do it tired. Do it bored. Just do it."),
-        t("The weeks pass either way. Decide what you'll have to show for them."),
-        t("Consistency first. Progress follows."),
+        "Nobody is coming to do this for you.",
+        "You don't need motivation. You need to start.",
+        "The plan is already written. Your only job is to show up.",
+        "Every session you skip is one you never get back.",
+        "81 to 90 doesn't happen by thinking about it.",
+        "Results are slow. That's not a reason to stop. It's the reason most people do.",
+        "Small, boring, every day. That's the whole secret.",
+        "Your excuses aren't as original as you think.",
+        "If it were easy, everyone would look like that.",
+        "The version of you at 90 kg didn't skip today.",
+        "Feelings are optional. Reps are not.",
+        "Do it tired. Do it bored. Just do it.",
+        "The weeks pass either way. Decide what you'll have to show for them.",
+        "Consistency first. Progress follows.",
     )
     private val preWorkout = listOf(
-        t("%s is on the schedule. The schedule doesn't care how you feel."),
-        t("Get the first set of %s done. The rest follows."),
-        t("%s today. Warm up, then go to work."),
-        t("%s. Forty-five minutes. You've lost more than that scrolling today."),
+        "%s is on the schedule. The schedule doesn't care how you feel.",
+        "Get the first set of %s done. The rest follows.",
+        "%s today. Warm up, then go to work.",
+        "%s. Forty-five minutes. You've lost more than that scrolling today.",
     )
     private val restDay = listOf(
-        t("Rest day. Growth happens now — eat like it."),
-        t("No training today. Hit your protein and sleep."),
-        t("Recovery is part of the program, not a day off from it."),
+        "Rest day. Growth happens now — eat like it.",
+        "No training today. Hit your protein and sleep.",
+        "Recovery is part of the program, not a day off from it.",
     )
     private val missed = listOf(
-        t("You missed. That's done. The next one isn't."),
-        t("One miss is an accident. Two is a pattern. Don't make it two."),
-        t("Pay the penalty and get back on schedule."),
+        "You missed. That's done. The next one isn't.",
+        "One miss is an accident. Two is a pattern. Don't make it two.",
+        "Pay the penalty and get back on schedule.",
     )
     private val streak = listOf(
-        t("%d sessions in a row. Don't be the one who breaks it."),
-        t("%d straight. This is who you are now."),
-        t("%d sessions without a miss. Keep the chain."),
+        "%d sessions in a row. Don't be the one who breaks it.",
+        "%d straight. This is who you are now.",
+        "%d sessions without a miss. Keep the chain.",
     )
     private val proteinLow = listOf(
-        t("%d g of protein left. Muscle isn't built from intentions."),
-        t("You trained. Now feed it. %d g protein to go."),
-        t("%d g short on protein. Fix it before bed."),
+        "%d g of protein left. Muscle isn't built from intentions.",
+        "You trained. Now feed it. %d g protein to go.",
+        "%d g short on protein. Fix it before bed.",
     )
     private val kcalLow = listOf(
-        t("%d kcal short. You can't build without material."),
-        t("%d kcal to go. The scale won't move on its own."),
+        "%d kcal short. You can't build without material.",
+        "%d kcal to go. The scale won't move on its own.",
     )
     private val done = listOf(
-        t("Workout done. Now eat and recover."),
-        t("Session logged. That's another brick."),
-        t("Done. Tomorrow's version of you says thanks."),
+        "Workout done. Now eat and recover.",
+        "Session logged. That's another brick.",
+        "Done. Tomorrow's version of you says thanks.",
     )
 
+    /**
+     * Arabic has its own lines, written in Arabic and approved one by one, rather than
+     * translations of the English ones. Same moments, same placeholders.
+     */
+    private object Ar {
+        val general = listOf(
+            "قطرة فوق قطرة تصنع نهرًا.",
+            "العقل السليم في الجسم السليم.",
+            "لا تنتظر الحماس. ابدأ، وسيلحق بك.",
+            "الخطة مكتوبة. مهمتك الوحيدة أن تحضر.",
+            "النتائج بطيئة، لكنها لا تأتي لمن يتوقف.",
+            "الأسابيع ستمضي على أي حال. قرّر ماذا ستجني منها.",
+            "الالتزام أولًا، والتقدّم يأتي بعده.",
+        )
+        val preWorkout = listOf(
+            "%s على الجدول اليوم. والجدول لا يسأل عن مزاجك.",
+            "أنهِ أول جولة من %s، والباقي أسهل.",
+            "%s اليوم. إحماء، ثم إلى العمل.",
+            "%s: خمس وأربعون دقيقة فقط. أضعتَ أكثر منها اليوم على الهاتف.",
+        )
+        val restDay = listOf(
+            "يوم راحة. العضلات تُبنى الآن، فكُل جيدًا.",
+            "لا تدريب اليوم. أكمل البروتين ونم جيدًا.",
+            "الراحة جزء من البرنامج، لا إجازة منه.",
+        )
+        val missed = listOf(
+            "فاتك التمرين. انتهى الأمر، لكن القادم لم يفُتك بعد.",
+            "مرة واحدة صدفة، ومرتان عادة. لا تجعلها مرتين.",
+            "أنجز العقوبة، وعُد إلى الجدول.",
+        )
+        val streak = listOf(
+            "%d جلسات متتالية. لا تكن أنت من يقطع السلسلة.",
+            "%d على التوالي. هذا أنت الآن.",
+        )
+        val proteinLow = listOf(
+            "بقي %d غ من البروتين. العضلات لا تُبنى بالنوايا.",
+            "تمرّنت، فأطعم عضلاتك. بقي %d غ بروتين.",
+        )
+        val kcalLow = listOf(
+            "ينقصك %d سعرة. لا بناء بلا مواد.",
+        )
+        val done = listOf(
+            "انتهى التمرين. الآن كُل وارتح.",
+            "أحسنت. نسختك في الغد تشكرك.",
+        )
+    }
+
+    private val ar get() = com.forge.app.i18n.Lang.arabic
     private fun <T> List<T>.pick(seed: Long): T = this[Random(seed).nextInt(size)]
 
-    fun general(seed: Long) = general.pick(seed)
-    fun preWorkout(seed: Long, day: String) = preWorkout.pick(seed).format(day)
-    fun restDay(seed: Long) = restDay.pick(seed)
-    fun missed(seed: Long) = missed.pick(seed)
-    fun streak(seed: Long, n: Int) = streak.pick(seed).format(n)
-    fun proteinLow(seed: Long, left: Int) = proteinLow.pick(seed).format(left)
-    fun kcalLow(seed: Long, left: Int) = kcalLow.pick(seed).format(left)
-    fun done(seed: Long) = done.pick(seed)
+    fun general(seed: Long) = (if (ar) Ar.general else general).pick(seed)
+    fun preWorkout(seed: Long, day: String) = (if (ar) Ar.preWorkout else preWorkout).pick(seed).format(day)
+    fun restDay(seed: Long) = (if (ar) Ar.restDay else restDay).pick(seed)
+    fun missed(seed: Long) = (if (ar) Ar.missed else missed).pick(seed)
+    fun streak(seed: Long, n: Int) = (if (ar) Ar.streak else streak).pick(seed).format(n)
+    fun proteinLow(seed: Long, left: Int) = (if (ar) Ar.proteinLow else proteinLow).pick(seed).format(left)
+    fun kcalLow(seed: Long, left: Int) = (if (ar) Ar.kcalLow else kcalLow).pick(seed).format(left)
+    fun done(seed: Long) = (if (ar) Ar.done else done).pick(seed)
 
     // Notification copy, escalating through the day.
     fun reminder(meta: String, deadline: String) = t("%1${'$'}s Due by %2${'$'}s. Start now and it's done.", meta, deadline)
