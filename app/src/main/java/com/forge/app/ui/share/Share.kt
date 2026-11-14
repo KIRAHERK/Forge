@@ -53,6 +53,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.unit.sp
@@ -100,7 +103,37 @@ const val CARD_DENSITY = 4f // the card is laid out at 360 × 450 dp
 
 /** Small share icon for the corner of a panel. */
 @Composable
-fun ShareIcon(onClick: () -> Unit) = IconBtn(Icons.Rounded.Share, t("Share"), onClick, tint = C.Mid, size = 36.dp)
+fun ShareIcon(onClick: () -> Unit) {
+    // Accent-tinted and outlined so it reads as a button, not decoration.
+    Box(
+        Modifier.size(36.dp).clip(CircleShape).background(C.VoltSoft).border(1.dp, C.Volt.copy(alpha = 0.5f), CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(Icons.Rounded.Share, t("Share"), tint = C.Volt, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** A number and a caption centred inside a ring; the number shrinks rather than spill over the ring. */
+@Composable
+private fun RingLabel(value: String, caption: String, color: Color, ring: androidx.compose.ui.unit.Dp = 80.dp) {
+    val ar = com.forge.app.i18n.Lang.arabic
+    // Fits inside the ring's hole: the ring's width less both strokes and a little air.
+    Column(Modifier.width(ring * 0.72f), horizontalAlignment = Alignment.CenterHorizontally) {
+        androidx.compose.foundation.text.BasicText(
+            value, maxLines = 1,
+            style = T.Num.copy(color = color, textAlign = androidx.compose.ui.text.style.TextAlign.Center, lineHeight = if (ar) 20.sp else 22.sp),
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = if (ar) 18.sp else 22.sp, stepSize = 1.sp),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        androidx.compose.foundation.text.BasicText(
+            caption, maxLines = 1,
+            style = T.Tiny.copy(color = C.Mid, textAlign = androidx.compose.ui.text.style.TextAlign.Center, lineHeight = if (ar) 12.sp else 14.sp),
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = if (ar) 9.sp else 11.sp, stepSize = 0.5.sp),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
 
 // ------------------------------------------------------------------ dialog
 
@@ -213,7 +246,7 @@ internal fun CardFrame(
             Gap(12.dp)
             Eyebrow(eyebrow)
             Gap(2.dp)
-            Text(title.uppercase(), style = T.Display.copy(fontSize = 34.sp, lineHeight = 36.sp), color = C.Hi, maxLines = 2)
+            Text(title.uppercase(), style = if (com.forge.app.i18n.Lang.arabic) T.hero(28, 30) else T.hero(34, 36), color = C.Hi, maxLines = 2)
             if (badge != null) {
                 Gap(8.dp)
                 Tag(badge, color = C.OnVolt, bg = C.Volt)
@@ -343,36 +376,33 @@ fun FuelCard(date: LocalDate) {
             else -> t("%s g of protein to go today.", (s.protein - m.protein).roundToInt().coerceAtLeast(0))
         },
     ) {
+        // Arabic runs taller, so the rings shrink a little to leave the weekly chart its room.
+        val ar = com.forge.app.i18n.Lang.arabic
+        val ringSize = if (ar) 64.dp else 80.dp
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Ring(m.kcal.toFloat() / s.kcal, size = 80.dp, stroke = 7.dp, color = C.Hi) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(Fmt.num(m.kcal), style = T.Num, color = C.Hi)
-                        Text("of ${Fmt.num(s.kcal)}", style = T.Tiny, color = C.Mid)
-                    }
+                Ring(m.kcal.toFloat() / s.kcal, size = ringSize, stroke = 7.dp, color = C.Hi) {
+                    RingLabel(Fmt.num(m.kcal), t("of %s", Fmt.num(s.kcal)), C.Hi, ringSize)
                 }
-                Gap(4.dp)
+                Gap(if (ar) 2.dp else 4.dp)
                 Eyebrow(t("Calories"))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Ring((m.protein / s.protein).toFloat(), size = 80.dp, stroke = 7.dp, color = C.Volt) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(com.forge.app.i18n.t("%s g", Fmt.g(m.protein)), style = T.Num, color = C.Volt)
-                        Text(t("of %s g", s.protein), style = T.Tiny, color = C.Mid)
-                    }
+                Ring((m.protein / s.protein).toFloat(), size = ringSize, stroke = 7.dp, color = C.Volt) {
+                    RingLabel(com.forge.app.i18n.t("%s g", Fmt.g(m.protein)), t("of %s g", s.protein), C.Volt, ringSize)
                 }
-                Gap(4.dp)
+                Gap(if (ar) 2.dp else 4.dp)
                 Eyebrow(t("Protein"))
             }
         }
-        Gap(8.dp)
+        Gap(if (ar) 4.dp else 8.dp)
         Text(
             t("Fat %1${'$'}s / %2${'$'}s g  ·  Carbs %3${'$'}s / %4${'$'}s g", Fmt.g(m.fat), s.fat, Fmt.g(m.carbs), s.carbs),
-            style = T.Small, color = C.Mid, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            style = if (ar) T.Tiny else T.Small, color = C.Mid, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
-        Gap(8.dp)
+        Gap(if (ar) 4.dp else 8.dp)
         Eyebrow(t("Protein this week"))
-        Gap(4.dp)
+        Gap(if (ar) 0.dp else 4.dp)
         // The chart takes the rest of the card, so there's never a blank band above the credit.
         BarChart(
             weekProtein, days.map { Fmt.dowLetter(it) }, Modifier.weight(1f).heightIn(min = 44.dp),

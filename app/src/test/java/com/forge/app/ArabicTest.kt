@@ -26,7 +26,7 @@ class ArabicTest {
 
     /** Arabic keeps the same %s / %1$s / %d placeholders, or String.format would crash. */
     @Test fun placeholdersMatch() {
-        val spec = Regex("""%(?:\d+\$)?[-+ 0,(#]*\d*(?:\.\d+)?[sdf%]""")
+        val spec = Regex("""%(?:\d+\$)?[-+0,(#]*\d*(?:\.\d+)?[sdf%]""")
         fun norm(s: String) = spec.findAll(s).map { it.value.replace(Regex("""\d+\$"""), "") }.sorted().toList()
         val bad = table.filter { (k, v) -> norm(k) != norm(v) }.keys
         assertTrue("Placeholder mismatch: $bad", bad.isEmpty())

@@ -1,7 +1,9 @@
-## Forge 1.12.1
+## Forge 1.12.2
 
-- **The scanner opens on the nutrition table.** Most Syrian products aren't in the barcode database yet, so reading the label is the way that works for them. Barcode is one tap away, and it now says that Syrian products aren't supported yet.
-- **Flashlight fix:** switching between Label and Barcode with the light on no longer turns it off while the button still shows it as on.
+- **Exercise guides and recipes in Arabic.** Every how-to (setup, steps, tips and common mistakes) for all 85 exercises, all 15 recipes and the full-day meal plans now read in Arabic. Only the basic food list is still in English.
+- **Share button:** a clear share button now sits in the corner of each card you can share (Fuel, weight, today's workout), on the right in English and on the left in Arabic.
+- **Share pictures:** the numbers inside the rings stay centred and inside the circle, "of 2,700" is translated, and the weekly protein chart shows on Arabic cards too.
+- **Week strip on Train:** sick days are the same size as the other days.
 
 Your data is untouched.
 

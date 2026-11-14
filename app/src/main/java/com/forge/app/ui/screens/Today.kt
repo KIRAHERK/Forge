@@ -349,8 +349,8 @@ private fun HeroCard(
 
     when {
         status == DayStatus.DONE -> {
-            Panel(border = C.Volt.copy(alpha = 0.45f), accent = true) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            Panel(border = C.Volt.copy(alpha = 0.45f), accent = true, onShare = todaySession?.let { { sharing = true } }) {
+                Row(Modifier.padding(end = if (todaySession != null) 40.dp else 0.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(C.Volt), contentAlignment = Alignment.Center) {
                         Icon(Icons.Rounded.Check, null, tint = C.OnVolt, modifier = Modifier.size(22.dp))
                     }
@@ -359,7 +359,6 @@ private fun HeroCard(
                         Eyebrow(t("Today · done"), color = C.Volt)
                         Text((day?.title ?: todaySession?.let { Program.day(it.dayId)?.title } ?: t("Session")).uppercase(), style = T.H2, color = C.Hi)
                     }
-                    if (todaySession != null) com.forge.app.ui.share.ShareIcon { sharing = true }
                 }
                 todaySession?.let { ts ->
                     Gap(16.dp)
