@@ -161,7 +161,8 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
-    var mode by remember { mutableStateOf(ScanMode.BARCODE) }
+    // Opens on the nutrition label: most Syrian products aren't in the barcode database yet.
+    var mode by remember { mutableStateOf(ScanMode.LABEL) }
     var stage by remember { mutableStateOf<Stage>(Stage.Camera) }
     var session by remember { mutableIntStateOf(0) }
     var torch by remember { mutableStateOf(false) }
@@ -189,7 +190,7 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                     nameHint = r.name
                     Stage.Message(t("No nutrition data"), t("%s is in Open Food Facts, but without its nutrition table. Scan the label instead.", r.name.ifBlank { t("This product") }), toLabel = true)
                 }
-                OpenFoodFacts.Lookup.NotFound -> Stage.Message(t("Not in Open Food Facts yet"), t("Barcode %s isn't in the database. Scan the nutrition label and name the food yourself.", code), toLabel = true)
+                OpenFoodFacts.Lookup.NotFound -> Stage.Message(t("Not in Open Food Facts yet"), t("Barcode %s isn't in the database. Syrian products aren't supported yet. Scan the nutrition label and name the food yourself.", code), toLabel = true)
                 OpenFoodFacts.Lookup.Offline -> Stage.Message(t("No connection"), t("Couldn't reach Open Food Facts. Check your connection, or scan the label instead: that works offline."), toLabel = true)
             }
         }
@@ -267,8 +268,8 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                 IconBtn(Icons.Rounded.Close, t("Close"), onDismiss, tint = C.Hi, bg = Color.Black.copy(alpha = 0.45f))
                 Spacer(Modifier.weight(1f))
                 Segmented(
-                    listOf(t("Barcode"), t("Label")), if (mode == ScanMode.BARCODE) 0 else 1,
-                    { mode = if (it == 0) ScanMode.BARCODE else ScanMode.LABEL; retry() },
+                    listOf(t("Label"), t("Barcode")), if (mode == ScanMode.LABEL) 0 else 1,
+                    { mode = if (it == 0) ScanMode.LABEL else ScanMode.BARCODE; retry() },
                     colors = listOf(C.Volt, C.Volt),
                 )
                 Spacer(Modifier.weight(1f))
@@ -295,7 +296,7 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                 }
                 else -> {
                     Text(
-                        if (mode == ScanMode.BARCODE) t("Point at the barcode. It reads by itself.") else t("Fit the nutrition table inside the frame, then take the photo."),
+                        if (mode == ScanMode.BARCODE) t("Point at the barcode. It reads by itself. Syrian products aren't supported yet: scan the nutrition table instead.") else t("Fit the nutrition table inside the frame, then take the photo."),
                         style = T.BodyS, color = C.Hi, textAlign = TextAlign.Center,
                         modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.5f)).padding(horizontal = 12.dp, vertical = 8.dp),
                     )
@@ -421,6 +422,7 @@ private fun CameraView(
     val executor = remember { Executors.newSingleThreadExecutor() }
     val scanner = remember { BarcodeScanning.getClient(barcodeOptions) }
     val latest by rememberUpdatedState(onBarcode)
+    val wantTorch by rememberUpdatedState(torch)
     var camera by remember { mutableStateOf<Camera?>(null) }
     var analyzer by remember { mutableStateOf<BarcodeAnalyzer?>(null) }
 
@@ -453,11 +455,21 @@ private fun CameraView(
             }
             runCatching {
                 p.unbindAll()
-                camera = p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, *cases.toTypedArray())
-                onFlash(camera?.cameraInfo?.hasFlashUnit() == true)
+                val cam = p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, *cases.toTypedArray())
+                camera = cam
+                onFlash(cam.cameraInfo.hasFlashUnit())
+                // Rebinding (switching Label/Barcode) turns the light off; a torch request made before the
+                // camera is open is dropped. Re-apply whenever the camera reaches OPEN.
+                cam.cameraInfo.cameraState.removeObservers(owner)
+                cam.cameraInfo.cameraState.observe(owner) { st ->
+                    if (st.type == androidx.camera.core.CameraState.Type.OPEN && cam.cameraInfo.hasFlashUnit()) {
+                        cam.cameraControl.enableTorch(wantTorch)
+                    }
+                }
             }
         }, ContextCompat.getMainExecutor(ctx))
         onDispose {
+            camera?.cameraInfo?.cameraState?.removeObservers(owner)
             provider?.unbindAll()
             camera = null
             capture.value = null

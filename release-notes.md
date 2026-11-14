@@ -1,10 +1,7 @@
-## Forge 1.12.0
+## Forge 1.12.1
 
-- **Forge in Arabic.** The whole app now comes in Arabic, laid out right to left, with the Changa and Cairo fonts. It uses clear Modern Standard Arabic that any Arabic reader understands, and every word for gym and food terms was chosen one by one.
-- **Exercise names** are in Arabic, with the English name in small type underneath so they still match what people say in the gym. Search finds an exercise in either language.
-- **Motivation lines** in Arabic were written in Arabic, not translated from English.
-- It follows your phone's language. To choose yourself: **Settings → Language** (phone's language, English or العربية), or on the first setup screen. The app restarts to switch.
-- Numbers stay Western (117, not ١١٧). Exercise how-to guides, recipes and the basic food list are still in English for now.
+- **The scanner opens on the nutrition table.** Most Syrian products aren't in the barcode database yet, so reading the label is the way that works for them. Barcode is one tap away, and it now says that Syrian products aren't supported yet.
+- **Flashlight fix:** switching between Label and Barcode with the light on no longer turns it off while the button still shows it as on.
 
 Your data is untouched.
 
