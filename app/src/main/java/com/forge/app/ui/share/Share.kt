@@ -114,27 +114,6 @@ fun ShareIcon(onClick: () -> Unit) {
     }
 }
 
-/** A number and a caption centred inside a ring; the number shrinks rather than spill over the ring. */
-@Composable
-private fun RingLabel(value: String, caption: String, color: Color, ring: androidx.compose.ui.unit.Dp = 80.dp) {
-    val ar = com.forge.app.i18n.Lang.arabic
-    // Fits inside the ring's hole: the ring's width less both strokes and a little air.
-    Column(Modifier.width(ring * 0.72f), horizontalAlignment = Alignment.CenterHorizontally) {
-        androidx.compose.foundation.text.BasicText(
-            value, maxLines = 1,
-            style = T.Num.copy(color = color, textAlign = androidx.compose.ui.text.style.TextAlign.Center, lineHeight = if (ar) 20.sp else 22.sp),
-            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = if (ar) 18.sp else 22.sp, stepSize = 1.sp),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        androidx.compose.foundation.text.BasicText(
-            caption, maxLines = 1,
-            style = T.Tiny.copy(color = C.Mid, textAlign = androidx.compose.ui.text.style.TextAlign.Center, lineHeight = if (ar) 12.sp else 14.sp),
-            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = if (ar) 9.sp else 11.sp, stepSize = 0.5.sp),
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
 // ------------------------------------------------------------------ dialog
 
 @Composable
@@ -243,9 +222,10 @@ internal fun CardFrame(
                 Text(t("FORGE"), style = T.H3.copy(letterSpacing = 3.sp), color = C.Volt, modifier = Modifier.weight(1f))
                 Text(date.format(cardDate), style = T.Tiny, color = C.Mid)
             }
-            Gap(12.dp)
-            Eyebrow(eyebrow)
-            Gap(2.dp)
+            // Arabic runs taller; the eyebrow goes and the gaps tighten so the content keeps its room.
+            val ar = com.forge.app.i18n.Lang.arabic
+            Gap(if (ar) 6.dp else 12.dp)
+            if (!ar) { Eyebrow(eyebrow); Gap(2.dp) }
             Text(title.uppercase(), style = if (com.forge.app.i18n.Lang.arabic) T.hero(28, 30) else T.hero(34, 36), color = C.Hi, maxLines = 2)
             if (badge != null) {
                 Gap(8.dp)
@@ -378,18 +358,18 @@ fun FuelCard(date: LocalDate) {
     ) {
         // Arabic runs taller, so the rings shrink a little to leave the weekly chart its room.
         val ar = com.forge.app.i18n.Lang.arabic
-        val ringSize = if (ar) 64.dp else 80.dp
+        val ringSize = if (ar) 76.dp else 80.dp
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Ring(m.kcal.toFloat() / s.kcal, size = ringSize, stroke = 7.dp, color = C.Hi) {
-                    RingLabel(Fmt.num(m.kcal), t("of %s", Fmt.num(s.kcal)), C.Hi, ringSize)
+                    com.forge.app.ui.components.RingCenter(Fmt.num(m.kcal), t("of %s", Fmt.num(s.kcal)), C.Hi, ringSize, valueMax = 22.sp)
                 }
                 Gap(if (ar) 2.dp else 4.dp)
                 Eyebrow(t("Calories"))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Ring((m.protein / s.protein).toFloat(), size = ringSize, stroke = 7.dp, color = C.Volt) {
-                    RingLabel(com.forge.app.i18n.t("%s g", Fmt.g(m.protein)), t("of %s g", s.protein), C.Volt, ringSize)
+                    com.forge.app.ui.components.RingCenter(com.forge.app.i18n.t("%s g", Fmt.g(m.protein)), t("of %s g", s.protein), C.Volt, ringSize, valueMax = 22.sp)
                 }
                 Gap(if (ar) 2.dp else 4.dp)
                 Eyebrow(t("Protein"))

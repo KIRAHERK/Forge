@@ -88,11 +88,19 @@ object T {
     private val ar get() = com.forge.app.i18n.Lang.arabic
 
     private fun title(weight: FontWeight, size: Float, line: Float, spacing: Float = 0f, tnum: Boolean = false) =
-        if (ar) TextStyle(fontFamily = Changa, fontWeight = weight, fontSize = (size * 0.86f).sp, lineHeight = (size * 1.22f).sp, fontFeatureSettings = if (tnum) TNUM else null)
+        if (ar) TextStyle(
+            fontFamily = Changa, fontWeight = weight, fontSize = (size * 0.86f).sp, lineHeight = (size * 1.18f).sp, fontFeatureSettings = if (tnum) TNUM else null,
+            // Changa sits low in a tall line box; trimming keeps titles close to the text above them.
+            lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center, androidx.compose.ui.text.style.LineHeightStyle.Trim.Both),
+        )
         else TextStyle(fontFamily = BarlowCondensed, fontWeight = weight, fontSize = size.sp, lineHeight = line.sp, letterSpacing = spacing.em, fontFeatureSettings = if (tnum) TNUM else null)
 
     private fun body(weight: FontWeight, size: Float, line: Float, spacing: Float = 0f, tnum: Boolean = false) =
-        if (ar) TextStyle(fontFamily = Cairo, fontWeight = weight, fontSize = size.sp, lineHeight = (line * 1.12f).sp, fontFeatureSettings = if (tnum) TNUM else null)
+        if (ar) TextStyle(
+            fontFamily = Cairo, fontWeight = weight, fontSize = size.sp, lineHeight = (line * 1.12f).sp, fontFeatureSettings = if (tnum) TNUM else null,
+            // Cairo's line box is tall; trimming the first and last line keeps labels from looking padded.
+            lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center, androidx.compose.ui.text.style.LineHeightStyle.Trim.Both),
+        )
         else TextStyle(fontFamily = Barlow, fontWeight = weight, fontSize = size.sp, lineHeight = line.sp, letterSpacing = spacing.em, fontFeatureSettings = if (tnum) TNUM else null)
 
     val Hero get() = title(FontWeight.Bold, 64f, 58f, -0.01f, tnum = true)

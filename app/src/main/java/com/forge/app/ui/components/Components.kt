@@ -92,6 +92,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.isSpecified
 import com.forge.app.ui.theme.C
 import com.forge.app.ui.theme.T
@@ -981,6 +982,31 @@ fun EnglishName(ex: com.forge.app.domain.Exercise, modifier: Modifier = Modifier
         Text(
             ex.en, style = T.Tiny.copy(textDirection = androidx.compose.ui.text.style.TextDirection.Ltr),
             color = C.Lo, maxLines = 1, modifier = modifier,
+        )
+    }
+}
+
+
+/**
+ * A number with a caption under it, centred in a ring of [ring] diameter. Both shrink to stay
+ * inside the hole, whatever the language or font.
+ */
+@Composable
+fun RingCenter(value: String, caption: String, color: Color, ring: Dp, valueMax: androidx.compose.ui.unit.TextUnit, captionMax: androidx.compose.ui.unit.TextUnit = 11.sp) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        androidx.compose.foundation.text.BasicText(
+            value, maxLines = 1,
+            style = T.Num.copy(color = color, textAlign = TextAlign.Center, lineHeight = valueMax * 1.05f,
+                lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center, androidx.compose.ui.text.style.LineHeightStyle.Trim.Both)),
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = valueMax, stepSize = 1.sp),
+            modifier = Modifier.width(ring * 0.6f),
+        )
+        androidx.compose.foundation.text.BasicText(
+            caption, maxLines = 1,
+            style = T.Tiny.copy(color = C.Mid, textAlign = TextAlign.Center, lineHeight = captionMax * 1.2f,
+                lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center, androidx.compose.ui.text.style.LineHeightStyle.Trim.Both)),
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = captionMax, stepSize = 0.5.sp),
+            modifier = Modifier.width(ring * 0.62f),
         )
     }
 }
