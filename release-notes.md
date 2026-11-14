@@ -1,9 +1,8 @@
-## Forge 1.12.2
+## Forge 1.12.3
 
-- **Exercise guides and recipes in Arabic.** Every how-to (setup, steps, tips and common mistakes) for all 85 exercises, all 15 recipes and the full-day meal plans now read in Arabic. Only the basic food list is still in English.
-- **Share button:** a clear share button now sits in the corner of each card you can share (Fuel, weight, today's workout), on the right in English and on the left in Arabic.
-- **Share pictures:** the numbers inside the rings stay centred and inside the circle, "of 2,700" is translated, and the weekly protein chart shows on Arabic cards too.
-- **Week strip on Train:** sick days are the same size as the other days.
+- **Rings fit their text.** The week score on Habits and the rings on share pictures keep their numbers and captions inside the circle, in both languages.
+- **Arabic share pictures:** the rings are as big as in English, the empty space under the title is gone, and the weekly protein chart has more room.
+- Arabic titles and labels sit a little tighter, so screens look less padded.
 
 Your data is untouched.
 

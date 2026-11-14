@@ -161,8 +161,7 @@ fun HabitsScreen(nav: Nav) {
                     val col = when { score.score >= 80 -> C.Volt; score.score >= 55 -> C.Hi; else -> C.Red }
                     Ring(score.score / 100f, size = 112.dp, stroke = 9.dp, color = col) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("${score.score}", style = T.Display, color = col)
-                            Text(t("week score"), style = T.Tiny, color = C.Mid)
+                            com.forge.app.ui.components.RingCenter("${score.score}", t("week score"), col, 112.dp, valueMax = 34.sp, captionMax = 11.sp)
                         }
                     }
                     HGap(18.dp)
