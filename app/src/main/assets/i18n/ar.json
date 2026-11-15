@@ -2033,5 +2033,18 @@
  "Scanned products": "المنتجات الممسوحة",
  "Products you scan the label for are remembered by their barcode. None yet.": "المنتجات التي تمسح ملصقها تُحفظ برقم الباركود. لا يوجد شيء بعد.",
  "%s products remembered by their barcode. Share them so they can be added to the Forge product list for everyone.": "%s منتجات محفوظة برقم الباركود. شاركها لتُضاف إلى قائمة منتجات Forge للجميع.",
- "Share scanned products": "شارك المنتجات الممسوحة"
+ "Share scanned products": "شارك المنتجات الممسوحة",
+ "Hold the nutrition table inside the frame. Each value locks in once it's read clearly; move closer or tilt if one won't.": "ضع جدول القيم داخل الإطار. تُثبَّت كل قيمة بعد قراءتها بوضوح؛ اقترب أو أمِل الهاتف إن لم تُثبَّت إحداها.",
+ "Use what's read": "استخدم ما قُرئ",
+ "Looking for a nutrition table…": "جارٍ البحث عن جدول القيم…",
+ "Reading…": "جارٍ القراءة…",
+ "Point at the %s row, with its name and number inside the frame.": "وجّه الكاميرا إلى سطر %s، بحيث يكون اسمه ورقمه داخل الإطار.",
+ "Reading: %s": "القراءة: %s",
+ "Looking…": "جارٍ البحث…",
+ "Scan %s again": "امسح %s مجددًا",
+ "Not found on the label: %s. Type it in, or tap the camera next to it.": "لم يُعثر عليها في الملصق: %s. اكتبها يدويًا، أو اضغط الكاميرا بجانبها.",
+ "Not found on the label: %s. Type them in, or tap the camera next to each.": "لم يُعثر عليها في الملصق: %s. اكتبها يدويًا، أو اضغط الكاميرا بجانب كل منها.",
+ "Calories match protein, fat and carbs.": "السعرات تتوافق مع البروتين والدهون والكربوهيدرات.",
+ "These don't add up: protein and carbs give about 4 kcal per gram, fat 9. Check each number against the pack.": "هذه القيم لا تتوافق: البروتين والكربوهيدرات نحو 4 سعرات لكل غرام، والدهون 9. قارن كل رقم بالعبوة.",
+ "Corrected a likely misread: %s. Check it against the pack.": "صُحّحت قراءة خاطئة محتملة: %s. قارنها بالعبوة."
 }
