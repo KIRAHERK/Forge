@@ -4,7 +4,7 @@
 
 A training and nutrition app for Android that holds you to your plan: reminders, deadlines, and real consequences for skipping.
 
-Pick a ready-made program or build your own from 85 gym and home exercises. It comes with a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, finds food values online or from a photo of the label, and tracks the daily habits you choose. Everything stays on your phone.
+Pick a ready-made program or build your own from 85 gym and home exercises. It comes with a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, reads nutrition labels live with the camera, and tracks the daily habits you choose. Everything stays on your phone.
 
 <img src="docs/screenshots/colors.png" alt="Forge in green, red, purple, pink and blue">
 
@@ -61,7 +61,7 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Programs** | Six ready-made programs (the original 4-day home program, full body, upper/lower, push/pull/legs, dumbbell-only, bodyweight-only) or build your own: pick training days, add exercises from 85 gym and home exercises, set sets and reps (or seconds), reorder, and add your own exercises. Keep several programs and switch any time; your history stays. Share a program as a QR code: others scan it with the camera or from a screenshot. |
 | **Train** | The active program, form guides for every exercise (how to do it, setup, cues, common mistakes) in tap-to-open sections, a 1-rep-max chart per exercise, session history. |
 | **Workout** | Tick sets, adjust reps and kg, see last time's numbers, automatic rest timer, double-progression hints ("go heavier: 12.5 kg"), PR detection. A session counts only at 75% of its sets. |
-| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Photograph a nutrition table and name the food, or scan a barcode (most Syrian products aren't in the barcode database yet, so the scanner opens on the table). 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. A day counts as hit at 90–115% of your calories; go above that and Fuel tells you you're over. |
+| **Fuel** | Calories and macros against your targets. Search a basic food list (USDA), 35 Syrian dishes with sourced values, and packaged foods online (Open Food Facts). Scan a nutrition table live: hold it in the frame and calories, protein, fat and carbs each lock in once they've been read clearly. Forge checks the calories match protein, fat and carbs, fixes a lost decimal point and tells you, and lets you re-scan any single value. It reads tilted tables, per-100 g and per-serving columns, US-style and one-sentence labels. Or scan a barcode: your scanned products first, then the Forge product list (Syrian products, updated without an app update), Open Food Facts and USDA. A product nobody knows is remembered after one label scan, and you can share your scanned products from Settings. Drinks are measured in ml. 15 budget high-protein recipes, full-day meal plans. A weekly chart of protein or calories with your daily average and hit count. A day counts as hit at 90–115% of your calories; go above that and Fuel tells you you're over. |
 | **Habits** | Add any habit you want to build or quit. Weekly grid, week score, streaks and best runs, the last 4 weeks of each habit at a glance, an urge timer for quit habits, penalty record. Starts empty. |
 | **Progress** | 7-day average weight with a 1M / 3M / 1Y / All chart, kg per week vs target, ETA, 2-week check-in, workouts and training volume for the last 8 weeks, levels, lifts, progress photos (stored privately) and body measurements. |
 | **Weight** | Morning weigh-ins with a type-in reminder notification, streak, 30-day change, lowest and highest, weekly averages, editable history. |
@@ -81,8 +81,8 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 ## Your data
 
 - Stored only on the device. No account, no analytics.
-- Network calls: this repo (new releases, and the latest dish list) and [Open Food Facts](https://world.openfoodfacts.org) (what you type into food search, or a barcode you scan). Nothing else is sent.
-- Nutrition labels are read on the phone. Photos are never uploaded or saved.
+- Network calls: this repo (new releases, the latest dish and product lists), [Open Food Facts](https://world.openfoodfacts.org) (what you type into food search, or a barcode you scan) and [USDA FoodData Central](https://fdc.nal.usda.gov) (a scanned barcode Open Food Facts doesn't know). Nothing else is sent.
+- Nutrition labels are read on the phone, live or from a photo. Camera frames and photos are never uploaded or saved. Products you scan are remembered on the phone and kept in backups.
 - Updates keep your data: same app, same signing key. The updater refuses any APK signed with a different key.
 - A backup is written before every update, and daily to `Downloads/Forge/` on Android 10+. **Settings → Data** exports, imports and restores.
 
@@ -122,7 +122,7 @@ Forge is designed, built and maintained by **Hussein Al Herk**.
 
 ## Credits
 
-Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Strength, Eric Cressey and StrengthLog. Food values from USDA FoodData Central, Hoteit et al. (2021) and the FAO Near East tables. Product data from Open Food Facts (ODbL). Scanning uses Google ML Kit, on device. Typefaces: Barlow, and Changa and Cairo for Arabic (all SIL Open Font License).
+Exercise cues compiled from ACE, NASM, Motra, Garage Gym Reviews, Muscle & Strength, Eric Cressey and StrengthLog. Food values from USDA FoodData Central, Hoteit et al. (2021) and the FAO Near East tables. Product data from Open Food Facts (ODbL) and USDA FoodData Central branded foods. Scanning uses Google ML Kit, on device. Typefaces: Barlow, and Changa and Cairo for Arabic (all SIL Open Font License).
 
 ## License
 
