@@ -1,9 +1,11 @@
-## Forge 1.12.4
+## Forge 1.13.0
 
-- **Drinks in ml.** Scanned or searched drinks are measured in millilitres, not grams. A label scan picks ml when the label says so, and you can switch it yourself.
-- **Barcodes are remembered.** If no database knows a product (most Syrian ones), scan its nutrition label once: the next scan of that barcode finds it instantly. Kept in your backups.
-- **More places to look.** A barcode is checked against your scanned products, the Forge product list (updated without an app update), Open Food Facts, then USDA.
-- **Share scanned products** from Settings, so they can be added to the Forge product list for everyone.
+- **Live label scanning.** Hold the nutrition table in the frame: calories, protein, fat and carbs each lock in with a ✓ once they've been read clearly, and the scanner moves on by itself when all four are in. The photo button still works.
+- **Reads more labels correctly.** Tilted photos, two or more columns, "% daily intake" and "with milk" columns, US-style labels, labels written as one sentence, "Nil", kJ-only energy and a "g" misread as 9.
+- **Calorie check.** Forge checks that the calories match protein, fat and carbs. If a decimal point was lost (76 instead of 7.6), it fixes it and tells you to check that number.
+- **Re-scan one number.** On the review screen, tap the camera next to any value to read just that row again.
+
+Everything is read on your phone. Nothing is uploaded.
 
 Your data is untouched.
 

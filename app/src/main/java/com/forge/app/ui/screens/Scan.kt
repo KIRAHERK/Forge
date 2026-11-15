@@ -49,10 +49,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.FlashlightOff
 import androidx.compose.material.icons.rounded.FlashlightOn
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -99,6 +102,7 @@ import com.forge.app.domain.Basis
 import com.forge.app.domain.LabelColumn
 import com.forge.app.domain.LabelParser
 import com.forge.app.domain.LabelResult
+import com.forge.app.domain.LabelVotes
 import com.forge.app.domain.Macros
 import com.forge.app.domain.OcrLine
 import com.forge.app.ui.components.Chip
@@ -121,8 +125,11 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text as MlText
 import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
@@ -185,7 +192,26 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
     val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
     DisposableEffect(Unit) { onDispose { barcodes.close(); recognizer.close() } }
 
-    fun retry() { stage = Stage.Camera; session++ }
+    // Live reading of the label: every camera frame votes, values lock once read consistently.
+    var votes by remember { mutableStateOf(LabelVotes()) }
+    var tick by remember { mutableIntStateOf(0) }
+
+    fun retry() { stage = Stage.Camera; session++; votes = LabelVotes(); tick++ }
+
+    fun onFrame(lines: List<OcrLine>) {
+        if (stage != Stage.Camera || mode != ScanMode.LABEL) return
+        val current = votes
+        scope.launch {
+            val r = withContext(Dispatchers.Default) { LabelParser.parse(lines) }
+            if (current !== votes || stage != Stage.Camera) return@launch
+            current.add(r)
+            tick++
+            if (current.complete) {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                stage = Stage.Review(current.result())
+            }
+        }
+    }
 
     fun lookup(code: String) {
         stage = Stage.Busy(t("Looking up %s", code))
@@ -207,13 +233,15 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
         }
     }
 
-    fun read(image: InputImage) {
+    /** A still photo: read once. From the camera, it's added to what the live reading has seen. */
+    fun read(image: InputImage, live: LabelVotes? = null) {
         stage = Stage.Busy(t("Reading the label"))
         scope.launch {
             val text = runCatching { recognizer.process(image).await() }.getOrNull()
             val lines = text?.toLines()
             if (com.forge.app.BuildConfig.DEBUG) lines?.forEach { android.util.Log.d("ForgeScan", "${it.left},${it.top},${it.right},${it.bottom} | ${it.text}") }
-            val result = lines?.let { LabelParser.parse(it) }
+            val parsed = lines?.let { withContext(Dispatchers.Default) { LabelParser.parse(it) } }
+            val result = if (live != null) { parsed?.let { live.add(it, weight = 2) }; live.result().takeIf { !it.empty } ?: parsed } else parsed
             stage = if (result == null || result.empty) {
                 Stage.Message(
                     t("Couldn't read a nutrition table"),
@@ -260,6 +288,8 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     lookup(code)
                 },
+                recognizer = recognizer,
+                onText = ::onFrame,
             )
             ScanFrame(mode)
         } else {
@@ -312,11 +342,15 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                 }
                 else -> {
                     Text(
-                        if (mode == ScanMode.BARCODE) t("Point at the barcode. It reads by itself. Syrian products aren't supported yet: scan the nutrition table instead.") else t("Fit the nutrition table inside the frame, then take the photo."),
+                        if (mode == ScanMode.BARCODE) t("Point at the barcode. It reads by itself. Syrian products aren't supported yet: scan the nutrition table instead.") else t("Hold the nutrition table inside the frame. Each value locks in once it's read clearly; move closer or tilt if one won't."),
                         style = T.BodyS, color = C.Hi, textAlign = TextAlign.Center,
                         modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.5f)).padding(horizontal = 12.dp, vertical = 8.dp),
                     )
-                    Gap(16.dp)
+                    Gap(12.dp)
+                    if (mode == ScanMode.LABEL && granted) {
+                        tick.let { LiveValues(votes) }
+                        Gap(14.dp)
+                    }
                     if (mode == ScanMode.LABEL && granted) {
                         Box(
                             Modifier.size(76.dp).clip(CircleShape).border(3.dp, C.Hi, CircleShape).padding(6.dp).clip(CircleShape).background(C.Volt)
@@ -325,13 +359,16 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
                                     stage = Stage.Busy(t("Reading the label"))
                                     takePhoto(ctx, cap) { bmp, rotation ->
                                         if (bmp == null) stage = Stage.Message(t("Photo failed"), t("The camera didn't return a photo. Try again."))
-                                        else read(InputImage.fromBitmap(bmp, rotation))
+                                        else read(InputImage.fromBitmap(bmp, rotation), votes)
                                     }
                                 },
                         )
                         Gap(16.dp)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        if (mode == ScanMode.LABEL && votes.readable > 0) {
+                            SecondaryButton(t("Use what's read"), { stage = Stage.Review(votes.result()) }, height = 44.dp, border = C.Volt.copy(alpha = 0.6f), color = C.Volt)
+                        }
                         SecondaryButton(t("From photo"), { photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, height = 44.dp, border = C.Hi.copy(alpha = 0.4f))
                         if (mode == ScanMode.BARCODE) SecondaryButton(t("Type code"), { typeCode = true }, height = 44.dp, border = C.Hi.copy(alpha = 0.4f))
                     }
@@ -354,6 +391,111 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
             Text(t("The digits under the bars, 8 to 13 of them."), style = T.Small, color = C.Mid)
             Gap(12.dp)
             ForgeField(code, { code = it }, t("Barcode"), number = true)
+        }
+    }
+}
+
+private fun fieldName(f: LabelVotes.Field) = when (f) {
+    LabelVotes.Field.KCAL -> t("Calories")
+    LabelVotes.Field.PROTEIN -> t("Protein")
+    LabelVotes.Field.FAT -> t("Fat")
+    LabelVotes.Field.CARBS -> t("Carbs")
+}
+
+/** The four values while the camera reads: a value locks, with a tick, once it's been read the same way a few times. */
+@Composable
+private fun LiveValues(votes: LabelVotes) {
+    val basis = votes.primary
+    val liquid = votes.readable > 0 && votes.result().liquid
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.Black.copy(alpha = 0.6f)).padding(10.dp)) {
+        Text(
+            when {
+                votes.readable == 0 -> t("Looking for a nutrition table…")
+                basis == Basis.PER_100 -> if (liquid) t("Per 100 ml") else t("Per 100 g")
+                basis == Basis.SERVING -> t("Per serving")
+                else -> t("Reading…")
+            },
+            style = T.Tiny, color = C.Mid, modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            LabelVotes.Field.entries.forEach { f ->
+                val locked = votes.locked(basis, f)
+                val seen = votes.seen(basis, f)
+                Column(
+                    Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        .background(if (locked != null) C.Volt.copy(alpha = 0.16f) else C.S1)
+                        .border(1.dp, if (locked != null) C.Volt else C.Line, RoundedCornerShape(10.dp))
+                        .padding(vertical = 7.dp, horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(fieldName(f), style = T.Tiny, color = C.Mid, maxLines = 1)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (locked != null) {
+                            Icon(Icons.Rounded.Check, null, tint = C.Volt, modifier = Modifier.size(13.dp))
+                            HGap(2.dp)
+                        }
+                        Text(show(locked ?: seen).ifEmpty { "—" }, style = T.BodyS, color = if (locked != null) C.Hi else C.Lo, maxLines = 1)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Reads one value again: the camera looks for that row ("Protein  5.6 g") until the same number
+ * has been read a few times. When the row has more than one column, [pick] chooses.
+ */
+@Composable
+private fun RescanCamera(field: LabelVotes.Field, pick: (List<Double>) -> Double, onValue: (Double) -> Unit, onCancel: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
+    val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+    DisposableEffect(Unit) { onDispose { recognizer.close() } }
+    val votes = remember { LabelVotes(needed = 3) }
+    var tick by remember { mutableIntStateOf(0) }
+    var done by remember { mutableStateOf(false) }
+    var torch by remember { mutableStateOf(false) }
+    var hasFlash by remember { mutableStateOf(false) }
+    val capture = remember { mutableStateOf<ImageCapture?>(null) }
+    androidx.activity.compose.BackHandler(onBack = onCancel)
+
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
+        CameraView(
+            mode = ScanMode.LABEL, session = 0, torch = torch, paused = done, capture = capture,
+            onFlash = { hasFlash = it }, onBarcode = {}, recognizer = recognizer,
+            onText = { lines ->
+                scope.launch {
+                    val r = withContext(Dispatchers.Default) { LabelParser.parse(lines) }
+                    if (done) return@launch
+                    votes.add(r)
+                    tick++
+                    val found = votes.candidates(field)
+                    if (found.isNotEmpty()) {
+                        done = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onValue(pick(found))
+                    }
+                }
+            },
+        )
+        ScanFrame(ScanMode.BARCODE)
+        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconBtn(Icons.Rounded.Close, t("Cancel"), onCancel, tint = C.Hi, bg = Color.Black.copy(alpha = 0.45f))
+            Spacer(Modifier.weight(1f))
+            if (hasFlash) IconBtn(if (torch) Icons.Rounded.FlashlightOn else Icons.Rounded.FlashlightOff, t("Torch"), { torch = !torch }, tint = if (torch) C.Volt else C.Hi, bg = Color.Black.copy(alpha = 0.45f))
+        }
+        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                t("Point at the %s row, with its name and number inside the frame.", fieldName(field).lowercase()),
+                style = T.BodyS, color = C.Hi, textAlign = TextAlign.Center,
+                modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.5f)).padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+            Gap(10.dp)
+            tick.let {
+                val seen = Basis.entries.firstNotNullOfOrNull { b -> votes.seen(b, field) }
+                Text(seen?.let { t("Reading: %s", show(it)) } ?: t("Looking…"), style = T.Small, color = C.Mid)
+            }
         }
     }
 }
@@ -417,6 +559,23 @@ private class BarcodeAnalyzer(private val scanner: BarcodeScanner, private val o
     }
 }
 
+/** Reads the text in camera frames, a few times a second, for the live label reading. */
+@androidx.annotation.OptIn(ExperimentalGetImage::class)
+private class TextAnalyzer(private val recognizer: TextRecognizer, private val onLines: (List<OcrLine>) -> Unit) : ImageAnalysis.Analyzer {
+    @Volatile var paused = false
+    private var last = 0L
+
+    override fun analyze(proxy: ImageProxy) {
+        val media = proxy.image
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (media == null || paused || now - last < 250) { proxy.close(); return }
+        last = now
+        recognizer.process(InputImage.fromMediaImage(media, proxy.imageInfo.rotationDegrees))
+            .addOnSuccessListener { if (!paused) onLines(it.toLines()) }
+            .addOnCompleteListener { proxy.close() }
+    }
+}
+
 @Composable
 private fun CameraView(
     mode: ScanMode,
@@ -426,6 +585,8 @@ private fun CameraView(
     capture: androidx.compose.runtime.MutableState<ImageCapture?>,
     onFlash: (Boolean) -> Unit,
     onBarcode: (String) -> Unit,
+    recognizer: TextRecognizer? = null,
+    onText: ((List<OcrLine>) -> Unit)? = null,
 ) {
     val ctx = LocalContext.current
     val owner = LocalLifecycleOwner.current
@@ -438,6 +599,8 @@ private fun CameraView(
     val executor = remember { Executors.newSingleThreadExecutor() }
     val scanner = remember { BarcodeScanning.getClient(barcodeOptions) }
     val latest by rememberUpdatedState(onBarcode)
+    val latestText by rememberUpdatedState(onText)
+    var textAnalyzer by remember { mutableStateOf<TextAnalyzer?>(null) }
     val wantTorch by rememberUpdatedState(torch)
     var camera by remember { mutableStateOf<Camera?>(null) }
     var analyzer by remember { mutableStateOf<BarcodeAnalyzer?>(null) }
@@ -468,10 +631,30 @@ private fun CameraView(
                 val c = ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY).build()
                 capture.value = c
                 cases += c
+                if (recognizer != null) {
+                    // Small print needs a sharp frame: full HD where the camera can.
+                    val a = TextAnalyzer(recognizer) { lines -> view.post { latestText?.invoke(lines) } }
+                    textAnalyzer = a
+                    cases += ImageAnalysis.Builder()
+                        .setResolutionSelector(
+                            ResolutionSelector.Builder()
+                                .setResolutionStrategy(ResolutionStrategy(Size(1920, 1080), ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
+                                .build(),
+                        )
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build().also { it.setAnalyzer(executor, a) }
+                }
             }
             runCatching {
                 p.unbindAll()
-                val cam = p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, *cases.toTypedArray())
+                // A camera that can't stream frames and take photos at once still gets the photo button.
+                val cam = runCatching { p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, *cases.toTypedArray()) }
+                    .getOrElse {
+                        if (mode != ScanMode.LABEL || cases.size < 3) throw it
+                        textAnalyzer = null
+                        p.unbindAll()
+                        p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, *cases.filter { c -> c !is ImageAnalysis }.toTypedArray())
+                    }
                 camera = cam
                 onFlash(cam.cameraInfo.hasFlashUnit())
                 // Rebinding (switching Label/Barcode) turns the light off; a torch request made before the
@@ -494,6 +677,7 @@ private fun CameraView(
 
     LaunchedEffect(camera, torch) { camera?.cameraControl?.enableTorch(torch) }
     LaunchedEffect(analyzer, paused) { analyzer?.paused = paused }
+    LaunchedEffect(textAnalyzer, paused) { textAnalyzer?.paused = paused }
 
     AndroidView({ view }, Modifier.fillMaxSize())
 }
@@ -544,10 +728,12 @@ private fun LabelReview(result: LabelResult, nameHint: String, remembered: Boole
         "calories".takeIf { col.kcal == null }, "protein".takeIf { col.protein == null },
         "fat".takeIf { col.fat == null }, "carbs".takeIf { col.carbs == null },
     )
+    var rescan by remember { mutableStateOf<LabelVotes.Field?>(null) }
     val values = listOf(num(kcal), num(p), num(f), num(c))
     val servingG = num(serving)?.takeIf { it > 0 && it < 2000 }
     val ready = name.isNotBlank() && values.all { it != null && it >= 0 }
 
+    Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().background(C.Bg).systemBarsPadding().imePadding()) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconBtn(Icons.AutoMirrored.Rounded.ArrowBack, t("Retake"), onBack)
@@ -580,18 +766,45 @@ private fun LabelReview(result: LabelResult, nameHint: String, remembered: Boole
                 ForgeField(serving, { serving = it }, t("Serving size (optional)"), number = true, suffix = t(unit.sym))
             }
             Gap(16.dp)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            @Composable
+            fun RescanButton(field: LabelVotes.Field) =
+                IconBtn(Icons.Rounded.PhotoCamera, t("Scan %s again", fieldName(field).lowercase()), { rescan = field }, tint = C.Volt, size = 36.dp)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 ForgeField(kcal, { kcal = it; calculated = false }, t("Calories"), Modifier.weight(1f), number = true, suffix = t("kcal"))
+                RescanButton(LabelVotes.Field.KCAL)
                 ForgeField(p, { p = it }, t("Protein"), Modifier.weight(1f), number = true, suffix = t("g"))
+                RescanButton(LabelVotes.Field.PROTEIN)
             }
             Gap(8.dp)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 ForgeField(f, { f = it }, t("Fat"), Modifier.weight(1f), number = true, suffix = t("g"))
+                RescanButton(LabelVotes.Field.FAT)
                 ForgeField(c, { c = it }, t("Carbs"), Modifier.weight(1f), number = true, suffix = t("g"))
+                RescanButton(LabelVotes.Field.CARBS)
             }
             if (missing.isNotEmpty()) {
                 Gap(10.dp)
-                Text(if (missing.size == 1) t("Not found on the label: %s. Type it in.", missing.joinToString(", ")) else t("Not found on the label: %s. Type them in.", missing.joinToString(", ")), style = T.Small, color = C.Amber)
+                Text(if (missing.size == 1) t("Not found on the label: %s. Type it in, or tap the camera next to it.", missing.joinToString(", ")) else t("Not found on the label: %s. Type them in, or tap the camera next to each.", missing.joinToString(", ")), style = T.Small, color = C.Amber)
+            }
+            // The cross-check: about 4 kcal per gram of protein and carbs, 9 per gram of fat.
+            val (vk, vp, vf, vc) = values
+            if (vk != null && vp != null && vf != null && vc != null && vk > 0) {
+                Gap(10.dp)
+                val ok = kotlin.math.abs(4 * vp + 4 * vc + 9 * vf - vk) / maxOf(vk, 40.0) < 0.2
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (ok) { Icon(Icons.Rounded.Check, null, tint = C.Volt, modifier = Modifier.size(16.dp)); HGap(6.dp) }
+                    Text(
+                        if (ok) t("Calories match protein, fat and carbs.")
+                        else t("These don't add up: protein and carbs give about 4 kcal per gram, fat 9. Check each number against the pack."),
+                        style = T.Small, color = if (ok) C.Volt else C.Amber,
+                    )
+                }
+            }
+            if (col.fixes.isNotEmpty()) {
+                Gap(6.dp)
+                Text(t("Corrected a likely misread: %s. Check it against the pack.", col.fixes.joinToString(", ") { fix ->
+                    fix.replace("protein", fieldName(LabelVotes.Field.PROTEIN)).replace("fat", fieldName(LabelVotes.Field.FAT)).replace("carbs", fieldName(LabelVotes.Field.CARBS))
+                }), style = T.Small, color = C.Amber)
             }
             if (col.kcalFromKj && col.kcal != null) {
                 Gap(6.dp)
@@ -637,5 +850,31 @@ private fun LabelReview(result: LabelResult, nameHint: String, remembered: Boole
                 onUse(pick)
             }, enabled = ready)
         }
+    }
+    rescan?.let { field ->
+        RescanCamera(
+            field,
+            pick = { found ->
+                // Several columns on that row: take the number that makes this column add up.
+                if (found.size == 1) found.first() else found.minByOrNull { v ->
+                    val k = if (field == LabelVotes.Field.KCAL) v else num(kcal)
+                    val pp = if (field == LabelVotes.Field.PROTEIN) v else num(p)
+                    val ff = if (field == LabelVotes.Field.FAT) v else num(f)
+                    val cc = if (field == LabelVotes.Field.CARBS) v else num(c)
+                    if (k == null || pp == null || ff == null || cc == null || k <= 0) 0.0 else kotlin.math.abs(4 * pp + 4 * cc + 9 * ff - k) / k
+                }!!
+            },
+            onValue = { v ->
+                when (field) {
+                    LabelVotes.Field.KCAL -> { kcal = show(Math.round(v).toDouble()); calculated = false }
+                    LabelVotes.Field.PROTEIN -> p = show(v)
+                    LabelVotes.Field.FAT -> f = show(v)
+                    LabelVotes.Field.CARBS -> c = show(v)
+                }
+                rescan = null
+            },
+            onCancel = { rescan = null },
+        )
+    }
     }
 }

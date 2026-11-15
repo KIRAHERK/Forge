@@ -1,0 +1,363 @@
+{
+ "uk_crisps": {
+  "unit": "g",
+  "per100": [
+   488,
+   5.6,
+   30.0,
+   53.3
+  ],
+  "serving": [
+   171,
+   2.0,
+   10.5,
+   18.7
+  ],
+  "servingSize": 35
+ },
+ "uk_crisps_rot": {
+  "unit": "g",
+  "per100": [
+   488,
+   5.6,
+   30.0,
+   53.3
+  ],
+  "serving": [
+   171,
+   2.0,
+   10.5,
+   18.7
+  ],
+  "servingSize": 35
+ },
+ "me_sweet": {
+  "unit": "g",
+  "per100": [
+   524,
+   6,
+   28,
+   62
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "me_ghee": {
+  "unit": "g",
+  "per100": [
+   900,
+   0,
+   null,
+   0
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "in_biscuit": {
+  "unit": "g",
+  "per100": [
+   469.5,
+   7.0,
+   17.5,
+   71.0
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "in_juice": {
+  "unit": "ml",
+  "per100": [
+   53,
+   0.2,
+   0,
+   13.4
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "us_bar": {
+  "unit": "g",
+  "per100": null,
+  "serving": [
+   220,
+   8,
+   12,
+   21
+  ],
+  "servingSize": 58
+ },
+ "in_choc": {
+  "unit": "g",
+  "per100": [
+   470,
+   6.4,
+   21,
+   63
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "in_flakes": {
+  "unit": "g",
+  "per100": [
+   406.6,
+   7.6,
+   1.5,
+   89.11
+  ],
+  "serving": [
+   365.9,
+   6.8,
+   1.3,
+   80.19
+  ],
+  "servingSize": 90
+ },
+ "in_cake": {
+  "unit": "g",
+  "per100": [
+   489,
+   8.9,
+   21.4,
+   65.1
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "in_wafer": {
+  "unit": "g",
+  "per100": [
+   502,
+   6.9,
+   22.8,
+   67.2
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "in_cookie": {
+  "unit": "g",
+  "per100": null,
+  "serving": [
+   97.2,
+   2.4,
+   3.9,
+   9
+  ],
+  "servingSize": 20
+ },
+ "in_candy": {
+  "unit": "g",
+  "per100": [
+   357,
+   3,
+   13,
+   57
+  ],
+  "serving": null,
+  "servingSize": null
+ },
+ "au_biscuit": {
+  "unit": "g",
+  "per100": [
+   471,
+   7.9,
+   20.0,
+   62.6
+  ],
+  "serving": [
+   118,
+   2.0,
+   5.0,
+   15.6
+  ],
+  "servingSize": 25
+ },
+ "au_snack": {
+  "unit": "g",
+  "per100": [
+   145,
+   5.5,
+   10.0,
+   8.5
+  ],
+  "serving": [
+   145,
+   5.5,
+   10.0,
+   8.5
+  ],
+  "servingSize": 100
+ },
+ "au_energy": {
+  "unit": "ml",
+  "per100": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "serving": [
+   9,
+   0,
+   0,
+   2
+  ],
+  "servingSize": 500
+ },
+ "au_weetbix5col": {
+  "unit": "g",
+  "per100": [
+   351,
+   9.9,
+   1.8,
+   67.0
+  ],
+  "serving": [
+   117,
+   3.3,
+   0.6,
+   22.3
+  ],
+  "servingSize": 33.3
+ },
+ "au_arnotts": {
+  "unit": "g",
+  "per100": [
+   421,
+   8.8,
+   8.8,
+   73.7
+  ],
+  "serving": [
+   117,
+   2.4,
+   2.5,
+   20.5
+  ],
+  "servingSize": 27.8
+ },
+ "au_currants": {
+  "unit": "g",
+  "per100": [
+   305,
+   2.7,
+   0.3,
+   72.0
+  ],
+  "serving": [
+   91,
+   0.8,
+   0.1,
+   21.6
+  ],
+  "servingSize": 30
+ },
+ "au_cereal4col": {
+  "unit": "g",
+  "per100": [
+   370,
+   21.2,
+   0.6,
+   66.4
+  ],
+  "serving": [
+   148,
+   8.5,
+   0.2,
+   26.6
+  ],
+  "servingSize": 40
+ },
+ "au_weetbix": {
+  "unit": "g",
+  "per100": [
+   355,
+   12.4,
+   1.3,
+   65.9
+  ],
+  "serving": [
+   110,
+   3.8,
+   0.4,
+   20.4
+  ],
+  "servingSize": 31
+ },
+ "au_oats": {
+  "unit": "g",
+  "per100": [
+   378,
+   13.6,
+   8.7,
+   54.6
+  ],
+  "serving": [
+   113,
+   4.1,
+   2.6,
+   16.4
+  ],
+  "servingSize": 30
+ },
+ "au_rice_curved": {
+  "unit": "g",
+  "per100": [
+   177,
+   3.3,
+   3.2,
+   32.8
+  ],
+  "serving": [
+   221,
+   4.1,
+   4.0,
+   41.0
+  ],
+  "servingSize": 125
+ },
+ "au_honey_nil": {
+  "unit": "g",
+  "per100": [
+   315,
+   0.3,
+   0,
+   82.1
+  ],
+  "serving": [
+   88,
+   0.1,
+   0,
+   23
+  ],
+  "servingSize": 28
+ },
+ "au_milk": {
+  "unit": "ml",
+  "per100": [
+   63,
+   3.3,
+   3.4,
+   4.8
+  ],
+  "serving": [
+   158,
+   8.2,
+   8.5,
+   12.0
+  ],
+  "servingSize": 250
+ },
+ "us_rotated": {
+  "unit": "g",
+  "per100": null,
+  "serving": [
+   110,
+   4,
+   1,
+   22
+  ],
+  "servingSize": 30
+ }
+}
