@@ -483,7 +483,7 @@ fun AddFoodSheet(date: LocalDate, startScan: Boolean = false, onDismiss: () -> U
                                     item { Text(t("No products with full nutrition data for \"%s\". Try another word, or scan the label.", q), style = T.Small, color = C.Lo) }
                                 } else {
                                     items(o.items, key = { "o" + it.code }) { p ->
-                                        PickRow(p.name, listOf(p.brand, t("per 100 g"), macroText(p.per100)).filter { it.isNotBlank() }.joinToString(" · ")) { pick = p.pick() }
+                                        PickRow(p.name, listOf(p.brand, if (p.unit == com.forge.app.data.Measure.ML) t("per 100 ml") else t("per 100 g"), macroText(p.per100)).filter { it.isNotBlank() }.joinToString(" · ")) { pick = p.pick() }
                                     }
                                 }
                             }

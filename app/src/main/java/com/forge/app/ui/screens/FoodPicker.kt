@@ -38,7 +38,8 @@ import androidx.compose.ui.unit.dp
 import com.forge.app.data.FoodPick
 import com.forge.app.data.Fmt
 import com.forge.app.data.chip
-import com.forge.app.data.gramsLabel
+import com.forge.app.data.Measure
+import com.forge.app.data.amountLabel
 import com.forge.app.data.per
 import com.forge.app.domain.Macros
 import com.forge.app.ui.components.Chip
@@ -72,6 +73,7 @@ private fun field(v: Double) = if (v % 1.0 == 0.0) v.toInt().toString() else Str
 @Composable
 fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
     val gramBased = pick.per100 != null
+    val unit = pick.unit
     val original = pick.per100 ?: pick.base ?: Macros.ZERO
     var portion by remember(pick) { mutableIntStateOf(0) }
     var count by remember(pick) { mutableDoubleStateOf(pick.servings) }
@@ -94,7 +96,7 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
     val line: Triple<String, Macros, Double>? = when {
         edited == null -> null
         !gramBased -> Triple(pick.name, edited, count)
-        gramsMode -> grams?.let { Triple("${pick.name} · ${gramsLabel(it)}", edited.per(it), 1.0) }
+        gramsMode -> grams?.let { Triple("${pick.name} · ${amountLabel(it, unit)}", edited.per(it), 1.0) }
         else -> pick.portions[portion].let { pt -> Triple("${pick.name} · ${pt.label}", edited.per(pt.grams ?: 100.0), count) }
     }
 
@@ -115,14 +117,14 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
         if (gramBased) {
             Gap(10.dp)
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                pick.portions.forEachIndexed { i, pt -> Chip(pt.chip(), portion == i, { portion = i }) }
-                Chip(t("Grams"), gramsMode, { portion = pick.portions.size })
+                pick.portions.forEachIndexed { i, pt -> Chip(pt.chip(unit), portion == i, { portion = i }) }
+                Chip(if (unit == Measure.ML) t("ml") else t("Grams"), gramsMode, { portion = pick.portions.size })
             }
         }
         Gap(10.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (gramsMode) {
-                ForgeField(gramsText, { gramsText = it }, t("Amount"), Modifier.width(140.dp), number = true, suffix = t("g"))
+                ForgeField(gramsText, { gramsText = it }, t("Amount"), Modifier.width(140.dp), number = true, suffix = t(unit.sym))
             } else {
                 Stepper(
                     "${Fmt.kg(count).removeSuffix(".0")}×",
@@ -141,7 +143,7 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
         if (pick.fromOutside) {
             Gap(8.dp)
             Text(
-                if (editing) (if (gramBased) t("Values per 100 g") else t("Values per serving")) else t("Edit values"),
+                if (editing) (if (!gramBased) t("Values per serving") else if (unit == Measure.ML) t("Values per 100 ml") else t("Values per 100 g")) else t("Edit values"),
                 style = T.Small, color = C.Volt,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { editing = true }.padding(vertical = 6.dp),
             )
@@ -164,8 +166,8 @@ fun PickPanel(pick: FoodPick, onCancel: () -> Unit, onAdd: (LogItem) -> Unit) {
             line?.let { (name, m, n) ->
                 val serving = when {
                     !gramBased -> t("1 serving")
-                    gramsMode -> gramsLabel(grams ?: 100.0)
-                    else -> pick.portions[portion].chip()
+                    gramsMode -> amountLabel(grams ?: 100.0, unit)
+                    else -> pick.portions[portion].chip(unit)
                 }
                 onAdd(LogItem(name, m, n, pick.source, if (save) pick.name to serving else null))
             }

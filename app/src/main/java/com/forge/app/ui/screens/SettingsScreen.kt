@@ -372,6 +372,27 @@ fun SettingsScreen(nav: Nav) {
                 }
             }
 
+            Group(t("Scanned products")) {
+                val scanned = remember { com.forge.app.data.BarcodeMemory.all(ctx) }
+                Text(
+                    if (scanned.isEmpty()) t("Products you scan the label for are remembered by their barcode. None yet.")
+                    else t("%s products remembered by their barcode. Share them so they can be added to the Forge product list for everyone.", scanned.size),
+                    style = T.Small, color = C.Mid,
+                )
+                if (scanned.isNotEmpty()) {
+                    Gap(10.dp)
+                    SecondaryButton(t("Share scanned products"), {
+                        val text = com.forge.app.data.BarcodeMemory.share(scanned)
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, "Forge scanned products")
+                            putExtra(Intent.EXTRA_TEXT, text)
+                        }
+                        runCatching { ctx.startActivity(Intent.createChooser(send, t("Share scanned products"))) }
+                    }, Modifier.fillMaxWidth(), height = 46.dp)
+                }
+            }
+
             Group(t("About")) {
                 Text(t("Forge v%s", com.forge.app.update.Updater.currentVersion), style = T.BodyS, color = C.Hi)
                 Gap(2.dp)
