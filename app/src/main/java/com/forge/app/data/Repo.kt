@@ -65,6 +65,8 @@ data class Backup(
     val customExercises: List<CustomExerciseEntity> = emptyList(),
     val customFoods: List<CustomFoodEntity>,
     val measurements: List<MeasurementEntity> = emptyList(),
+    /** Barcodes remembered from label scans (not in any database). */
+    val scannedBarcodes: Map<String, SavedBarcode> = emptyMap(),
 )
 
 class Repo(private val context: Context, val db: ForgeDb, val settings: SettingsStore) {
@@ -637,6 +639,7 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
             programDays = db.programs().daysNow(),
             programExercises = db.programs().exercisesNow(),
             customExercises = db.programs().customNow(),
+            scannedBarcodes = BarcodeMemory.all(context),
         )
         return json.encodeToString(Backup.serializer(), b)
     }
@@ -660,6 +663,8 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
         db.programs().upsertDays(b.programDays)
         db.programs().insertExercises(b.programExercises.map { it.copy(id = 0) })
         b.customExercises.forEach { db.programs().upsertCustom(it) }
+        // Merged, not replaced: an older backup has none, and a scan is never worth losing.
+        BarcodeMemory.replaceAll(context, BarcodeMemory.all(context) + b.scannedBarcodes)
         val restored = settings.decode(b.settings)
         settings.update { restored }
         // A backup from before programs existed gets the original program back, with its schedule.

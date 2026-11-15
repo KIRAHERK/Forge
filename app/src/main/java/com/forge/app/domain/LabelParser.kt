@@ -23,7 +23,12 @@ data class LabelColumn(
     val found get() = listOf(kcal, protein, fat, carbs).count { it != null }
 }
 
-data class LabelResult(val columns: List<LabelColumn>, val servingG: Double?) {
+data class LabelResult(
+    val columns: List<LabelColumn>,
+    val servingG: Double?,
+    /** The table is per 100 ml or a serving in ml: a drink. */
+    val liquid: Boolean = false,
+) {
     val best: LabelColumn? get() = columns.firstOrNull()
     val empty get() = columns.all { it.found == 0 }
 }
@@ -45,6 +50,7 @@ object LabelParser {
     private val carbExclude = listOf("sugar", "sucre", "zucker", "zucchero", "azúcar", "of which", "dont", "davon", "fibre", "fiber", "polyol", "starch")
     private val servingWords = listOf("serving", "portion", "per pack", "porción", "porzione")
     private val headerAmount = Regex("(?<![\\d.,])(\\d{1,4})\\s*(?:g|ml|gr)\\b", RegexOption.IGNORE_CASE)
+    private val mlAmount = Regex("(?<![\\d.,])\\d{1,4}\\s*ml\\b", RegexOption.IGNORE_CASE)
     private val per100 = Regex("(?:per|pour|pro|por|per)?\\s*100\\s*(?:g|ml|gr)\\b", RegexOption.IGNORE_CASE)
 
     // A number, optionally with a unit. Not part of a word (so "B12" or "E330" are skipped).
@@ -203,6 +209,7 @@ object LabelParser {
                 kcalFromKj = fromKj,
             )
         }.filter { it.found > 0 }
-        return LabelResult(columns.ifEmpty { listOf(LabelColumn(null, null, null, null, bases.first())) }, servingG)
+        val liquid = lower.any { mlAmount.containsMatchIn(it) }
+        return LabelResult(columns.ifEmpty { listOf(LabelColumn(null, null, null, null, bases.first())) }, servingG, liquid)
     }
 }

@@ -69,10 +69,12 @@ jobs:
             "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
 
       - name: Test and build the signed APK
+        env:
+          FDC_API_KEY: ${{ secrets.FDC_API_KEY }}
         run: |
           chmod +x gradlew
           ./gradlew testDebugUnitTest assembleRelease \
-            -PforgeVersion="$VERSION" -PforgeRepo="$GITHUB_REPOSITORY" --no-daemon
+            -PforgeVersion="$VERSION" -PforgeRepo="$GITHUB_REPOSITORY" -PfdcKey="$FDC_API_KEY" --no-daemon
           cp app/build/outputs/apk/release/app-release.apk "Forge-$VERSION.apk"
           # Same file under a fixed name, so releases/latest/download/Forge.apk always gets the newest.
           cp "Forge-$VERSION.apk" Forge.apk

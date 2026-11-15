@@ -2016,5 +2016,22 @@
  "warm-up": "إحماء",
  "week score": "نتيجة الأسبوع",
  "with guides": "مع شرح",
- "½ onion": "نصف بصلة"
+ "½ onion": "نصف بصلة",
+ "Per 100 ml": "لكل 100 مل",
+ "per 100 ml": "لكل 100 مل",
+ "Values per 100 ml": "القيم لكل 100 مل",
+ "ml": "مل",
+ "Measured in": "وحدة القياس",
+ "Grams · food": "غرام · طعام",
+ "ml · drink": "مل · مشروب",
+ "Product not found": "المنتج غير موجود",
+ "Barcode %s isn't in Open Food Facts, USDA or the Forge product list. Scan its nutrition label once and Forge remembers it next time.": "الباركود %s غير موجود في Open Food Facts أو USDA أو قائمة منتجات Forge. امسح جدول القيم الغذائية مرة واحدة وسيتذكره Forge في المرة القادمة.",
+ "%s is in Open Food Facts, but without its nutrition table. Scan the label once and Forge remembers it.": "%s موجود في Open Food Facts لكن دون جدول القيم الغذائية. امسح الملصق مرة واحدة وسيتذكره Forge.",
+ "Forge will remember these values for this barcode, so the next scan finds it.": "سيتذكر Forge هذه القيم لهذا الباركود، فيجده المسح القادم مباشرة.",
+ "Saved from your label scan · barcode %s": "محفوظ من مسحك للملصق · باركود %s",
+ "Forge product list · barcode %s": "قائمة منتجات Forge · باركود %s",
+ "Scanned products": "المنتجات الممسوحة",
+ "Products you scan the label for are remembered by their barcode. None yet.": "المنتجات التي تمسح ملصقها تُحفظ برقم الباركود. لا يوجد شيء بعد.",
+ "%s products remembered by their barcode. Share them so they can be added to the Forge product list for everyone.": "%s منتجات محفوظة برقم الباركود. شاركها لتُضاف إلى قائمة منتجات Forge للجميع.",
+ "Share scanned products": "شارك المنتجات الممسوحة"
 }

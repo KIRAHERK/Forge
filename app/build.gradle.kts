@@ -21,6 +21,8 @@ val forgeVersionCode = forgeVersion.split('.').map { it.toIntOrNull() ?: 0 }.let
 // Where the in-app updater looks for releases.
 val forgeRepo = (findProperty("forgeRepo") as String?) ?: "KIRAHERK/Forge"
 val forgeUpdateApi = (findProperty("forgeUpdateApi") as String?) ?: "https://api.github.com"
+// Free data.gov key for USDA FoodData Central barcode lookups; DEMO_KEY works at a low rate.
+val fdcKey = (findProperty("fdcKey") as String?)?.takeIf { it.isNotBlank() } ?: "DEMO_KEY"
 
 android {
     namespace = "com.forge.app"
@@ -34,6 +36,7 @@ android {
         versionName = forgeVersion
         buildConfigField("String", "UPDATE_REPO", "\"$forgeRepo\"")
         buildConfigField("String", "UPDATE_API", "\"$forgeUpdateApi\"")
+        buildConfigField("String", "FDC_KEY", "\"$fdcKey\"")
         // Plain http is only ever allowed for a local test server.
         manifestPlaceholders["usesCleartext"] = forgeUpdateApi.startsWith("http://").toString()
     }

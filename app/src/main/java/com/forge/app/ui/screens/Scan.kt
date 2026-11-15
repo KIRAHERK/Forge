@@ -89,7 +89,11 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.forge.app.data.FoodPick
+import com.forge.app.data.BarcodeLookup
+import com.forge.app.data.BarcodeMemory
+import com.forge.app.data.Measure
 import com.forge.app.data.OpenFoodFacts
+import com.forge.app.data.SavedBarcode
 import com.forge.app.data.Portion
 import com.forge.app.domain.Basis
 import com.forge.app.domain.LabelColumn
@@ -169,6 +173,8 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
     var hasFlash by remember { mutableStateOf(false) }
     var typeCode by remember { mutableStateOf(false) }
     var nameHint by remember { mutableStateOf("") }
+    // A barcode no database knew: the label scanned next is remembered under it.
+    var pendingCode by remember { mutableStateOf<String?>(null) }
     val capture = remember { mutableStateOf<ImageCapture?>(null) }
     var granted by remember { mutableStateOf(ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) }
     var asked by remember { mutableStateOf(false) }
@@ -183,15 +189,20 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
 
     fun lookup(code: String) {
         stage = Stage.Busy(t("Looking up %s", code))
+        pendingCode = null
         scope.launch {
-            stage = when (val r = OpenFoodFacts.lookup(code)) {
-                is OpenFoodFacts.Lookup.Found -> { onPick(r.product.pick()); return@launch }
-                is OpenFoodFacts.Lookup.NoNutrition -> {
+            stage = when (val r = BarcodeLookup.find(ctx, code)) {
+                is BarcodeLookup.Outcome.Found -> { onPick(r.pick); return@launch }
+                is BarcodeLookup.Outcome.NoNutrition -> {
                     nameHint = r.name
-                    Stage.Message(t("No nutrition data"), t("%s is in Open Food Facts, but without its nutrition table. Scan the label instead.", r.name.ifBlank { t("This product") }), toLabel = true)
+                    pendingCode = code
+                    Stage.Message(t("No nutrition data"), t("%s is in Open Food Facts, but without its nutrition table. Scan the label once and Forge remembers it.", r.name.ifBlank { t("This product") }), toLabel = true)
                 }
-                OpenFoodFacts.Lookup.NotFound -> Stage.Message(t("Not in Open Food Facts yet"), t("Barcode %s isn't in the database. Syrian products aren't supported yet. Scan the nutrition label and name the food yourself.", code), toLabel = true)
-                OpenFoodFacts.Lookup.Offline -> Stage.Message(t("No connection"), t("Couldn't reach Open Food Facts. Check your connection, or scan the label instead: that works offline."), toLabel = true)
+                BarcodeLookup.Outcome.NotFound -> {
+                    pendingCode = code
+                    Stage.Message(t("Product not found"), t("Barcode %s isn't in Open Food Facts, USDA or the Forge product list. Scan its nutrition label once and Forge remembers it next time.", code), toLabel = true)
+                }
+                BarcodeLookup.Outcome.Offline -> Stage.Message(t("No connection"), t("Couldn't reach Open Food Facts. Check your connection, or scan the label instead: that works offline."), toLabel = true)
             }
         }
     }
@@ -227,7 +238,12 @@ private fun ScanScreen(onDismiss: () -> Unit, onPick: (FoodPick) -> Unit) {
 
     val review = stage as? Stage.Review
     if (review != null) {
-        LabelReview(review.result, nameHint, onBack = { retry() }, onUse = onPick)
+        LabelReview(review.result, nameHint, remembered = pendingCode != null, onBack = { retry() }, onUse = { pick ->
+            val code = pendingCode
+            val m = pick.per100 ?: pick.base
+            if (code != null && m != null) BarcodeMemory.put(ctx, code, SavedBarcode.of(pick, m))
+            onPick(if (code != null) pick.copy(barcode = code, source = "barcode:$code") else pick)
+        })
         return
     }
 
@@ -504,14 +520,14 @@ private fun show(v: Double?) = when {
     else -> String.format(java.util.Locale.US, "%.1f", v)
 }
 
-private fun LabelColumn.title(i: Int, servingG: Double?) = when (basis) {
-    Basis.PER_100 -> t("Per 100 g")
-    Basis.SERVING -> t("Per serving") + (servingG?.let { " · ${show(it)} g" } ?: "")
+private fun LabelColumn.title(i: Int, servingG: Double?, unit: Measure) = when (basis) {
+    Basis.PER_100 -> if (unit == Measure.ML) t("Per 100 ml") else t("Per 100 g")
+    Basis.SERVING -> t("Per serving") + (servingG?.let { " · ${show(it)} ${t(unit.sym)}" } ?: "")
     Basis.UNKNOWN -> t("Column %s", i + 1)
 }
 
 @Composable
-private fun LabelReview(result: LabelResult, nameHint: String, onBack: () -> Unit, onUse: (FoodPick) -> Unit) {
+private fun LabelReview(result: LabelResult, nameHint: String, remembered: Boolean, onBack: () -> Unit, onUse: (FoodPick) -> Unit) {
     var column by remember { mutableIntStateOf(0) }
     val col = result.columns.getOrElse(column) { result.columns.first() }
     var name by remember { mutableStateOf(nameHint) }
@@ -522,6 +538,7 @@ private fun LabelReview(result: LabelResult, nameHint: String, onBack: () -> Uni
     var f by remember(column) { mutableStateOf(show(col.fat)) }
     var c by remember(column) { mutableStateOf(show(col.carbs)) }
     var calculated by remember(column) { mutableStateOf(false) }
+    var unit by remember { mutableStateOf(if (result.liquid) Measure.ML else Measure.G) }
 
     val missing = listOfNotNull(
         "calories".takeIf { col.kcal == null }, "protein".takeIf { col.protein == null },
@@ -547,16 +564,20 @@ private fun LabelReview(result: LabelResult, nameHint: String, onBack: () -> Uni
                 Eyebrow(t("The label has %s columns", result.columns.size))
                 Gap(8.dp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    result.columns.forEachIndexed { i, cl -> Chip(cl.title(i, result.servingG), column == i, { column = i }) }
+                    result.columns.forEachIndexed { i, cl -> Chip(cl.title(i, result.servingG, unit), column == i, { column = i }) }
                 }
                 Gap(16.dp)
             }
+            Eyebrow(t("Measured in"))
+            Gap(8.dp)
+            Segmented(listOf(t("Grams · food"), t("ml · drink")), if (unit == Measure.ML) 1 else 0, { unit = if (it == 1) Measure.ML else Measure.G }, colors = listOf(C.Volt, C.Volt))
+            Gap(16.dp)
             Eyebrow(t("These values are"))
             Gap(8.dp)
-            Segmented(listOf(t("Per 100 g"), t("Per serving")), if (per100) 0 else 1, { per100 = it == 0 }, colors = listOf(C.Volt, C.Volt))
+            Segmented(listOf(if (unit == Measure.ML) t("Per 100 ml") else t("Per 100 g"), t("Per serving")), if (per100) 0 else 1, { per100 = it == 0 }, colors = listOf(C.Volt, C.Volt))
             if (!per100) {
                 Gap(10.dp)
-                ForgeField(serving, { serving = it }, t("Serving size (optional)"), number = true, suffix = t("g"))
+                ForgeField(serving, { serving = it }, t("Serving size (optional)"), number = true, suffix = t(unit.sym))
             }
             Gap(16.dp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -585,6 +606,10 @@ private fun LabelReview(result: LabelResult, nameHint: String, onBack: () -> Uni
             }
             Gap(16.dp)
             Text(t("Read on your phone; nothing is uploaded. OCR can misread a digit, so check before adding."), style = T.Tiny, color = C.Lo)
+            if (remembered) {
+                Gap(6.dp)
+                Text(t("Forge will remember these values for this barcode, so the next scan finds it."), style = T.Tiny, color = C.Volt)
+            }
             Gap(24.dp)
         }
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
@@ -598,16 +623,16 @@ private fun LabelReview(result: LabelResult, nameHint: String, onBack: () -> Uni
                 }.joinToString(" · ")
                 val pick = when {
                     per100 -> FoodPick(
-                        name = name.trim(), per100 = m,
-                        portions = listOfNotNull(servingG?.let { Portion(t("1 serving"), it) }, Portion("100 g", 100.0)),
+                        name = name.trim(), per100 = m, unit = unit,
+                        portions = listOfNotNull(servingG?.let { Portion(t("1 serving"), it) }, Portion("100 ${unit.sym}", 100.0)),
                         source = "label", sourceNote = note, fromOutside = true,
                     )
                     servingG != null -> FoodPick(
-                        name = name.trim(), per100 = m * (100.0 / servingG),
-                        portions = listOf(Portion(t("1 serving"), servingG), Portion("100 g", 100.0)),
+                        name = name.trim(), per100 = m * (100.0 / servingG), unit = unit,
+                        portions = listOf(Portion(t("1 serving"), servingG), Portion("100 ${unit.sym}", 100.0)),
                         source = "label", sourceNote = note, fromOutside = true,
                     )
-                    else -> FoodPick(name = name.trim(), base = m, source = "label", sourceNote = note, fromOutside = true)
+                    else -> FoodPick(name = name.trim(), base = m, unit = unit, source = "label", sourceNote = note, fromOutside = true)
                 }
                 onUse(pick)
             }, enabled = ready)
