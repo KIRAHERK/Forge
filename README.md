@@ -1,57 +1,48 @@
-# Forge
+<p align="center"><img src="docs/icon.svg" width="88" alt="Forge app icon"></p>
 
-**Designed and developed by Hussein Al Herk.**
+<h1 align="center">Forge</h1>
 
-A training and nutrition app for Android that holds you to your plan: reminders, deadlines, and real consequences for skipping.
+<p align="center"><b>Your plan, enforced.</b><br>
+A training and nutrition app for Android that holds you to your plan: reminders, deadlines, and real consequences for skipping. In English and Arabic, on your phone, with no account.</p>
+
+<p align="center">
+  <a href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk"><b>Download for Android</b></a> ·
+  <a href="https://kiraherk.github.io/Forge/">Download page</a> ·
+  Android 8.0+ · Free for personal use
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/today.png" width="15%" alt="Today">
+  <img src="docs/screenshots/workout.png" width="15%" alt="Workout">
+  <img src="docs/screenshots/fuel.png" width="15%" alt="Fuel">
+  <img src="docs/screenshots/progress.png" width="15%" alt="Progress">
+  <img src="docs/screenshots/habits.png" width="15%" alt="Habits">
+  <img src="docs/screenshots/weight.png" width="15%" alt="Weight">
+</p>
+
+<p align="center">Designed and developed by <b>Hussein Al Herk</b>.</p>
 
 Pick a ready-made program or build your own from 85 gym and home exercises. It comes with a lean-bulk nutrition plan, logs every set, tracks calories, protein and morning weight, reads nutrition labels live with the camera, and tracks the daily habits you choose. Everything stays on your phone.
 
-<img src="docs/screenshots/colors.png" alt="Forge in green, red, purple, pink and blue">
+## Install
 
-Pick your color when you set up: green, red, purple, pink or blue. It runs through the whole app, the widget and the pictures you share, and you can change it any time in Settings.
-
-<p>
-  <img src="docs/screenshots/today.png" width="16%" alt="Today">
-  <img src="docs/screenshots/workout.png" width="16%" alt="Workout">
-  <img src="docs/screenshots/fuel.png" width="16%" alt="Fuel">
-  <img src="docs/screenshots/progress.png" width="16%" alt="Progress">
-  <img src="docs/screenshots/habits.png" width="16%" alt="Habits">
-  <img src="docs/screenshots/weight.png" width="16%" alt="Weight">
-</p>
-
-In Arabic too: the whole app, right to left. Exercise names in Arabic with the English name underneath, and motivation lines written in Arabic.
-
-<img src="docs/screenshots/arabic.png" width="80%" alt="Forge in Arabic: Today, Train and Fuel">
-
-New here? A short guide walks you through every tab the first time you open the app, so nothing gets missed. Replay it any time with the **?** button on Today, or from **Settings → Help**.
-
-<img src="docs/screenshots/guide.png" width="80%" alt="The first-run guide: Today, Fuel and the final step">
-
-Share your progress, a day of eating or a workout as a ready-to-post image:
-
-<p>
-  <img src="docs/screenshots/card-progress.png" width="32%" alt="Progress share card">
-  <img src="docs/screenshots/card-fuel.png" width="32%" alt="Fuel share card">
-  <img src="docs/screenshots/card-workout.png" width="32%" alt="Workout share card">
-</p>
-
-## Download
-
-<p>
-  <a href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk"><b>Download Forge for Android</b></a> (always the newest version) · <a href="https://kiraherk.github.io/Forge/">download page</a>
-</p>
-
-<img src="docs/download-qr.png" width="140" alt="QR code that downloads Forge">
+<img src="docs/download-qr.png" width="140" alt="QR code that downloads Forge" align="right">
 
 On a computer? Scan the code with your phone.
 
-1. Tap the download link on your phone. Forge isn't on the Play Store, so it downloads as a file.
-2. Open it and allow installs from your browser or file manager when Android asks. It only asks once.
+1. Tap **[Download for Android](https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk)** on your phone (always the newest version). Forge isn't on the Play Store, so it downloads as a file.
+2. Open it and allow installs from your browser or file manager when Android asks. It only asks once. If Play Protect says the app is unknown, that's because it isn't from the Play Store: tap **More details**, then **Install anyway**.
 3. After that the app updates itself: **Settings → Updates**, or the daily "new version" notification. Updates install over the existing app, so your data stays.
 
-Android 8.0 or newer.
+Every release is built from this repo by GitHub Actions and signed with the same key. Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) works with this repo too.
 
-Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) works with this repo too.
+## One rule: missing a session costs you
+
+- Miss the daily deadline on a training day: the streak resets, you lose XP, and a random penalty lands (e.g. 100 push-ups) that's due in 24 hours.
+- Ignore the penalty and it doubles. Ignore it again and it's recorded as failed.
+- Make the session up within 48 hours to restore the streak. The penalty still stands.
+- Actually sick? Tap **I'm sick today** (or mark yesterday) to skip with no penalty and no XP lost. The streak pauses instead of resetting. Up to 3 sick days in any 30.
+- Optional penalty jar: a money amount you owe yourself for every miss or slip.
 
 ## What it does
 
@@ -70,13 +61,31 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 | **Guide** | A tour of every tab on first open: what each one is for and the one thing not to miss. Go back a step any time, skip it, or replay it with the **?** button on Today. |
 | **Arabic** | The whole app in Arabic, right to left, in clear Modern Standard Arabic that any Arabic reader understands. Exercise names are in Arabic with the English name underneath, and the motivation lines were written in Arabic, not translated. It follows your phone's language, or pick English or العربية in Settings. Exercise how-to guides and recipes are in Arabic too; only the basic food list is still in English. |
 
-### Consequences
+## In your color
 
-- Miss the daily deadline on a training day: the streak resets, you lose XP, and a random penalty lands (e.g. 100 push-ups) that's due in 24 hours.
-- Ignore the penalty and it doubles. Ignore it again and it's recorded as failed.
-- Make the session up within 48 hours to restore the streak. The penalty still stands.
-- Actually sick? Tap **I'm sick today** (or mark yesterday) to skip with no penalty and no XP lost. The streak pauses instead of resetting. Up to 3 sick days in any 30.
-- Optional penalty jar: a money amount you owe yourself for every miss or slip.
+Pick your color when you set up: green, red, purple, pink or blue. It runs through the whole app, the widget and the pictures you share, and you can change it any time in Settings.
+
+<img src="docs/screenshots/colors.png" alt="Forge in green, red, purple, pink and blue">
+
+## In Arabic
+
+The whole app, right to left. Exercise names in Arabic with the English name underneath, and motivation lines written in Arabic.
+
+<img src="docs/screenshots/arabic.png" width="80%" alt="Forge in Arabic: Today, Train and Fuel">
+
+## First-run guide and share images
+
+A short guide walks you through every tab the first time you open the app, so nothing gets missed. Replay it any time with the **?** button on Today, or from **Settings → Help**.
+
+<img src="docs/screenshots/guide.png" width="80%" alt="The first-run guide: Today, Fuel and the final step">
+
+Share your progress, a day of eating or a workout as a ready-to-post image:
+
+<p>
+  <img src="docs/screenshots/card-progress.png" width="32%" alt="Progress share card">
+  <img src="docs/screenshots/card-fuel.png" width="32%" alt="Fuel share card">
+  <img src="docs/screenshots/card-workout.png" width="32%" alt="Workout share card">
+</p>
 
 ## Your data
 
@@ -86,15 +95,12 @@ Prefer a dedicated updater? [Obtainium](https://github.com/ImranR98/Obtainium) w
 - Updates keep your data: same app, same signing key. The updater refuses any APK signed with a different key.
 - A backup is written before every update, and daily to `Downloads/Forge/` on Android 10+. **Settings → Data** exports, imports and restores.
 
-## The built-in plan
-
-The program (Day 1 Chest Priority, Day 2 Legs + Posterior Chain, rest, Day 4 Upper + Back + Arms, Day 5 Legs + Delts/Arms, rest, rest) is used exactly as written. Nutrition targets default to 2,700 kcal and 130 g protein, and you set your own during setup or in Settings.
-
-**Not medical advice.** If you have a medical condition, check calorie and protein limits with your clinician.
-
 ## Syrian dishes
 
-Food search includes 35 Syrian and Levantine dishes in English and Arabic: shish barak, kibbeh bil sayniyeh, yabraq, mloukhieh, fatteh, mujaddara and more. Every value has a source shown in the app, and nothing is estimated:
+Food search includes 35 Syrian and Levantine dishes in English and Arabic: shish barak, kibbeh bil sayniyeh, yabraq, mloukhieh, fatteh, mujaddara and more. Every value has a source shown in the app, and nothing is estimated.
+
+<details>
+<summary>Sources, and how to add a dish</summary>
 
 - 30 dishes measured in an accredited lab: Hoteit et al., [*F1000Research* 10:12 (2021)](https://doi.org/10.12688/f1000research.27461.1).
 - Manakish, Arabic bread and halawa from the [FAO/USDA Food Composition Tables for the Near East](https://www.fao.org/4/x6879e/x6879e00.htm).
@@ -102,7 +108,18 @@ Food search includes 35 Syrian and Levantine dishes in English and Arabic: shish
 
 The list lives in [`app/src/main/assets/dishes.json`](app/src/main/assets/dishes.json), and the app downloads the newest copy from this repo, so a dish can be added without a new release. To add one, give its values per 100 g with a published source, and bump `version`. Fried kibbeh, maqluba and muhammara aren't in yet: no measured values for them turned up. Corrections and sources are welcome.
 
+</details>
+
+## The built-in plan
+
+The program (Day 1 Chest Priority, Day 2 Legs + Posterior Chain, rest, Day 4 Upper + Back + Arms, Day 5 Legs + Delts/Arms, rest, rest) is used exactly as written. Nutrition targets default to 2,700 kcal and 130 g protein, and you set your own during setup or in Settings.
+
+**Not medical advice.** If you have a medical condition, check calorie and protein limits with your clinician.
+
 ## Build
+
+<details>
+<summary>Build it yourself</summary>
 
 JDK 17 and the Android SDK (platform 35).
 
@@ -111,6 +128,8 @@ JDK 17 and the Android SDK (platform 35).
 ```
 
 Releases are built and signed by GitHub Actions when a `v*` tag is pushed, or from **Actions → Release → Run workflow**. See [RELEASING.md](RELEASING.md). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+</details>
 
 ## About the developer
 
