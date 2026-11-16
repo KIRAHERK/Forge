@@ -115,12 +115,9 @@
   .row li b { color: var(--ink); font-weight: 600; }
 
   /* wide pictures */
-  .wide { margin-top: 44px; border-radius: 28px; overflow: hidden; background: var(--night); box-shadow: var(--shadow-phone); }
+  .wide { margin-top: 44px; border-radius: 28px; overflow: hidden; background: var(--night); }
   .split { display: flex; justify-content: space-between; align-items: end; gap: 40px; flex-wrap: wrap; }
-  .swatches { display: flex; gap: 10px; list-style: none; flex-wrap: wrap; }
-  .swatches li { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); padding: 7px 13px 7px 9px; border: 1px solid var(--rule); border-radius: 999px; background: #fff; }
-  .swatches i { width: 14px; height: 14px; border-radius: 50%; }
-  .arabic-line { font: 600 22px/1.6 "Cairo", sans-serif; color: var(--ink); margin-top: 14px; }
+  .arabic-line { font: 600 22px/1.6 "Cairo", sans-serif; color: var(--ink); margin-top: 14px; max-width: var(--measure); }
 
   /* facts */
   .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 56px); margin-top: 48px; }
@@ -165,6 +162,8 @@
     .rule dl div { grid-template-columns: 1fr; gap: 4px; }
     .facts, .steps { grid-template-columns: 1fr; }
     .qr { display: none; }
+    .wide.strip { overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
+    .wide.strip img { width: 900px; max-width: none; scroll-snap-align: start; }
     .fan { height: 96vw; max-height: 440px; }
     .fan .phone { width: 40vw; }
     .fan .p2 { width: 46vw; }
@@ -180,7 +179,6 @@
   </a>
   <nav>
     <a href="#features" data-ar="المزايا">Features</a>
-    <a href="#arabic" data-ar="العربية">Arabic</a>
     <a href="#install" data-ar="التثبيت">Install</a>
     <button class="lang" id="lang" type="button" aria-label="Read this page in Arabic">العربية</button>
   </nav>
@@ -190,7 +188,7 @@
   <div class="wrap hero">
     <svg class="icon" viewBox="0 0 108 108" role="img" aria-label="Forge app icon"><rect width="108" height="108" fill="#0B0B0D"/><path fill="#CCFF4D" d="M39 76h10l6-44H45zM45 32h28l-1.36 10h-28zM42.55 50H64l-1.23 9H41.32z"/></svg>
     <h1 data-ar="خطتك، بالتزام.">Your plan, enforced.</h1>
-    <p class="sub" data-ar="تطبيق تمرين وتغذية لأندرويد يُلزمك بخطتك. بالعربية والإنجليزية، ويعمل على هاتفك بلا حساب.">A training and nutrition app for Android that holds you to it. In English and Arabic, on your phone, with no account.</p>
+    <p class="sub" data-ar="تطبيق تمرين وتغذية لأندرويد يُلزمك بخطتك. بالعربية والإنجليزية، ويعمل على هاتفك بلا حساب.">A training and nutrition app for Android that holds you to&nbsp;it. In English and Arabic, on your phone, with no account.</p>
     <div class="get">
       <a class="download" href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
@@ -202,7 +200,7 @@
         <span data-ar="على الحاسوب؟&lt;br&gt;امسح الرمز بهاتفك.">On a computer?<br>Scan with your phone.</span>
       </div>
     </div>
-    <p class="meta" data-ar="مجاني للاستخدام الشخصي · أندرويد 8.0 فأحدث · نحو 18 ميغابايت · يحدّث نفسه">Free for personal use · Android 8.0 or newer · About 18 MB · Updates itself</p>
+    <p class="meta" data-ar="مجاني للاستخدام الشخصي · أندرويد 8.0 فأحدث · نحو 18&amp;nbsp;ميغابايت · يحدّث نفسه">Free for personal use · Android 8.0 or newer · About 18&nbsp;MB · Updates itself</p>
 
     <div class="fan" aria-label="Forge on a phone: Habits, Today and Weight screens" role="img">
       <div class="phone p1"><img src="screenshots/habits.png" alt="" width="1080" height="2400"></div>
@@ -286,15 +284,8 @@
           <h2 data-ar="بلونك.">In your color.</h2>
           <p class="lede" data-ar="اختر لونًا عند الإعداد. يظهر في التطبيق كله، وفي الأداة على الشاشة الرئيسية، وفي الصور التي تشاركها. وغيّره متى شئت.">Pick one when you set up. It runs through the whole app, the home-screen widget and the pictures you share. Change it any time.</p>
         </div>
-        <ul class="swatches">
-          <li><i style="background:#CCFF4D"></i><span data-ar="أخضر">Green</span></li>
-          <li><i style="background:#FF4545"></i><span data-ar="أحمر">Red</span></li>
-          <li><i style="background:#B57BFF"></i><span data-ar="بنفسجي">Purple</span></li>
-          <li><i style="background:#FF6FC8"></i><span data-ar="وردي">Pink</span></li>
-          <li><i style="background:#4DA8FF"></i><span data-ar="أزرق">Blue</span></li>
-        </ul>
       </div>
-      <div class="wide"><img src="screenshots/colors.png" alt="Forge in green, red, purple, pink and blue" width="2576" height="1151" loading="lazy"></div>
+      <div class="wide strip"><img src="screenshots/colors.png" alt="Forge in green, red, purple, pink and blue" width="2576" height="1151" loading="lazy"></div>
     </div>
   </section>
 
@@ -321,10 +312,10 @@
   <section class="install" id="install">
     <div class="wrap">
       <h2 data-ar="التثبيت في دقيقة.">Install in a minute.</h2>
-      <p class="lede" data-ar="Forge ليس على متجر Play، لذلك يُنزَّل كملف. هكذا:">Forge isn't on the Play Store, so it downloads as a file. Here's how:</p>
+      <p class="lede" data-ar="Forge ليس على متجر Play، لذلك يُنزَّل كملف. هكذا:">Forge isn't on the Play Store, so it downloads as a file. Here's&nbsp;how:</p>
       <ol class="steps">
         <li data-ar="اضغط &lt;b&gt;نزّل لأندرويد&lt;/b&gt; على هاتفك.">Tap <b>Download for Android</b> on your phone.</li>
-        <li data-ar="افتح الملف. إن سألك أندرويد، اسمح لمتصفحك بتثبيت التطبيقات. يسأل مرة واحدة فقط.">Open the file. If Android asks, allow your browser to install apps. It only asks once.</li>
+        <li data-ar="افتح الملف. إن سألك أندرويد، اسمح لمتصفحك بتثبيت التطبيقات، فهو يسأل مرة واحدة فقط. وإن نبّهك Play Protect إلى أن التطبيق غير معروف، فذلك لأنه ليس من متجر Play: اضغط &lt;b&gt;مزيد من التفاصيل&lt;/b&gt; ثم &lt;b&gt;التثبيت على أي حال&lt;/b&gt;. كل إصدار مبنيّ من الشيفرة المنشورة على GitHub وموقّع بمفتاح Forge نفسه.">Open the file. If Android asks, allow your browser to install apps; it only asks once. If Play Protect warns that the app is unknown, that's because it isn't from the Play Store: tap <b>More details</b>, then <b>Install anyway</b>. Every release is built from the public source on GitHub and signed with the same Forge key.</li>
         <li data-ar="تم. يبحث Forge عن التحديثات بنفسه، فتبقى بياناتك.">Done. Forge looks for updates itself, and your data stays.</li>
       </ol>
       <div class="get">
