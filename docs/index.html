@@ -63,7 +63,7 @@
   .hero { text-align: center; padding-top: clamp(28px, 5vw, 64px); }
   .icon { width: 80px; height: 80px; margin: 0 auto 24px; border-radius: 22px; box-shadow: 0 14px 28px -12px rgba(14, 15, 12, 0.45); }
   h1 { font-weight: 600; font-size: clamp(44px, 7vw, 76px); line-height: 1.02; letter-spacing: -0.03em; text-wrap: balance; }
-  .sub { margin: 18px auto 0; max-width: 33rem; font-size: clamp(18px, 2vw, 21px); color: var(--ink-2); text-wrap: balance; }
+  .sub { margin: 18px auto 0; max-width: 38rem; font-size: clamp(18px, 2vw, 21px); color: var(--ink-2); text-wrap: pretty; }
   .get { margin-top: 34px; display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
   .download {
     display: inline-flex; align-items: center; gap: 12px; padding: 15px 26px 15px 22px;
@@ -131,7 +131,9 @@
   .steps li { counter-increment: step; color: var(--ink-2); font-size: 17px; }
   .steps li::before { content: counter(step); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--ink); color: var(--ink); font-weight: 600; font-size: 16px; margin-bottom: 14px; }
   .steps b { color: var(--ink); font-weight: 600; }
-  .install .get { margin-top: 56px; }
+  .install .get { margin-top: 48px; }
+  .warn { max-width: 40rem; margin: 40px auto 0; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 16px; color: var(--ink-3); text-wrap: pretty; }
+  .warn b { color: var(--ink); font-weight: 600; }
 
   footer { border-top: 1px solid var(--rule); padding-block: 32px 48px; font-size: 15px; color: var(--ink-3); }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px 40px; flex-wrap: wrap; }
@@ -163,7 +165,7 @@
     .facts, .steps { grid-template-columns: 1fr; }
     .qr { display: none; }
     .wide.strip { overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
-    .wide.strip img { width: 900px; max-width: none; scroll-snap-align: start; }
+    .wide.strip img { width: 790px; max-width: none; scroll-snap-align: start; }
     .fan { height: 96vw; max-height: 440px; }
     .fan .phone { width: 40vw; }
     .fan .p2 { width: 46vw; }
@@ -315,9 +317,10 @@
       <p class="lede" data-ar="Forge ليس على متجر Play، لذلك يُنزَّل كملف. هكذا:">Forge isn't on the Play Store, so it downloads as a file. Here's&nbsp;how:</p>
       <ol class="steps">
         <li data-ar="اضغط &lt;b&gt;نزّل لأندرويد&lt;/b&gt; على هاتفك.">Tap <b>Download for Android</b> on your phone.</li>
-        <li data-ar="افتح الملف. إن سألك أندرويد، اسمح لمتصفحك بتثبيت التطبيقات، فهو يسأل مرة واحدة فقط. وإن نبّهك Play Protect إلى أن التطبيق غير معروف، فذلك لأنه ليس من متجر Play: اضغط &lt;b&gt;مزيد من التفاصيل&lt;/b&gt; ثم &lt;b&gt;التثبيت على أي حال&lt;/b&gt;. كل إصدار مبنيّ من الشيفرة المنشورة على GitHub وموقّع بمفتاح Forge نفسه.">Open the file. If Android asks, allow your browser to install apps; it only asks once. If Play Protect warns that the app is unknown, that's because it isn't from the Play Store: tap <b>More details</b>, then <b>Install anyway</b>. Every release is built from the public source on GitHub and signed with the same Forge key.</li>
+        <li data-ar="افتح الملف. إن سألك أندرويد، اسمح لمتصفحك بتثبيت التطبيقات. يسأل مرة واحدة فقط.">Open the file. If Android asks, allow your browser to install apps. It only asks once.</li>
         <li data-ar="تم. يبحث Forge عن التحديثات بنفسه، فتبقى بياناتك.">Done. Forge looks for updates itself, and your data stays.</li>
       </ol>
+      <p class="warn" data-ar="هل نبّهك Play Protect إلى أن التطبيق غير معروف؟ ذلك لأنه ليس من متجر Play. اضغط &lt;b&gt;مزيد من التفاصيل&lt;/b&gt; ثم &lt;b&gt;التثبيت على أي حال&lt;/b&gt;. كل إصدار مبنيّ من الشيفرة المنشورة على GitHub وموقّع بمفتاح Forge نفسه.">Play Protect says the app is unknown? That's because it isn't from the Play Store. Tap <b>More details</b>, then <b>Install anyway</b>. Every release is built from the public source on GitHub and signed with the same Forge key.</p>
       <div class="get">
         <a class="download" href="https://github.com/KIRAHERK/Forge/releases/latest/download/Forge.apk">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
