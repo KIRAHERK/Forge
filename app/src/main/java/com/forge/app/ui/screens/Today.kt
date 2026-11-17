@@ -143,6 +143,8 @@ fun TodayScreen(nav: Nav) {
     var showWeigh by remember { mutableStateOf(false) }
     var habitDialog by remember { mutableStateOf<HabitDef?>(null) }
     var sickAsk by remember { mutableStateOf<LocalDate?>(null) }
+    var injuryAsk by remember { mutableStateOf(false) }
+    var backAsk by remember { mutableStateOf(false) }
     fun sickCheck(date: LocalDate) = Stats.canMarkSick(s, date, today, done)
 
 
@@ -174,6 +176,7 @@ fun TodayScreen(nav: Nav) {
             val seed = today.toEpochDay()
             val line = when {
                 activePenalties.isNotEmpty() -> Lines.missed(seed)
+                s.isInjured(today) && status != DayStatus.DONE -> t("Injured. Healing is the job now: hit your protein, sleep, and come back when it's ready.")
                 status == DayStatus.SICK -> t("Sick day. Rest, eat, drink water. Back at it when you're well.")
                 status == DayStatus.DONE -> Lines.done(seed)
                 status == DayStatus.PENDING && day != null -> Lines.preWorkout(seed, t(day.name))
@@ -212,6 +215,16 @@ fun TodayScreen(nav: Nav) {
         item {
             val activeSets by remember(active?.id) { active?.let { repo.setsFor(it.id) } ?: kotlinx.coroutines.flow.flowOf(emptyList()) }
                 .collectAsState(emptyList())
+            if (s.injured && active == null && status != DayStatus.DONE) {
+                InjuryCard(
+                    since = LocalDate.ofEpochDay(s.injuredSince),
+                    canTrain = day != null,
+                    onBack = { backAsk = true },
+                    onTrain = { if (day != null) start(day.id, today, false) },
+                )
+                Gap(12.dp)
+                return@item
+            }
             HeroCard(
                 s = s, now = now, status = status, day = day, active = active,
                 activeProgress = activeSets.count { it.done } to activeSets.size,
@@ -223,6 +236,11 @@ fun TodayScreen(nav: Nav) {
                 onSick = { sickAsk = today },
                 onUndoSick = { scope.launch { repo.setSick(today, false) } },
             )
+            if (!s.injured && active == null) {
+                Box(Modifier.fillMaxWidth().padding(top = 2.dp), contentAlignment = Alignment.Center) {
+                    TextAction(t("Injured? Pause training"), { injuryAsk = true }, color = C.Mid, style = T.Small)
+                }
+            }
             Gap(12.dp)
         }
 
@@ -300,6 +318,31 @@ fun TodayScreen(nav: Nav) {
                 t("Use it only when you're actually sick. After this you have %1${'$'}s of %2${'$'}s left in the next %3${'$'}s days.", left - 1, Penalties.SICK_LIMIT, Penalties.SICK_WINDOW_DAYS),
                 style = T.Small, color = C.Lo,
             )
+        }
+    }
+    if (injuryAsk) {
+        ForgeDialog(
+            title = t("Pause training?"),
+            onDismiss = { injuryAsk = false },
+            confirm = t("Pause training"),
+            onConfirm = { injuryAsk = false; scope.launch { repo.startInjury(today) } },
+        ) {
+            Text(
+                t("From today, workouts have no deadline, no reminders and no penalties, and your streak is frozen, not lost. It stays on until you tap I'm back."),
+                style = T.Body, color = C.Mid,
+            )
+            Gap(10.dp)
+            Text(t("Food, protein, weigh-ins and your habits keep counting: they matter most while you heal. Sick days aren't used up."), style = T.Small, color = C.Lo)
+        }
+    }
+    if (backAsk) {
+        ForgeDialog(
+            title = t("Back to training?"),
+            onDismiss = { backAsk = false },
+            confirm = t("I'm back"),
+            onConfirm = { backAsk = false; scope.launch { repo.endInjury(today) } },
+        ) {
+            Text(t("Today stays paused. From tomorrow your program, deadlines and penalties are back on, and your streak picks up where it stopped."), style = T.Body, color = C.Mid)
         }
     }
     habitDialog?.let { def ->
@@ -539,6 +582,31 @@ private fun MakeUpCard(day: WorkoutDay, date: LocalDate, now: LocalDateTime, s: 
         Gap(14.dp)
         PrimaryButton(t("Make it up"), onStart, color = C.Amber, height = 48.dp)
         SickRow(sick, if (date == now.toLocalDate()) t("I was sick today") else t("I was sick yesterday"), onSick)
+    }
+}
+
+/** Training is paused for an injury: what's off, what still counts, and the way back. */
+@Composable
+private fun InjuryCard(since: LocalDate, canTrain: Boolean, onBack: () -> Unit, onTrain: () -> Unit) {
+    Panel {
+        Eyebrow(t("Training paused · injured"))
+        Gap(8.dp)
+        Text(t("HEAL UP."), style = T.Display, color = C.Hi)
+        Gap(6.dp)
+        Text(
+            t("No deadlines, reminders or penalties for training, and your streak is frozen. Food, weigh-ins and habits still count."),
+            style = T.Body, color = C.Mid,
+        )
+        Gap(6.dp)
+        Text(t("Paused since %s", Fmt.day(since)), style = T.Small, color = C.Lo)
+        Gap(16.dp)
+        PrimaryButton(t("I'm back"), onBack, height = 48.dp)
+        if (canTrain) {
+            Gap(4.dp)
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TextAction(t("Feeling up to it? Train anyway"), onTrain, color = C.Mid, style = T.Small)
+            }
+        }
     }
 }
 
