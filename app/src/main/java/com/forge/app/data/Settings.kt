@@ -17,6 +17,10 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.TemporalAdjusters
 
+/** An ended injury pause: both days included (epoch days). */
+@Serializable
+data class Pause(val from: Long, val to: Long)
+
 @Serializable
 data class Settings(
     val onboarded: Boolean = false,
@@ -63,6 +67,15 @@ data class Settings(
     /** Training days marked as sick (epoch days): no penalty, no XP lost, streak paused. */
     val sickDays: List<Long> = emptyList(),
 
+    /**
+     * Injury pause: training is off from this epoch day until the person says they're back
+     * (-1 = not paused). No deadline, reminder or penalty; the streak freezes. Unlike sick
+     * days there is no limit. Food, weigh-ins and habits keep counting.
+     */
+    val injuredSince: Long = -1,
+    /** Injury pauses that have ended, kept so past days still read as paused. */
+    val injuries: List<Pause> = emptyList(),
+
     /** Free-text notes from your own plan (e.g. a doctor's limit). Kept on the phone, never in the code. */
     val planNote: String = "",
 
@@ -81,7 +94,15 @@ data class Settings(
 ) {
     fun slotFor(date: LocalDate): String = schedule.getOrElse(date.dayOfWeek.value - 1) { Program.REST }
     fun isTraining(date: LocalDate) = slotFor(date) != Program.REST
-    fun isSick(date: LocalDate) = date.toEpochDay() in sickDays
+    /** A training day that can't cost anything: marked sick, or inside an injury pause. */
+    fun isSick(date: LocalDate) = date.toEpochDay() in sickDays || isInjured(date)
+
+    val injured: Boolean get() = injuredSince >= 0
+
+    fun isInjured(date: LocalDate): Boolean {
+        val d = date.toEpochDay()
+        return (injuredSince in 0..d) || injuries.any { d in it.from..it.to }
+    }
     fun dayFor(date: LocalDate) = Program.day(slotFor(date))
 
     fun deadlineAt(date: LocalDate): LocalDateTime = date.atTime(LocalTime.of(deadline / 60, deadline % 60))

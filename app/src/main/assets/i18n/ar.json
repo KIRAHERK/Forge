@@ -2046,5 +2046,19 @@
  "Not found on the label: %s. Type them in, or tap the camera next to each.": "لم يُعثر عليها في الملصق: %s. اكتبها يدويًا، أو اضغط الكاميرا بجانب كل منها.",
  "Calories match protein, fat and carbs.": "السعرات تتوافق مع البروتين والدهون والكربوهيدرات.",
  "These don't add up: protein and carbs give about 4 kcal per gram, fat 9. Check each number against the pack.": "هذه القيم لا تتوافق: البروتين والكربوهيدرات نحو 4 سعرات لكل غرام، والدهون 9. قارن كل رقم بالعبوة.",
- "Corrected a likely misread: %s. Check it against the pack.": "صُحّحت قراءة خاطئة محتملة: %s. قارنها بالعبوة."
+ "Corrected a likely misread: %s. Check it against the pack.": "صُحّحت قراءة خاطئة محتملة: %s. قارنها بالعبوة.",
+ "Injured. Healing is the job now: hit your protein, sleep, and come back when it's ready.": "مُصاب. مهمتك الآن هي التعافي: حقّق هدف البروتين، ونَم جيدًا، وعُد حين تكون جاهزًا.",
+ "Injured? Pause training": "مُصاب؟ أوقف التمرين مؤقتًا",
+ "Pause training?": "إيقاف التمرين مؤقتًا؟",
+ "Pause training": "أوقف التمرين",
+ "From today, workouts have no deadline, no reminders and no penalties, and your streak is frozen, not lost. It stays on until you tap I'm back.": "من اليوم، لا موعد نهائي للتمارين ولا تذكيرات ولا عقوبات، وتتجمّد سلسلتك ولا تنكسر. يبقى الإيقاف حتى تضغط «عدتُ».",
+ "Food, protein, weigh-ins and your habits keep counting: they matter most while you heal. Sick days aren't used up.": "الطعام والبروتين وتسجيل الوزن وعاداتك تبقى محسوبة، فهي الأهم أثناء التعافي. ولا تُستهلك أيام المرض.",
+ "Back to training?": "العودة إلى التمرين؟",
+ "I'm back": "عدتُ",
+ "Today stays paused. From tomorrow your program, deadlines and penalties are back on, and your streak picks up where it stopped.": "يبقى اليوم ضمن الإيقاف. ومن الغد يعود برنامجك ومواعيده وعقوباته، وتكمل سلسلتك من حيث توقفت.",
+ "Training paused · injured": "التمرين متوقف · إصابة",
+ "HEAL UP.": "تعافَ أولًا.",
+ "No deadlines, reminders or penalties for training, and your streak is frozen. Food, weigh-ins and habits still count.": "لا مواعيد نهائية ولا تذكيرات ولا عقوبات للتمرين، وسلسلتك مجمّدة. الطعام وتسجيل الوزن والعادات ما زالت محسوبة.",
+ "Paused since %s": "متوقف منذ %s",
+ "Feeling up to it? Train anyway": "تشعر أنك قادر؟ تمرّن رغم ذلك"
 }

@@ -500,6 +500,33 @@ class Repo(private val context: Context, val db: ForgeDb, val settings: Settings
      * penalty (if it is still active) and gives the lost XP back. Unmarking removes the
      * cancelled penalty so evaluation can issue the miss again if the deadline has passed.
      */
+    /**
+     * Starts an injury pause from [today]: training stops costing anything until [endInjury].
+     * Today's missed-workout penalty, if one already landed, is cancelled like a sick day's.
+     */
+    suspend fun startInjury(today: LocalDate) {
+        settings.update { s -> if (s.injured) s else s.copy(injuredSince = today.toEpochDay()) }
+        val key = "miss:${today.toEpochDay()}"
+        db.xp().deleteKey(key)
+        db.penalties().byKey(key)?.let { p ->
+            if (p.status == "ACTIVE") db.penalties().update(p.copy(status = "VOID", jarAmount = 0))
+        }
+        onChanged()
+    }
+
+    /** Ends the pause. Today still counts as paused, so ending it late in the day can't cost a session. */
+    suspend fun endInjury(today: LocalDate) {
+        val keepFrom = LocalDate.now().minusDays(400).toEpochDay()
+        settings.update { s ->
+            if (!s.injured) s
+            else s.copy(
+                injuries = (s.injuries + Pause(s.injuredSince, maxOf(s.injuredSince, today.toEpochDay()))).filter { it.to >= keepFrom },
+                injuredSince = -1,
+            )
+        }
+        onChanged()
+    }
+
     suspend fun setSick(date: LocalDate, sick: Boolean) {
         val d = date.toEpochDay()
         val keepFrom = LocalDate.now().minusDays(400).toEpochDay()
